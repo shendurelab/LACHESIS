@@ -31,7 +31,7 @@ INCLUDES=-I$(INCLUDE_DIR) -I$(SAMTOOLS_DIR)
 INC_LIBS=-L$(INCLUDE_DIR) -lJtime -lJgtools -lJmarkov
 BOOST_LIBS=-L$(BOOST_DIR)/stage/lib -lboost_system -lboost_filesystem -lboost_regex
 SAMTOOLS_LIBS=-L$(SAMTOOLS_DIR) -lbam
-LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz
+LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 
 
 # dependencies
