@@ -102,9 +102,10 @@ add_contig_data($contig_name,\$contig_seq);
 print "\n" if $verbose;
 
 
-# Figure out output file name.
-my ($outfile) = $fasta =~ /^(.+)\.(fasta|fa|fsa)$/i or die "\$fasta doesn't end in '\.fasta' or a similar extension";
-$outfile .= ".counts_$motif.txt";
+
+
+# Open output file for writing.
+my $outfile = "$fasta.counts_$motif.txt";
 print localtime(). ": Done reading.  $N_lines lines read.  Now writing to $outfile\n";
 
 
