@@ -105,7 +105,7 @@ GetFastaNames( const string & fasta_file )
   assert( boost::filesystem::is_regular_file( fasta_file ) );
   
   string names_file = fasta_file + ".names";
-  if( !boost::filesystem::is_regular_file( fasta_file ) ) MakeFastaNamesFile( fasta_file );
+  if( !boost::filesystem::is_regular_file( names_file ) ) MakeFastaNamesFile( fasta_file );
   return ParseTabDelimFile<string>( names_file, 0 );
 }
 
@@ -116,8 +116,8 @@ GetFastaNames( const string & fasta_file )
 // After running this, the contig names can be read in via: ParseTabDelimFile<string>( fasta-file.names, 0 )
 void
 MakeFastaNamesFile( const string & fasta_file )
-{
-  string cmd = "grep \">\" " + fasta_file + " | cut -c2- > " + fasta_file + ".names";
+{ 
+  string cmd = "grep '>' " + fasta_file + " | cut -c2- > " + fasta_file + ".names";
   int ret = system( cmd.c_str() );
   if ( ret > 0 ) cout << "WARNING: MakeFastaNamesFile: system() return nonzero value " << ret << endl;
 }
