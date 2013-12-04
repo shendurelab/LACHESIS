@@ -19,18 +19,14 @@ CFLAGS += -ansi
 CFLAGS += -pedantic
 #CFLAGS += -pg
 
-# Directories for includes & linking flags
-INCLUDE_DIR=include
-BOOST_DIR=/net/shendure/vol10/jnburton/extern/boost_1_47_0
-SAMTOOLS_DIR=/net/shendure/vol10/jnburton/extern/samtools-0.1.16
-
 # Includes
+INCLUDE_DIR=include
 INCLUDES=-I$(INCLUDE_DIR) -I$(SAMTOOLS_DIR)
 
-# Linking flags
+# Linking flags.  The environment variables BOOST_LIBS and SAMTOOLS_LIBS must be set or this won't work.
 INC_LIBS=-L$(INCLUDE_DIR) -lJtime -lJgtools -lJmarkov
-BOOST_LIBS=-L$(BOOST_DIR)/stage/lib -lboost_system -lboost_filesystem -lboost_regex
-SAMTOOLS_LIBS=-L$(SAMTOOLS_DIR) -lbam
+BOOST_LIBS=-L$(LACHESIS_BOOST_DIR)/stage/lib -lboost_system -lboost_filesystem -lboost_regex
+SAMTOOLS_LIBS=-L$(LACHESIS_SAMTOOLS_DIR) -lbam
 LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 
 
@@ -39,12 +35,12 @@ LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 .cc.o:  .cc
 	$(CC) -c $< $(CFLAGS) $(INCLUDES)
 
-all:    libs $(EXES)
+all:   check-env libs $(EXES)
 
-libs:
-	cd $(INCLUDE_DIR); make; cd ..
+libs: check-env
+	$(MAKE) -C include
 
-Lachesis:  $(OBJS)
+Lachesis: check-env $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o Lachesis $(LFLAGS)
 
 clean:
@@ -53,5 +49,15 @@ clean:
 
 clobber: clean
 	$(RM) $(BACKUPS) $(EXES)
+
+
+# Environment variable check.
+check-env:
+ifndef LACHESIS_SAMTOOLS_DIR
+    $(error Environment variable $$LACHESIS_SAMTOOLS_DIR is undefined - please set to a directory containing the samtools package)
+endif
+ifndef LACHESIS_BOOST_DIR
+    $(error Environment variable $$LACHESIS_BOOST_DIR is undefined - please set to a directory containing the root of the Boost package)
+endif
 
                                                                                

@@ -16,9 +16,8 @@ RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
-# directories with .h's in them
-BOOST_DIR=/net/shendure/vol10/jnburton/extern/boost_1_47_0
-INCLUDES = -I$(BOOST_DIR) #-I$(HOME)/include
+# directories with .h's in them - the LACHESIS_BOOST_DIR environment variable must be set
+INCLUDES = -I$(LACHESIS_BOOST_DIR) #-I$(HOME)/include
 
 # compiler flags
 
@@ -26,7 +25,7 @@ CFLAGS  = -Wall -ansi -pedantic -g -O3
 #CFLAGS += -pg
 
 # linking flags
-BOOST_LIBS=-L$(BOOST_DIR)/stage/lib -lboost_system -lboost_filesystem -lboost_regex
+BOOST_LIBS=-L$(LACHESIS_BOOST_DIR)/stage/lib -lboost_system -lboost_filesystem -lboost_regex
 #INC_LIBS=-L$(HOME)/include -lJtime
 LFLAGS = -lz $(BOOST_LIBS) $(INC_LIBS)
 

@@ -33,7 +33,7 @@
 
 INSTALLING LACHESIS
 1. System requirements
-2. Unpacking the LACHESIS package (LACHESIS.tar.gz)
+2. Downloading the LACHESIS package
 3. Compiling the LACHESIS package
 4. Testing out LACHESIS on a sample dataset
 
@@ -77,9 +77,9 @@ You may also need the following software:
 
 
 
-2. Unpacking the LACHESIS package (LACHESIS.tar.gz)
+2. Downloading the LACHESIS package
 
-Download the LACHESIS package from http://www.gs.washington.edu/~jnburton/LACHESIS/LACHESIS.tar.gz into a UNIX filesystem.  Then run the following UNIX commands:
+Download the LACHESIS package from http://shendurelab.github.io/LACHESIS/ into a UNIX filesystem.  If you download the tarball (LACHESIS.tar.gz), unpacki it using the following UNIX commands:
 
 tar xzvf LACHESIS.tar.gz
 cd LACHESIS/
@@ -88,7 +88,7 @@ cd LACHESIS/
 
 3. Compiling the LACHESIS package
 
-To compile LACHESIS, you must first download and install the two other libraries: boost (available at www.boost.org) and SAMtools (available at samtools.sourceforge.net).  Once these are installed, set the variables BOOST_DIR and SAMTOOLS_DIR in the Makefile (and also in the Makefiles in include/, include/gtools, include/markov/.)  To compile LACHESIS, simply type `make` in the main LACHESIS directory.
+To compile LACHESIS, you must first download and install two other libraries: boost (available at www.boost.org) and SAMtools (available at samtools.sourceforge.net).  Once these are installed, set the shell environment variables $LACHESIS_BOOST_DIR and $LACHESIS_SAMTOOLS_DIR to point to the directories containing these packages.  The command for setting an environment variable will depend on what Unix shell you are using.  Then, to compile LACHESIS, simply type `make` in the main LACHESIS directory.
 
 
 
@@ -233,5 +233,7 @@ The LACHESIS software package and all software and documentation contained with 
 ACKNOWLEDGEMENTS
 
 Thanks to Jay Shendure for leadership, management, and many ideas.
+
+Thanks to Aaron McKenna for making LACHESIS available over GitHub.
 
 Thanks to Aaron McKenna, Qi Zhou, and Christopher Beitel for patiently helping me test LACHESIS for bugs and compatibility.

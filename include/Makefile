@@ -20,15 +20,12 @@ RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
-# directories with .h's in them
-BOOST_DIR=/net/shendure/vol10/jnburton/extern/boost_1_47_0
-INCLUDES = -I$(BOOST_DIR)
-
 # compiler flags
 CFLAGS  = -Wall -ansi -pedantic -g -O3
+INCLUDES = -I$(LACHESIS_BOOST_DIR)
 
-# linking flags
-BOOST_LIBS=-L$(BOOST_DIR)/stage/lib -lboost_filesystem
+# linking flags.  The LACHESIS_BOOST_DIR environment variable must be set
+BOOST_LIBS=-L$(LACHESIS_BOOST_DIR)/stage/lib -lboost_filesystem
 LFLAGS = $(BOOST_LIBS)
 
 # dependencies
@@ -42,10 +39,10 @@ libJtime.a: $(OBJS_TIME)
 	$(AR) libJtime.a $(OBJS_TIME)
 
 libJgtools.a:
-	cd gtools; make; cd ..
+	$(MAKE) -C gtools
 
 libJmarkov.a:
-	cd markov; make; cd ..
+	$(MAKE) -C markov
 
 clean: 
 	$(RM) $(LIBS) $(OBJS_TIME) gtools/*.o markov/*.o markov/TestMarkovModel core .make.state
