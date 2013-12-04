@@ -21,7 +21,7 @@ CFLAGS += -pedantic
 
 # Includes
 INCLUDE_DIR=include
-INCLUDES=-I$(INCLUDE_DIR) -I$(SAMTOOLS_DIR)
+INCLUDES=-I$(INCLUDE_DIR) -I$(LACHESIS_SAMTOOLS_DIR)
 
 # Linking flags.  The environment variables BOOST_LIBS and SAMTOOLS_LIBS must be set or this won't work.
 INC_LIBS=-L$(INCLUDE_DIR) -lJtime -lJgtools -lJmarkov
