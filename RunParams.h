@@ -32,8 +32,16 @@ class RunParams
   
   void ParseIniFile( const string & ini_file );
   
-  // Get the set of contig names in the draft assembly.  After the first call, this vector is cached for faster retrieval in the future.
+  // Get the set of contig/chromosome names in the reference assembly fasta.  This fails if USE_REFERENCE = 0.
+  // After the first call, this vector is cached for faster retrieval in the future.
+  vector<string> * LoadRefGenomeContigNames() const;
+  
+  // Get the set of contig names in the draft assembly fasta.  After the first call, this vector is cached for faster retrieval in the future.
   vector<string> * LoadDraftContigNames() const;
+  
+  // Get the filename that contains the number of restriction enzyme sites for each contig in the draft assembly.  This might require generating the file,
+  // by calling the script CountMotifsInFasta.pl.
+  string DraftContigRESitesFilename() const;
   
   // Load a TrueMapping using the files in this RunParams object.
   // If _use_ref == false, returns a NULL pointer; otherwise returns a new object that must be 'delete'd later to save memory.
@@ -46,18 +54,20 @@ class RunParams
  public:
   /* These variables are all loaded in by ParseIniFile(). */
   
-  string _species;
+  string _species; // effect: certain Lachesis functions are only available if _species == "human"; if _species == "fly", the reference genome is modified
+  string _out_dir; // output directory
+  
   
   // Draft assembly files.
+  string _draft_assembly_fasta; // FASTA file of draft assembly
   string _SAM_dir; // directory containing SAM/BAM files
   vector<string> _SAM_files; // the set of SAM/BAM files
-  string _RE_sites_file; // file containing the number of RE sites per contig in the draft assembly
+  string _RE_site_seq; // used in LoadDraftContigRESites(), which passes it to CountMotifsInFasta.pl
   
   // Reference assembly files (optional).
   bool _use_ref;
   int _sim_bin_size;
-  string _BLAST_file_head, _draft_assembly_names_file, _ref_assembly_names_file;
-  
+  string _ref_assembly_fasta, _BLAST_file_head;
   
   // Options for what steps of Lachesis to run.
   bool _do_clustering, _do_ordering, _do_reporting;
@@ -65,18 +75,17 @@ class RunParams
   
   // Heuristic parameters for clustering.
   int _cluster_N, _cluster_min_RE_sites;
-  double _cluster_max_link_density;
-  bool _cluster_do_noninformative, _cluster_draw_heatmap, _cluster_draw_dotplot;
+  double _cluster_max_link_density, _cluster_noninformative_ratio;
+  bool _cluster_draw_heatmap, _cluster_draw_dotplot;
   
   // Heuristic parameters for ordering.
   int _order_min_N_REs_in_trunk, _order_min_N_REs_in_shreds;
-  
-  // Output files.
-  string _out_dir;
+  bool _order_draw_dotplots;
   
   // Heuristic parameters for reporting.
   vector<int> _report_excluded_groups; // groups chosen not to be included in reporting numbers (e.g., small, chimeric groups)
   int _report_quality_filter;
+  bool _report_draw_heatmap;
   
  private:
   // A listing of all of the lines from the ini file that were used in the creation of this RunParams object.
@@ -103,6 +112,7 @@ class RunParams
   
   
   // Cached stuff.  This stuff starts out empty.
+  mutable vector<string> _ref_contig_names;   // filled by GetRefGenomeContigNames()
   mutable vector<string> _draft_contig_names; // filled by GetDraftContigNames()
   
 };

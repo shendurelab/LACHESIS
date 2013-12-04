@@ -607,7 +607,7 @@ Reporter::ReportChartWithReference() const
   const double epsilon = 1.0e-12; // small number to add to denominators to avoid division by 0
   
   // Open the ReportChart output file.
-  string report_chart_file = _run_params._out_dir + "/ReportChart.txt";
+  string report_chart_file = _run_params._out_dir + "/REPORT.txt";
   cout << Time() << ": Writing a ReportChart to " << report_chart_file << endl;
   ofstream out( report_chart_file.c_str() );
   
@@ -765,7 +765,7 @@ Reporter::ReportChartNoReference() const
   assert( !_run_params._use_ref );
   
   // Open the ReportChart output file.
-  string report_chart_file = _run_params._out_dir + "/ReportChart.txt";
+  string report_chart_file = _run_params._out_dir + "/REPORT.txt";
   cout << Time() << ": Writing a ReportChart to " << report_chart_file << endl;
   ofstream out( report_chart_file.c_str() );
   
@@ -874,7 +874,7 @@ Reporter::HistogramOrderingErrors( const bool full_order, const string & file_he
   
   // For contig 'lengths', either use actual lengths or the number of RE sites.
   bool use_RE_lens = true;
-  vector<int> lens = use_RE_lens ? ParseTabDelimFile<int>( _run_params._RE_sites_file, 1 ) : _contig_lengths;
+  vector<int> lens = use_RE_lens ? ParseTabDelimFile<int>( _run_params.DraftContigRESitesFilename(), 1 ) : _contig_lengths;
   
   // If this assert fails, the input contig_lengths file is inconsistent with the original dataset (wrong number of contigs).
   assert( (int) lens.size() == _N_contigs );
@@ -1164,7 +1164,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, cons
   // Also get contig lengths.
   vector<int> contig_lengths = TargetLengths( run_params._SAM_files[0] );
   int N_contigs = contig_lengths.size();
-  vector<int> contig_N_REs = ParseTabDelimFile<int>( run_params._RE_sites_file, 1 );
+  vector<int> contig_N_REs = ParseTabDelimFile<int>( run_params.DraftContigRESitesFilename(), 1 );
   assert( N_contigs == (int) contig_lengths.size() );
   
   

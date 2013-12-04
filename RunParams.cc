@@ -1,6 +1,6 @@
 // For documentation, see RunParams.h
 #include "RunParams.h"
-#include "TextFileParsers.h" // ParseTabDelimFile()
+#include "TextFileParsers.h" // ParseTabDelimFile, GetFastaNames
 
 #include <assert.h>
 #include <vector>
@@ -106,14 +106,15 @@ RunParams::ParseIniFile( const string & ini_file )
   // This is the order in which RunParams expects to see the parameters.  It's also the order in which the parameters appear in the default INI files.
   // It's important to enforce the order because some parameters depend on earlier ones (e.g., SAM_DIR must be loaded so we know where to look for SAM_FILES.)
   // If you want to permanently add or remove any parameters, make sure to update N_keys as well as keys_order_array.
-  const int N_keys = 26;
-  const char * keys_order_array[] = { "SPECIES", "SAM_DIR", "SAM_FILES", "RE_COUNTS_FILE",
-				      "USE_REFERENCE", "SIM_BIN_SIZE", "BLAST_FILE_HEAD", "DRAFT_ASSEMBLY_NAMES_FILE", "REF_ASSEMBLY_NAMES_FILE",
+  const int N_keys = 27;
+  const char * keys_order_array[] = { "SPECIES", "OUTPUT_DIR",
+				      "DRAFT_ASSEMBLY_FASTA", "SAM_DIR", "SAM_FILES", "RE_SITE_SEQ",
+				      "USE_REFERENCE", "SIM_BIN_SIZE", "REF_ASSEMBLY_FASTA", "BLAST_FILE_HEAD",
 				      "DO_CLUSTERING", "DO_ORDERING", "DO_REPORTING", "OVERWRITE_GLM", "OVERWRITE_CLMS",
-				      "CLUSTER_N", "CLUSTER_MIN_RE_SITES", "CLUSTER_MAX_LINK_DENSITY", "CLUSTER_DO_NONINFORMATIVE",
+				      "CLUSTER_N", "CLUSTER_MIN_RE_SITES", "CLUSTER_MAX_LINK_DENSITY", "CLUSTER_NONINFORMATIVE_RATIO",
 				      "CLUSTER_DRAW_HEATMAP", "CLUSTER_DRAW_DOTPLOT",
-				      "ORDER_MIN_N_RES_IN_TRUNK", "ORDER_MIN_N_RES_IN_SHREDS",
-				      "OUTPUT_DIR", "REPORT_CHART_OUTFILE", "REPORT_EXCLUDED_GROUPS", "REPORT_QUALITY_FILTER" };
+				      "ORDER_MIN_N_RES_IN_TRUNK", "ORDER_MIN_N_RES_IN_SHREDS", "ORDER_DRAW_DOTPLOTS",
+				      "REPORT_EXCLUDED_GROUPS", "REPORT_QUALITY_FILTER", "REPORT_DRAW_HEATMAP" };
   const vector<string> keys_order( keys_order_array, keys_order_array + N_keys );
   
   // For certain keys, we can have any (nonzero) number of values appear after the key.  Mark these keys.  For all other keys, exactly one value is required.
@@ -192,6 +193,16 @@ RunParams::ParseIniFile( const string & ini_file )
       */
       _species = value;
     }
+    else if ( key == "OUTPUT_DIR" ) {
+      _out_dir = value;
+      if ( boost::filesystem::is_regular_file( value ) )
+	ReportParseFailure( "File '" + value + "' already exists as a non-directory file." );
+    }
+    else if ( key == "DRAFT_ASSEMBLY_FASTA" ) {
+      _draft_assembly_fasta = value;
+      if ( !boost::filesystem::is_regular_file( value ) )
+	ReportParseFailure( "Can't find file '" + value + "'." );
+    }
     else if ( key == "SAM_DIR" ) {
       _SAM_dir = value;
       if ( !boost::filesystem::is_directory( value ) )
@@ -205,47 +216,41 @@ RunParams::ParseIniFile( const string & ini_file )
       }
       VerifySAMFileHeaders();
     }
-    else if ( key == "RE_COUNTS_FILE" ) {
-      _RE_sites_file = value;
+    else if ( key == "RE_SITE_SEQ" ) _RE_site_seq = value;
+    else if ( key == "USE_REFERENCE" ) _use_ref = ConvertOrFail<bool>( value );
+    else if ( key == "SIM_BIN_SIZE" ) {
+      _sim_bin_size = ConvertOrFail<int>( value );
+      if ( _sim_bin_size != 0 && _species != "human" )
+	ReportParseFailure( "SIM_BIN_SIZE can only be nonzero if species = 'human'." );
+    }
+    else if ( key == "REF_ASSEMBLY_FASTA" ) {
+      _ref_assembly_fasta = value;
       if ( !boost::filesystem::is_regular_file( value ) )
 	ReportParseFailure( "Can't find file '" + value + "'." );
     }
-    else if ( key == "USE_REFERENCE" ) _use_ref = ConvertOrFail<bool>( value );
-    else if ( key == "SIM_BIN_SIZE" ) _sim_bin_size = ConvertOrFail<int>( value );
     else if ( key == "BLAST_FILE_HEAD" ) {
       _BLAST_file_head = value;
-      if ( _use_ref && _sim_bin_size == 0 && !boost::filesystem::is_regular_file( value + ".1.blast.out" ) )
-	ReportParseFailure( "BLAST_FILE_HEAD = " + value + " doesn't seem to point to any usable BLAST alignment files." ); // TODO: this is unnecessarily restrictive because it doesn't allow that the TrueMapping cache file might exist if the BLAST files don't; but there's nothing we can do about that because OUTPUT_DIR hasn't yet been loaded in; maybe reorder OUTPUT_DIR?
-    }
-    else if ( key == "DRAFT_ASSEMBLY_NAMES_FILE" ) {
-      _draft_assembly_names_file = value;
-      if ( !boost::filesystem::is_regular_file( value ) )
-	ReportParseFailure( "Can't find file '" + value + "'." );
-    }
-    else if ( key == "REF_ASSEMBLY_NAMES_FILE" ) {
-      _ref_assembly_names_file = value;
-      if ( _use_ref && !boost::filesystem::is_regular_file( value ) )
-	ReportParseFailure( "Can't find file '" + value + "'." );
+      if ( _use_ref && _sim_bin_size == 0 && !boost::filesystem::is_regular_file( value + ".1.blast.out" ) && !boost::filesystem::is_regular_file( _out_dir + "/cached_data/TrueMapping.assembly.txt" ) )
+	ReportParseFailure( "BLAST_FILE_HEAD = " + value + " doesn't seem to point to any usable BLAST alignment files, and no cached data is available in OUTPUT_DIR." );
     }
     else if ( key == "DO_CLUSTERING" )  _do_clustering  = ConvertOrFail<bool>( value );
     else if ( key == "DO_ORDERING" )    _do_ordering    = ConvertOrFail<bool>( value );
     else if ( key == "DO_REPORTING" )   _do_reporting   = ConvertOrFail<bool>( value );
     else if ( key == "OVERWRITE_GLM" )  _overwrite_GLM  = ConvertOrFail<bool>( value );
     else if ( key == "OVERWRITE_CLMS" ) _overwrite_CLMs = ConvertOrFail<bool> ( value );
-    else if ( key == "CLUSTER_N" )                 _cluster_N                 = ConvertOrFail<int>   ( value );
-    else if ( key == "CLUSTER_MIN_RE_SITES" )      _cluster_min_RE_sites      = ConvertOrFail<int>   ( value );
-    else if ( key == "CLUSTER_MAX_LINK_DENSITY" )  _cluster_max_link_density  = ConvertOrFail<double>( value );
-    else if ( key == "CLUSTER_DO_NONINFORMATIVE" ) _cluster_do_noninformative = ConvertOrFail<bool>  ( value );
-    else if ( key == "CLUSTER_DRAW_HEATMAP" )      _cluster_draw_heatmap      = ConvertOrFail<bool>  ( value );
-    else if ( key == "CLUSTER_DRAW_DOTPLOT" )      _cluster_draw_dotplot      = ConvertOrFail<bool>  ( value );
-    else if ( key == "ORDER_MIN_N_RES_IN_TRUNK" )  _order_min_N_REs_in_trunk  = ConvertOrFail<int>   ( value );
-    else if ( key == "ORDER_MIN_N_RES_IN_SHREDS" ) _order_min_N_REs_in_shreds = ConvertOrFail<int>   ( value );
-    else if ( key == "OUTPUT_DIR" ) {
-      _out_dir = value;
-      if ( boost::filesystem::is_regular_file( value ) )
-	ReportParseFailure( "File '" + value + "' already exists as a non-directory file." );
+    else if ( key == "CLUSTER_N" )                    _cluster_N                    = ConvertOrFail<int>   ( value );
+    else if ( key == "CLUSTER_MIN_RE_SITES" )         _cluster_min_RE_sites         = ConvertOrFail<int>   ( value );
+    else if ( key == "CLUSTER_MAX_LINK_DENSITY" )     _cluster_max_link_density     = ConvertOrFail<double>( value );
+    else if ( key == "CLUSTER_NONINFORMATIVE_RATIO" ) {
+      _cluster_noninformative_ratio = ConvertOrFail<double>( value );
+      if ( _cluster_noninformative_ratio != 0 && _cluster_noninformative_ratio <= 1 )
+	ReportParseFailure( "CLUSTER_NONINFORMATIVE_RATIO must either be 0 or >1." );
     }
-    else if ( key == "REPORT_CHART_OUTFILE" ) { string x = value; }
+    else if ( key == "CLUSTER_DRAW_HEATMAP" )         _cluster_draw_heatmap         = ConvertOrFail<bool>  ( value );
+    else if ( key == "CLUSTER_DRAW_DOTPLOT" )         _cluster_draw_dotplot         = ConvertOrFail<bool>  ( value );
+    else if ( key == "ORDER_MIN_N_RES_IN_TRUNK" )     _order_min_N_REs_in_trunk     = ConvertOrFail<int>   ( value );
+    else if ( key == "ORDER_MIN_N_RES_IN_SHREDS" )    _order_min_N_REs_in_shreds    = ConvertOrFail<int>   ( value );
+    else if ( key == "ORDER_DRAW_DOTPLOTS" )          _order_draw_dotplots          = ConvertOrFail<bool>  ( value );
     else if ( key == "REPORT_EXCLUDED_GROUPS" ) {
       _report_excluded_groups.clear();
       if ( value != "-1" ) // if the first listed value is -1, don't do anything - leave the _report_excluded_groups vector empty
@@ -256,6 +261,7 @@ RunParams::ParseIniFile( const string & ini_file )
 	}
     }
     else if ( key == "REPORT_QUALITY_FILTER" ) _report_quality_filter = ConvertOrFail<int>( value );
+    else if ( key == "REPORT_DRAW_HEATMAP" )   _report_draw_heatmap   = ConvertOrFail<bool>( value );
     
     
     // Record this line.
@@ -272,9 +278,25 @@ RunParams::ParseIniFile( const string & ini_file )
     cout << endl << endl;
   }
   
-  
+    
   assert( current_key_ID == N_keys );
 }
+
+
+
+
+// Get the set of contig/chromosome names in the reference assembly fasta.  This fails if USE_REFERENCE = 0.
+// After the first call, this vector is cached for faster retrieval in the future.
+vector<string> *
+RunParams::LoadRefGenomeContigNames() const
+{
+  // If this function hasn't already been run, parse the fasta file and get the reference assembly's contig/chromosome names.
+  // Note that this reads the file <_ref_assembly_fasta>.names, and will create the file if necessary.
+  assert( boost::filesystem::is_regular_file( _ref_assembly_fasta ) );
+  if ( _ref_contig_names.empty() ) _ref_contig_names = GetFastaNames( _ref_assembly_fasta );
+  return &_ref_contig_names;
+}
+
 
 
 
@@ -282,25 +304,31 @@ RunParams::ParseIniFile( const string & ini_file )
 vector<string> *
 RunParams::LoadDraftContigNames() const
 {
-  // If this has already been run, just return the cached value.  No need to go to the trouble (and I/O delay) of opening the file.
-  if ( !_draft_contig_names.empty() ) return &_draft_contig_names;
-  
-  // Parse the names file for the draft contig names.
-  //cout <<  _draft_assembly_names_file  << endl;
-  vector<string> names = ParseTabDelimFile<string>( _draft_assembly_names_file, 0 );
-  
-  // The names file contains all the draft contig names prefaced by the '>', indicating the start of a contig name in a fasta file.
-  // We must remove the '>'s.
-  _draft_contig_names.resize( names.size() );
-  for ( size_t i = 0; i < names.size(); i++ ) {
-    assert( names[i][0] == '>' );
-    _draft_contig_names[i] = names[i].substr(1);
-  }
-
-  
+  // If this function hasn't already been run, parse the fasta file and get the draft contig names.
+  // Note that this reads the file <_draft_assembly_fasta>.names, and will create the file if necessary.
+  if ( _draft_contig_names.empty() ) _draft_contig_names = GetFastaNames( _draft_assembly_fasta );
   return &_draft_contig_names;
 } 
 
+
+
+// Get the filename that contains the number of restriction enzyme sites for each contig in the draft assembly.  This might require generating the file,
+// by calling the script CountMotifsInFasta.pl.
+string
+RunParams::DraftContigRESitesFilename() const
+{
+  string RE_sites_file = _draft_assembly_fasta + ".counts_" + _RE_site_seq + ".txt";
+  
+  // If this function hasn't already been run, the file may not exist, in which case the script CountMotifsInFasta.pl needs to be run.
+  if ( !boost::filesystem::is_regular_file( RE_sites_file ) ) {
+    string cmd = "CountMotifsInFasta.pl " + _draft_assembly_fasta + " " + _RE_site_seq;
+    system( cmd.c_str() );
+    assert( boost::filesystem::is_regular_file( RE_sites_file ) ); // if this fails, the CountMotifsInFasta.pl script didn't run correctly
+  }
+  
+  return RE_sites_file;
+}
+  
 
 
 // Load a TrueMapping using the files in this RunParams object.
@@ -312,14 +340,19 @@ RunParams::LoadTrueMapping() const
   
   assert( !_SAM_files.empty() );
   
+  // Call these functions to fill the cache variables _ref_contig_names and _draft_contig_names, respectively.
+  LoadRefGenomeContigNames();
+  LoadDraftContigNames();
+  
   // Create a TrueMapping object, which records where the contigs are truly located on the reference.
   // If the draft assembly consists of simulated bins from the reference assembly, use a special constructor that deduces the true location of each bin.
   // Otherwise, pass the BLAST file head into the constructor so it can use those alignments.
+  
   TrueMapping * mapping =
     _sim_bin_size != 0 ?
-    new TrueMapping( _species, _sim_bin_size, _draft_assembly_names_file, _ref_assembly_names_file )
+    new TrueMapping( _species, _sim_bin_size, _draft_contig_names, _ref_contig_names )
     :
-    new TrueMapping( _species, _draft_assembly_names_file, _ref_assembly_names_file, _BLAST_file_head, _out_dir, _SAM_files[0] );
+    new TrueMapping( _species, _draft_contig_names, _ref_contig_names, _BLAST_file_head, _out_dir, _SAM_files[0] );
   
   
   // Remove heterochromatic regions from the fly reference.

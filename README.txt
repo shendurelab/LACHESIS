@@ -96,7 +96,7 @@ To compile LACHESIS, you must first download and install two other libraries: bo
 
 This LACHESIS distribution includes a small sample dataset - specifically, a reduced version of the hESC dataset - that allows you to try out running LACHESIS.  To run it, go into the LACHESIS directory and type `Lachesis INIs/test_case.ini`.  The file test_case.ini gives the parameters that control how LACHESIS is run, in this case including the input files from the sample dataset.  On my computer, LACHESIS takes 3 minutes to run on this dataset, most of which is in file I/O.
 
-A directory called out_test/ will be created and will contain the results from this run.  A summary of the results is in the file ReportChart.txt; the main output files are in the subdirectory main_results/; other intermediate results are in the subdirectory cached_data.  The results from this test case won't be very good because the dataset of Hi-C links is so small, but they should give you an idea of what to expect from LACHESIS.
+A directory called out_test/ will be created and will contain the results from this run.  A summary of the results is in the file REPORT.txt; the main output files are in the subdirectory main_results/; other intermediate results are in the subdirectory cached_data.  The results from this test case won't be very good because the dataset of Hi-C links is so small, but they should give you an idea of what to expect from LACHESIS.
 
 
 
@@ -187,7 +187,7 @@ There are many parameters in the INI file beyond the inputs to LACHESIS.  You ma
 
 9. Interpreting the LACHESIS results
 
-LACHESIS will create a set of output files in the directory OUTPUT_DIR that you have specified in the INI file.  This directory contains a file "ReportChart.txt" that will give a topline summary of LACHESIS' performance.  It also contains two subdirectories, main_results/ and cached_data/.  The main_results/ directory will contain the following files:
+LACHESIS will create a set of output files in the directory OUTPUT_DIR that you have specified in the INI file.  This directory contains a file "REPORT.txt" that will give a topline summary of LACHESIS' performance.  It also contains two subdirectories, main_results/ and cached_data/.  The main_results/ directory will contain the following files:
 I. clusters.txt and clusters.by_name.txt):  These files indicate the clustering results.  Each of LACHESIS' chromosome group is shown as a line, and the input contigs/scaffolds in that group are listed on the line, either by ID (clusters.txt) or by contig name (clusters.by_name.txt).
 II. group*.ordering: These files indicate the ordering and orienting results.  There is one file for each group.  In each file is a list of input contigs/scaffolds in order, with their orientations, orientation quality scores, and gap sizes.
 

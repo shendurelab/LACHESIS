@@ -12,7 +12,8 @@
  * ClusterVec: A vector< set<int> > describing a clustering result.
  * ContigOrdering: An ordering of contigs in a group, eventually including orientation and spacing.
  * TrueMapping: The true location of each contig on the reference assembly, if there is one.  Used for reference-based validation.
- * Reporter: Tools to evaluate the Lachesis result and produce the ReportChart.
+ * Reporter: Tools to evaluate the Lachesis result and produce the REPORT.txt file.
+ * TextFileParsers: A set of useful functions to parse text files.
  *
  *
  *
@@ -82,7 +83,7 @@ LachesisClustering( const RunParams & run_params )
   // Otherwise, create the data by reading the SAM files, which takes longer.
   string GLM_file = run_params._out_dir + "/cached_data/all.GLM";
   if ( !boost::filesystem::is_regular_file( GLM_file ) || run_params._overwrite_GLM ) {
-    glm = new GenomeLinkMatrix( run_params._species, run_params._SAM_files, run_params._RE_sites_file );
+    glm = new GenomeLinkMatrix( run_params._species, run_params._SAM_files, run_params.DraftContigRESitesFilename() );
     glm->WriteFile( GLM_file );
   }
   else
@@ -97,7 +98,7 @@ LachesisClustering( const RunParams & run_params )
   
   if ( run_params._cluster_draw_heatmap ) glm->DrawHeatmap( "heatmap.jpg" );
   
-  glm->AHClustering( run_params._cluster_N, 0, ( run_params._cluster_do_noninformative ? 3 : 0 ), run_params._cluster_draw_dotplot, true_mapping );
+  glm->AHClustering( run_params._cluster_N, 0, run_params._cluster_noninformative_ratio, run_params._cluster_draw_dotplot, true_mapping );
   
   // Improve the clustering results, in the postfosmid case.
   if ( postfosmid ) glm->MoveContigsInClusters( 1.2 );
@@ -152,7 +153,7 @@ LachesisOrdering( const RunParams & run_params )
 	CLMs[j] = new ChromLinkMatrix( run_params._species, clusters[j].size() );
       
       // Read all of the SAM files and fill all of the ChromLinkMatrices.
-      LoadDeNovoCLMsFromSAM( run_params._SAM_files, run_params._RE_sites_file, clusters, CLMs );
+      LoadDeNovoCLMsFromSAM( run_params._SAM_files, run_params.DraftContigRESitesFilename(), clusters, CLMs );
       
       // Write the ChromLinkMatrices to files.
       for ( size_t j = 0; j < clusters.size(); j++ ) {

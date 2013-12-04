@@ -33,44 +33,6 @@ static const unsigned LINE_LEN = 10000;
 
 
 
-// Helper function for the TrueMapping constructor.
-// Read a *.fasta.names file and find out all the contig names.  Output a vector<string> of contig names and also a lookup table of contig name to contig ID.
-void
-read_fasta_names( const string & fasta_names_file,
-		  vector<string> & contig_names, // output
-		  map<string,int> & contig_IDs ) // output
-{
-  char line[LINE_LEN];
-  vector<string> tokens;
-  
-  contig_names.clear();
-  contig_IDs.clear();
-  
-  // Read the file line-by-line.
-  ifstream in;
-  in.open( fasta_names_file.c_str(), ios::in );
-  
-  while ( 1 ) {
-    in.getline( line, LINE_LEN );
-    assert( strlen(line)+1 < LINE_LEN );
-    if ( in.fail() ) break;
-    
-    // Each line in the file is of the format ">name ..."; that is, the first token starts with a '>' and there may or may not be other tokens.
-    boost::split( tokens, line, boost::is_any_of(" \t") );
-    if ( tokens[0][0] != '>' ) {
-      cout << "ERROR: FASTA names file " << fasta_names_file << " should only have lines beginning with '>'.  Saw the line: " << line << endl;
-      assert( tokens[0][0] == '>' );
-    }
-    string name = tokens[0].substr(1);
-    
-    // Fill data structures.
-    contig_IDs[name] = contig_names.size();
-    contig_names.push_back(name);
-  }
-  
-  in.close();
-}
-
 
 
 
@@ -170,29 +132,30 @@ struct BlastAlignmentVec
 
 
 // Load in a BLAST output file.
-TrueMapping::TrueMapping( const string & species, const string & query_names_file, const string & target_names_file, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file )
-  : _species( species )
+TrueMapping::TrueMapping( const string & species, const vector<string> & query_names, const vector<string> & target_names, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file )
+  : _species( species ),
+    _query_names( query_names ),
+    _target_names( target_names )
 {
-  // Initially, clear the list of query and target names, and the set of alignments.
-  _query_names.clear();
-  _target_names.clear();
+  // Initially, clear the set of alignments.
   _target.clear();
   _start.clear();
   _stop.clear();
   _qual_alignability.clear();
   _qual_specificity.clear();
   
-  
+  // These parameters are taken from the lengths of the names vectors.
+  assert( NQueries() > 0 );
+  assert( NTargets() > 0 );
   
   cout << Time() << ": TrueMapping\t<-\t" << BLAST_file_head << endl;
-  assert( boost::filesystem::is_regular_file( query_names_file ) );
-  assert( boost::filesystem::is_regular_file( target_names_file ) );
   assert( boost::filesystem::is_regular_file( dummy_SAM_file ) );
   
-  // Read the query_names and target_names files, respectively.  Fill _query_names and _target_names with the names of queries in the respective fastas.
-  map<string,int> query_names_to_IDs, target_names_to_IDs;
-  read_fasta_names(  query_names_file,  _query_names,  query_names_to_IDs );
-  read_fasta_names( target_names_file, _target_names, target_names_to_IDs );
+  // Make a lookup table of target name -> ID.
+  map<string,int> target_names_to_IDs;
+  for ( size_t i = 0; i < _target_names.size(); i++ )
+    target_names_to_IDs[ _target_names[i] ] = i;
+  
   
   // Get query sequence lengths.
   vector<int> query_lengths = TargetLengths( dummy_SAM_file );
@@ -204,7 +167,7 @@ TrueMapping::TrueMapping( const string & species, const string & query_names_fil
   }
   
   if ( (int) query_lengths.size() != NQueries() ) {
-    cout << "ERROR: DRAFT_ASSEMBLY_NAMES_FILE (" << query_names_file << ") and SAM file '" << dummy_SAM_file << "' seem to be from different datasets." << endl;
+    cout << "ERROR: List of query names (from <DRAFT_ASSEMBLY_FASTA>.names) and SAM file '" << dummy_SAM_file << "' seem to be from different datasets." << endl;
     PRINT2( query_lengths.size(), NQueries() );
     assert( (int) query_lengths.size() == NQueries() );
   }
@@ -342,8 +305,11 @@ TrueMapping::TrueMapping( const string & species, const string & query_names_fil
 	  BLAST_aligns = BlastAlignmentVec( NTargets() );
 	}
 	
-	// "Query:" line gives query name; make sure it matches the name in the query_names_file (the queries must appear in the same order!)
-	else if ( tokens[1] == "Query:" ) assert( tokens.back() == _query_names[query_ID] );
+	// "Query:" line gives query name; make sure it matches the name in the query_names (the queries must appear in the same order!)
+	// Actually, don't make sure of this; this is too stringent because different BLAST files have slightly different formats
+	// We want to get the token in the line that represents the first word after "Query:", but taking into account the possibility of multiple spaces.
+	// This is too hard so let's just comment it out.
+	else if ( tokens[1] == "Query:" ) {} // assert( tokens[2] == _query_names[query_ID] );
 	
 	// "XXX hits found" line indicates the number of lines that will follow that describe alignments
 	else if ( tokens[2] == "hits" ) N_hits = boost::lexical_cast<int>( tokens[1] );
@@ -407,23 +373,22 @@ TrueMapping::TrueMapping( const string & species, const string & query_names_fil
 
 
 // Create a TrueMapping for a de novo GLM made by chopping up a reference genome into bins of size BIN_SIZE.  The species must be human (for now).
-TrueMapping::TrueMapping( const string & species, const int BIN_SIZE, const string & query_names_file, const string & target_names_file )
-  : _species( species )
+TrueMapping::TrueMapping( const string & species, const int BIN_SIZE, const vector<string> & query_names, const vector<string> & target_names )
+  : _species( species ),
+    _query_names( query_names ),
+    _target_names( target_names )
 {
-  // Initially, clear the list of query and target names, and the set of alignments.
-  _query_names.clear();
-  _target_names.clear();
+  // Initially, clear the set of alignments.
   _target.clear();
   _start.clear();
   _stop.clear();
   _qual_alignability.clear();
   _qual_specificity.clear();
   
+  // These parameters are taken from the lengths of the names vectors.
+  assert( NQueries() > 0 );
+  assert( NTargets() > 0 );
   
-  // Read the query_names and target_names files, respectively.  Fill _query_names and _target_names with the names of contigs in the respective fastas.
-  map<string,int> query_names_to_IDs, target_names_to_IDs; // not used
-  read_fasta_names(  query_names_file,  _query_names,  query_names_to_IDs );
-  read_fasta_names( target_names_file, _target_names, target_names_to_IDs );
   
   
   // Use the human chromosome lengths to determine the true position of each bin.
@@ -458,6 +423,7 @@ TrueMapping::TrueMapping( const string & species, const int BIN_SIZE, const stri
   }
   
   
+  
   // Sanity check.  If this fails, the bins don't add up right.
   if ( _target.size() != _query_names.size() ) {
     PRINT2( _target.size(), _query_names.size() );
@@ -478,6 +444,7 @@ TrueMapping::TrueMapping( const string & species, const int & bin_size, const ve
   : _species( species ),
     _target_names( chrom_names )
 {
+  _query_names.clear();
   
   // Determine the number of bins in each chromosome of this genome.
   for ( int i = 0; i < NTargets(); i++ ) {

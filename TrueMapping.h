@@ -62,9 +62,9 @@ class TrueMapping
   // Load in a set of BLAST alignments for a de novo GLM.  Also load in query names and target names files (which can be made by `grep "\>" <file.fasta>.`)
   // Files should exist: <BLAST_file_head>.blast.out, <BLAST_file_head>.*.blast.out (for * = 1,2,3,...)
   // The dummy_SAM_file is for getting contig lengths.
-  TrueMapping( const string & species, const string & query_names_file, const string & target_names_file, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file );
+  TrueMapping( const string & species, const vector<string> & query_names, const vector<string> & target_names, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file );
   // Create a TrueMapping for a de novo GLM made by chopping up a reference genome into bins of size BIN_SIZE.  The species must be human (for now).
-  TrueMapping( const string & species, const int BIN_SIZE, const string & query_names_file, const string & target_names_file );
+  TrueMapping( const string & species, const int BIN_SIZE, const vector<string> & query_names, const vector<string> & target_names );
   // Create a TrueMapping for a non-de novo GLM.
   TrueMapping( const string & species, const int & bin_size, const vector<string> & chrom_names, const map<string,int> & chrom_lengths );
   
