@@ -14,17 +14,11 @@ RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
-# directories with .h's in them
-BOOST_DIR=/net/shendure/vol10/jnburton/extern/boost_1_47_0
-SAMTOOLS_DIR=/net/shendure/vol10/jnburton/extern/samtools-0.1.16
-INCLUDES = -I$(BOOST_DIR) -I$(SAMTOOLS_DIR)
+# directories with .h's in them - the LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR environment variables must be set
+INCLUDES = -I$(LACHESIS_BOOST_DIR) -I$(LACHESIS_SAMTOOLS_DIR)
 
 # compiler flags
 CFLAGS  = -Wall -ansi -pedantic -g -O3
-
-# linking flags - these don't do anything because there's no linking in compilation
-#BOOST_LIBS=-L$(BOOST_DIR)/stage/lib -lboost_filesystem -lboost_regex
-#LFLAGS = $(BOOST_LIBS)
 
 # dependencies
 
