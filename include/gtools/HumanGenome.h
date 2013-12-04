@@ -14,10 +14,6 @@
  * map<string,int> HumanGenome_centromere_locs()
  *     Map of chromosome names to centromere locations.
  *
- * Much of this data is hard-wired in this module, but some of it is in a data
- * file located at:
- * ../human_ann/centromeres.txt
- *
  * We also assume centromeres are exactly 3MB, which they are in hg19.
  *
  *

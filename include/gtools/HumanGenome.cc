@@ -8,6 +8,7 @@
 
 
 // Boost libraries
+#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp> // split
 #include <boost/lexical_cast.hpp>
 
@@ -97,36 +98,37 @@ static const unsigned LINE_LEN = 1000;
 
 
 
-// Centromere locations.  Centromeres must be exactly 3MB in length, as in hg19.
+// Centromere locations.
+// The numbers are hard-wired here but are taken from the UCSC Genome Browser for hg19, as described here: http://genome.ucsc.edu/FAQ/FAQtracks.html#tracks20
 const map<string,chrom_interval>
 HumanGenome_centromere_intervals()
 {
   map<string,chrom_interval> intervals;
   
-  // This file gives centromere locations and is available from the UCSC
-  // Genome Browser.
-  const string centro_file = "../human_ann/centromeres.txt";
-  
-  // Read the file line-by-line.
-  char line[LINE_LEN];
-  ifstream in( centro_file.c_str(), ios::in );
-  while ( 1 ) {
-    in.getline( line, LINE_LEN );
-    assert( strlen(line)+1 < LINE_LEN );
-    if ( in.fail() ) break;
-    
-    if ( line[0] == '#' ) continue; // ignore commented lines
-    
-    // Split up the line into tokens.
-    vector<string> tokens;
-    boost::split( tokens, line, boost::is_any_of("\t") );
-    int centro_start = boost::lexical_cast<int>( tokens[2] );
-    int centro_stop  = boost::lexical_cast<int>( tokens[3] );
-    assert( centro_stop - centro_start == HumanGenome_centro_size );
-    intervals[ tokens[1] ] = chrom_interval( tokens[1], centro_start, centro_stop );
-    
-  }
-  
+  intervals["chr1"]  = chrom_interval( "chr1", 121535434, 124535434 );
+  intervals["chr2"]  = chrom_interval( "chr2",  92326171,  95326171 );
+  intervals["chr3"]  = chrom_interval( "chr3",  90504854,  93504854 );
+  intervals["chr4"]  = chrom_interval( "chr4",  49660117,  52660117 );
+  intervals["chr5"]  = chrom_interval( "chr5",  46405641,  49405641 );
+  intervals["chr6"]  = chrom_interval( "chr6",  58830166,  61830166 );
+  intervals["chr7"]  = chrom_interval( "chr7",  58054331,  61054331 );
+  intervals["chr8"]  = chrom_interval( "chr8",  43838887,  46838887 );
+  intervals["chr9"]  = chrom_interval( "chr9",  47367679,  50367679 );
+  intervals["chr10"] = chrom_interval( "chr10", 39254935,  42254935 );
+  intervals["chr11"] = chrom_interval( "chr11", 51644205,  54644205 );
+  intervals["chr12"] = chrom_interval( "chr12", 34856694,  37856694 );
+  intervals["chr13"] = chrom_interval( "chr13", 16000000,  19000000 );
+  intervals["chr14"] = chrom_interval( "chr14", 16000000,  19000000 );
+  intervals["chr15"] = chrom_interval( "chr15", 17000000,  20000000 );
+  intervals["chr16"] = chrom_interval( "chr16", 35335801,  38335801 );
+  intervals["chr17"] = chrom_interval( "chr17", 22263006,  25263006 );
+  intervals["chr18"] = chrom_interval( "chr18", 15460898,  18460898 );
+  intervals["chr19"] = chrom_interval( "chr19", 24681782,  27681782 );
+  intervals["chr20"] = chrom_interval( "chr20", 26369569,  29369569 );
+  intervals["chr21"] = chrom_interval( "chr21", 11288129,  14288129 );
+  intervals["chr22"] = chrom_interval( "chr22", 13000000,  16000000 );
+  intervals["chrX"] = chrom_interval( "chrX",   58632012,  61632012 );
+  intervals["chrY"] = chrom_interval( "chrY",   10104553,  13104553 );
   
   return intervals;
 }
