@@ -617,7 +617,7 @@ GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool fl
 // The distance metric between clusters is "average linkage", as described here: http://www2.statistics.com/resources/glossary/a/avglnkg.php
 // Sets: _clusters (via SetClusters())
 void
-GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const int NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping )
+GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping )
 {
   // Determine the number of non-skipped contigs (contigs not marked either short or reptitive by the Skip() functions.)  If there are none, throw an error.
   int N_non_skipped = count( _contig_skip.begin(), _contig_skip.end(), false );
@@ -626,7 +626,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
   }
   assert ( N_non_skipped > 0 );
   
-  cout << Time() << ": AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << boolalpha << NONINFORMATIVE_RATIO << ")" << endl;
+  cout << Time() << ": AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << NONINFORMATIVE_RATIO << ")" << endl;
   
   set<int>::const_iterator set_it1, set_it2;
   

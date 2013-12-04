@@ -140,7 +140,7 @@ class GenomeLinkMatrix
   */
   
   // Agglomerative Hierarchical clustering
-  void AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const int NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping );
+  void AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping );
   
   // Improvements to clustering algorithms.
   void ExcludeLowQualityContigs( const TrueMapping & true_mapping ); // remove from the clusters all contigs whose alignments to reference are sketchy
