@@ -200,7 +200,7 @@ RunParams::ParseIniFile( const string & ini_file )
     }
     else if ( key == "DRAFT_ASSEMBLY_FASTA" ) {
       _draft_assembly_fasta = value;
-      if ( !boost::filesystem::is_regular_file( value ) )
+      if ( !boost::filesystem::is_regular_file( value ) && !boost::filesystem::is_regular_file( value + ".names" ) ) // technically this should also check for the existence of <assembly-fasta>.counts_<RE_SITE_SEQ>.txt, but RE_SITE_SEQ hasn't been loaded in yet
 	ReportParseFailure( "Can't find file '" + value + "'." );
     }
     else if ( key == "SAM_DIR" ) {
@@ -225,7 +225,7 @@ RunParams::ParseIniFile( const string & ini_file )
     }
     else if ( key == "REF_ASSEMBLY_FASTA" ) {
       _ref_assembly_fasta = value;
-      if ( !boost::filesystem::is_regular_file( value ) )
+      if ( !boost::filesystem::is_regular_file( value ) && !boost::filesystem::is_regular_file( value + ".names" ) )
 	ReportParseFailure( "Can't find file '" + value + "'." );
     }
     else if ( key == "BLAST_FILE_HEAD" ) {
@@ -292,7 +292,6 @@ RunParams::LoadRefGenomeContigNames() const
 {
   // If this function hasn't already been run, parse the fasta file and get the reference assembly's contig/chromosome names.
   // Note that this reads the file <_ref_assembly_fasta>.names, and will create the file if necessary.
-  assert( boost::filesystem::is_regular_file( _ref_assembly_fasta ) );
   if ( _ref_contig_names.empty() ) _ref_contig_names = GetFastaNames( _ref_assembly_fasta );
   return &_ref_contig_names;
 }

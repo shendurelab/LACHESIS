@@ -102,11 +102,10 @@ template vector<string> ParseTabDelimFile( const string & infile, const size_t c
 vector<string>
 GetFastaNames( const string & fasta_file )
 {
-  assert( boost::filesystem::is_regular_file( fasta_file ) );
-  
   string names_file = fasta_file + ".names";
   if( !boost::filesystem::is_regular_file( names_file ) ) {
     cout << "Calling MakeFastaNamesFile on " << names_file << endl;
+    assert( boost::filesystem::is_regular_file( fasta_file ) );
     MakeFastaNamesFile( fasta_file );
   }
   return ParseTabDelimFile<string>( names_file, 0 );
