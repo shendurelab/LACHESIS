@@ -9,6 +9,7 @@
 #include <limits.h> // INT_MAX
 #include <cmath> // sqrt
 #include <iostream>
+#include <iomanip> // noboolalpha
 #include <fstream>
 #include <sstream> // ostringstream
 #include <string>
