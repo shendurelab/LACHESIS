@@ -31,8 +31,7 @@
 // Modules in ~/include (must add -L~/include and -lJ<module> to link)
 #include "TimeMem.h"
 #include "markov/WDAG.h"
-#include "gtools/HumanGenome.h"
-#include "gtools/SAMStepper.h"
+#include "gtools/SAMStepper.h" // SAMStepper, NTargetsInSAM
 
 // Modules in <samtools-dir> (must add -I~/include)
 #include "sam.h"
@@ -525,18 +524,18 @@ ChromLinkMatrix::LoadFromSAMDeNovo( const vector<string> & SAM_files, const stri
 
 
 
-// LoadFromSAMNonDeNovo: Fill this ChromLinkMatrix with data from one or more SAM/BAM files.
-// Use chromosome #chrom_ID (as defined by the mapping in HumanGenome.h: e.g., 0 = chr1.)
+// LoadFromSAMNonDeNovo: Fill this non-de novo ChromLinkMatrix with data from one or more SAM/BAM files describing Hi-C reads aligned to a reference genome.
+// The chromosome ID is specified by the chromosome order in the reference fasta file.
 // This is a wrapper to the function LoadNonDeNovoCLMsFromSAM, which loads data into one or more SAM files.
 void
 ChromLinkMatrix::LoadFromSAMNonDeNovo( const string & SAM_file, const int chrom_ID )
 {
-  // Check that this chromosome number makes sense.
-  int n_chroms = HumanGenome_n_chroms;
-  assert( chrom_ID >= 0 && chrom_ID < n_chroms );
+  // Look at the SAM file's header to determine the number of chromosomes in the reference genome.
+  int N_chroms = NTargetsInSAM( SAM_file );
+  assert( chrom_ID >= 0 && chrom_ID < N_chroms );
   
   // Make a list of ChromLinkMatrix pointers in which the only non-null pointer is to this ChromLinkMatrix.  This is needed for LoadNonDeNovoCLMsFromSAM.
-  vector<ChromLinkMatrix *> CLMs( n_chroms, NULL );
+  vector<ChromLinkMatrix *> CLMs( N_chroms, NULL );
   CLMs[chrom_ID] = this;
   
   LoadNonDeNovoCLMsFromSAM( SAM_file, CLMs );
@@ -1917,7 +1916,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
   
   // Set up a SAMStepper object to read in the alignments.
   SAMStepper stepper(SAM_file);
-  stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the reference.
+  stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the assembly.
   
   // Loop over all pairs of alignments in the SAM file.
   // Note that the next_pair() function assumes that all reads in a SAM file are paired, and the two reads in a pair occur in consecutive order.
@@ -1989,8 +1988,8 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
   cout << Time() << ": Reading Hi-C data from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
   assert( boost::filesystem::is_regular_file( SAM_file ) );
   
-  int N_chroms = CLMs.size();
-  assert( N_chroms == (int) HumanGenome_n_chroms );
+  int N_chroms = NTargetsInSAM( SAM_file );
+  assert( N_chroms == (int) CLMs.size() ); // if this fails, the CLMs vector doesn't have a number of elements equal to the number of chromosomes
   
   // Gather up stats on each ChromLinkMatrix object for local use.
   bool has_data = false;
@@ -2073,7 +2072,7 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
   
   if ( verbose ) cout << endl;
   
-  cout << Time() << ": Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << endl;
+  cout << Time() << ": Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << "; N pairs used: " << N_pairs_used << endl;
   
   for ( int i = 0; i < N_chroms; i++ )
     CLMs[i]->CalculateRepeatFactors();

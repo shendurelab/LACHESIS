@@ -79,11 +79,11 @@ class ChromLinkMatrix
   void DrawHeatmap( const string & heatmap_file = "" ) const;
   
   
-  // LoadFromNonDeNovo: Fill this de novo ChromLinkMatrix with data from one or more SAM/BAM files, but only for the contigs in cluster #cluster_ID.
+  // LoadFromSAMDeNovo: Fill this de novo ChromLinkMatrix with data from one or more SAM/BAM files, but only for the contigs in cluster #cluster_ID.
   void LoadFromSAMDeNovo( const        string  & SAM_file,  const string & RE_sites_file, const ClusterVec & cluster, const int cluster_ID );
   void LoadFromSAMDeNovo( const vector<string> & SAM_files, const string & RE_sites_file, const ClusterVec & cluster, const int cluster_ID );
   
-  // LoadFromSAMNonDeNovo: Fill this non-de novo ChromLinkMatrix with data from one or more SAM/BAM files.  Use chromosome chrom_ID (0 = chr1.)
+  // LoadFromSAMNonDeNovo: Fill this non-de novo ChromLinkMatrix with data from one or more SAM/BAM files describing Hi-C reads aligned to a reference genome.
   void LoadFromSAMNonDeNovo( const        string  & SAM_file,  const int chrom_ID );
   void LoadFromSAMNonDeNovo( const vector<string> & SAM_files, const int chrom_ID );
   
