@@ -29,8 +29,8 @@ sub RC( $ );
 
 
 # Defaults in the absence of parameters.
-my $assembly_fasta = "human/prefosmid/assembly.fasta";
-my $output_dir = "out/prefosmid";
+my $assembly_fasta = "../fly/assembly/assembly.fasta";
+my $output_dir = "out/Kc167";
 my $unknown_gap_size = 10000; # default size to apply to gaps between contigs/scaffolds when the gap size is not known from Lachesis
 
 # Read parameters from command-line arguments.
@@ -75,7 +75,7 @@ print localtime() . ": Found $N_orderings ordering files ('group*.ordering' in $
 print localtime() . ": Reading in sequences from assembly file $assembly_fasta\n";
 my ( $fasta_names, $fasta_seqs ) = &LoadFasta( $assembly_fasta );
 my $N_contigs = scalar keys %$fasta_seqs;
-die unless $N_contigs == scalar keys @$fasta_names;
+die unless $N_contigs == scalar @$fasta_names;
 print localtime() . ": Found $N_contigs contigs/scaffolds in assembly.\n";
 
 
@@ -220,7 +220,7 @@ print localtime(). ": Done!\n";
 # 2. A hash of contig name to contig sequence.
 sub LoadFasta( $ ) {
     
-    #print localtime() . ": FastaToContigs: $_[0]\n";
+    #print localtime() . ": LoadFasta: $_[0]\n";
     
     open IN, '<', $_[0] or die;
     
@@ -239,6 +239,8 @@ sub LoadFasta( $ ) {
     }
     
     close IN;
+    
+    die "ERROR: LoadFasta: Couldn't parse file $_[0] properly.  Are you sure this is a FASTA file?" unless scalar @contig_names >= 1 && scalar keys %contig_seqs >= 1;
     
     return ( \@contig_names, \%contig_seqs );
 }
