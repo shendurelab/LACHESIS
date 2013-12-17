@@ -1605,12 +1605,18 @@ ChromLinkMatrix::InitMatrix()
   
   int N_bins = 2 * _N_contigs; // each contig gets 2 bins: one for each of its possible orientations
   
-  // Initialize the matrix of data.
-  _matrix = new vector<int> * [N_bins];
-  for ( int i = 0; i < N_bins; i++ ) {
-    _matrix[i] = new vector<int>[N_bins];
-    for ( int j = 0; j < N_bins; j++ )
-      _matrix[i][j].clear();
+  // Initialize the matrix of data.  If the matrices are big, the machine may run out of memory, so catch that error.
+  try {
+    _matrix = new vector<int> * [N_bins];
+    for ( int i = 0; i < N_bins; i++ ) {
+      _matrix[i] = new vector<int>[N_bins];
+      for ( int j = 0; j < N_bins; j++ )
+	_matrix[i][j].clear();
+    }
+  }
+  catch ( std::bad_alloc & ba ) {
+    cerr << "ERROR: Sorry, there's not enough memory to allocate for this ChromLinkMatrix!  Try running on a machine with more RAM,\nbad_alloc error message: " << ba.what() << endl;
+    exit(1);
   }
   
   
