@@ -247,9 +247,8 @@ LachesisReporting( const RunParams & run_params )
   // Write a report file.
   reporter.ReportChart();
   
-  // TEMP: Optional: Make a heatmap of the whole assembly.  This is a usual reference-free visual evaluation.
-  //MakeWholeAssemblyHeatmap( run_params, false, 500000 );
-  
+  // Optional: Make a heatmap of the whole assembly.  This is a usual reference-free visual evaluation.
+  if ( run_params._report_draw_heatmap ) MakeWholeAssemblyHeatmap( run_params, false, 1000000 );
 }
 
 
