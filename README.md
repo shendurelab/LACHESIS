@@ -7,15 +7,12 @@ Publication in *Nature Biotechnology* (please cite) is here: [http://dx.doi.org/
 
 ## Table of Contents
 
-INSTALLING LACHESIS
-
+##### INSTALLING LACHESIS
 1. System requirements
 2. Downloading the LACHESIS package
 3. Compiling the LACHESIS package
 4. Testing out LACHESIS on a sample dataset
-
-RUNNING LACHESIS
-
+##### RUNNING LACHESIS
 1. Input requirements
 2. Creating an INI file
 3. Aligning the Hi-C reads to the draft assembly
@@ -23,14 +20,11 @@ RUNNING LACHESIS
 5. Aligning the draft assembly to the reference assembly, if there is one
 6. Running LACHESIS
 7. Interpreting the LACHESIS results
-
-TROUBLESHOOTING
-
-COPYRIGHT AND DISCLAIMER
-
-ACKNOWLEDGMENTS
-
-
+##### TROUBLESHOOTING
+1. LACHESIS is crashing!
+2. LACHESIS is producing a weird result!
+##### COPYRIGHT AND DISCLAIMER
+##### ACKNOWLEDGMENTS
 
 ## Installing LACHESIS
 
@@ -64,7 +58,7 @@ To compile LACHESIS, you must first download and install two other libraries: bo
 
 This LACHESIS distribution includes a small sample dataset - specifically, a reduced version of the hESC dataset we used in [our paper](http://dx.doi.org/10.1038/nbt.2727) - that allows you to try out running LACHESIS.  To run it, go into the LACHESIS directory and type `Lachesis INIs/test_case.ini`.  The file `test_case.ini` gives the parameters that control how LACHESIS is run, in this case including the input files from the sample dataset.  On my computer, LACHESIS takes 3 minutes to run on this dataset, most of which is in file I/O.
 
-A directory called `out_test/` will be created and will contain the results from this run.  A summary of the results is in the file `REPORT.txt`; the main output files are in the subdirectory `main_results/`; other intermediate results are in the subdirectory `cached_data/`.  The results from this test case won't be very good because the dataset of Hi-C links is so small, but they should give you an idea of how to run LACHESIS and what to expect from it.
+A directory called `out/test_case/` will be created and will contain the results from this run.  A summary of the results is in the file `REPORT.txt`; the main output files are in the subdirectory `main_results/`; other intermediate results are in the subdirectory `cached_data/`.  The results from this test case won't be very good because the dataset of Hi-C links is so small, but they should give you an idea of how to run LACHESIS and what to expect from it.
 
 ## Running Lachesis
 
@@ -136,11 +130,21 @@ To create the final assembly fasta, run the included script `CreateScaffoldedFas
 
 LACHESIS is a good piece of software, but it isn't perfect.  You may run it and get a result you weren't expecting.  You may also run it and get no result at all because it crashes.
 
+#### 1. LACHESIS is crashing!
+
 If LACHESIS crashes, the first thing you should do is look carefully at its output.  It might give a verbose explanation of what went wrong and give you a good idea for how to fix it.  You may also receive an "assertion error", which looks like this: `Assertion ... failed.`  That means that at some stage of the algorithm, LACHESIS encountered something specific that it wasn't expecting.  An assertion error will come with a reference to the file (`*.cc` or `*.h`) and the line number where the error occurred.  Try looking at that line in the file, which should contain the function `assert()`.  There should be some comments around that line that explain what might be causing the assertion error.
 
 In general, we've made a strong effort to make LACHESIS a well-designed and well-commented piece of code.  If you're familiar with C++, you should be able to poke around in the source code and get an idea of what's going on.  We recommend starting with the top-level module, `Lachesis.cc`, and working from there.
 
 If all else fails, and you still need help running LACHESIS, please e-mail Josh Burton at `jnburton at uw.edu`.
+
+#### 2. LACHESIS is producing a weird result!
+
+After you've gotten LACHESIS to run properly, take a good look at the REPORT.txt file.  If you're getting a weird result - for example, very little sequence is being assembled, or the error rate is high - you may need to tune LACHESIS' performance.
+
+There are several heuristic parameters involved in the running of LACHESIS.  They include: `CLUSTER_MIN_RE_SITES`, `CLUSTER_MAX_LINK_DENSITY`, `CLUSTER_DO_NONINFORMATIVE`, `ORDER_MIN_N_RES_IN_TRUNK`, and `ORDER_MIN_N_RES_IN_SHREDS`.  These parameters are tuning knobs that can be tweaked as necessary to produce a high-quality draft assembly.  For the LACHESIS publication, these parameters were set to values that are appropriate for the datasets that went into those assemblies, and these are the values you can see in the INI files that are provided with the LACHESIS distribution.  However, these values may not work for your situation.  The ideal values depend on the repeat content of the genome, the N50 of your input assembly, your density of Hi-C data, and your preference for accuracy versus completeness.
+
+Try tweaking some of the parameters and re-running LACHESIS.  The easiest approach is to produce a good clustering result first, then go from there to ordering (and make sure to set `OVERWRITE_CLMS = 1` when you move from clustering to ordering.)  If you have a reference genome to compare your result against (`USE_REFERENCE = `), the reference-based evaluation will be very helpful.
 
 ## COPYRIGHT AND DISCLAIMER
 
