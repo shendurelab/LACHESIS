@@ -11,6 +11,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <iomanip> // boolalpha
 #include <algorithm> // max_element
 #include <numeric> // accumulate
 
@@ -556,19 +557,22 @@ void
 GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool flip )
 {
   cout << Time() << ": SkipRepeats with repeat_multiplicity = " << repeat_multiplicity << ", flip = " << noboolalpha << flip << endl;
-  bool verbose = false; // TEMP
+  bool verbose = false;
   
   // Find the number of Hi-C links on each contig.  This is as simple as adding rows/columns in the matrix.  Also calculate the total sum.
+  // The use of iterators here follows the example at: http://www.guwi17.de/ublas/matrix_sparse_usage.html#Q1
   int64_t N_links_total = 0;
   vector<int64_t> N_links( _N_bins, 0 );
   
-  for ( int i = 0; i < _N_bins; i++ )
-    for ( int j = 0; j < _N_bins; j++ )
-      if ( _matrix(i,j) != 0 ) {
-	N_links_total += _matrix(i,j);
-	N_links[i]    += _matrix(i,j);
-	N_links[j]    += _matrix(i,j);
-      }
+  boost::numeric::ublas::compressed_matrix<int64_t>::const_iterator1 it1;
+  boost::numeric::ublas::compressed_matrix<int64_t>::const_iterator2 it2;
+  for ( it1 = _matrix.begin1(); it1 != _matrix.end1(); ++it1 )
+    for ( it2 = it1.begin(); it2 != it1.end(); ++it2 ) {
+      N_links_total           += _matrix( it2.index1(), it2.index2() );
+      N_links[ it2.index1() ] += _matrix( it2.index1(), it2.index2() );
+      N_links[ it2.index2() ] += _matrix( it2.index1(), it2.index2() );
+    }
+  
   
   // Calculate how many links should be used as a threshold in determining whether a contig is repetitive.
   double N_links_avg = 2.0 * N_links_total / _N_bins;
@@ -627,6 +631,19 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
   assert ( N_non_skipped > 0 );
   
   cout << Time() << ": AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << NONINFORMATIVE_RATIO << ")" << endl;
+  
+  /*
+  // TEMP: Skip 1% of contigs, randomly chosen.
+  cout << Time() << ": Skipping 1% more contigs randomly" << endl;
+  vector<bool> contig_skip_TEMP = _contig_skip;
+  srand48( time(0) );
+  for ( size_t i = 0; i < _contig_skip.size(); i++ )
+    if ( !_contig_skip[i] )
+      if ( lrand48() % 100 == 0 )
+	_contig_skip[i] = true;
+  N_non_skipped = count( _contig_skip.begin(), _contig_skip.end(), false );
+  cout << "\t\t\tNumber of non-skipped contigs reduced to " << N_non_skipped << endl;
+  */
   
   set<int>::const_iterator set_it1, set_it2;
   
@@ -832,6 +849,8 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
   
   // We've broken out of the clustering loop, so we're done, but set clusters one last time.
   SetClusters( bin_to_clusterID, NONINFORMATIVE_RATIO );
+  
+  //_contig_skip = contig_skip_TEMP;
 }
 
 
@@ -1075,10 +1094,14 @@ GenomeLinkMatrix::ValidateClusters( const TrueMapping * true_mapping, const bool
   cout << "\t-> GLOBAL INTRA-CLUSTER ENRICHMENT: " << density_same_cluster / density_diff_cluster << endl;
   //cout << "\t-> NORMALIZED TO NUMBER OF CLUSTERS: " << ( density_same_cluster / density_diff_cluster / N_clusters ) << endl;
   
-  // Find the individual amount of intra-cluster enrichment for each contig.  This is akin to a quality score for each individual contig.
   vector<int> bin_to_clusterID = _clusters.cluster_IDs();
   
+  cout << Time() << ": Done clustering!" << endl;
+  
   multimap< double, int, greater<double> > cluster_linkages;
+  
+  if (0)
+  // Find the individual amount of intra-cluster enrichment for each contig.  This is akin to a quality score for each individual contig.
   for ( int i = 0; i < _N_bins; i++ ) {
     int cluster = bin_to_clusterID[i];
     if ( cluster == -1 ) continue; // don't calculate quality scores for non-clustered contigs
@@ -1097,7 +1120,7 @@ GenomeLinkMatrix::ValidateClusters( const TrueMapping * true_mapping, const bool
     
     double ratio = ( linkage_in_cluster / N_in_cluster ) / ( linkage_out_of_cluster / N_out_of_cluster );
     if ( N_out_of_cluster == 0 ) ratio = INT_MAX; // no linkage at all out of cluster: awesome! great job!
-    if (0) cout << "CONTIG #" << i << "\tENRICHMENT RATIO: " << ratio << endl;
+    cout << "CONTIG #" << i << "\tENRICHMENT RATIO: " << ratio << endl;
   }
     
   
@@ -1392,7 +1415,7 @@ GenomeLinkMatrix::LoadFromSAM( const string & SAM_file, const vector<int> & bins
   
   // Set up a SAMStepper object to read in the alignments.
   SAMStepper stepper(SAM_file);
-  stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the reference.
+  stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the assembly.
   
   // Loop over all alignments.
   for ( bam1_t * align = stepper.next_read(); align != NULL; align = stepper.next_read() ) {
@@ -1495,7 +1518,7 @@ GenomeLinkMatrix::SetClusters( const vector<int> & bin_to_clusterID, const doubl
   
   // Assign the non-skipped contigs to clusters.
   _clusters = ClusterVec( bin_to_clusterID );
-  PRINT2( _N_bins, _clusters.N_contigs() );
+  //PRINT2( _N_bins, _clusters.N_contigs() );
   
   if ( NONINFORMATIVE_RATIO == 0 ) { CanonicalizeClusters(); return; }
   
