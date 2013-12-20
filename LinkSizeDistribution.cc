@@ -177,7 +177,7 @@ LinkSizeDistribution::LinkSizeDistribution( const vector<string> & SAM_files )
     
     // Set up a SAMStepper object to read in the alignments.
     SAMStepper stepper( SAM_files[i] );
-    stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the reference.
+    stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the assembly.
     
     // Loop over all pairs of alignments in the SAM file.
     // Note that the next_pair() function assumes that all reads in a SAM file are paired, and the two reads in a pair occur in consecutive order.
@@ -416,9 +416,43 @@ LinkSizeDistribution::DrawDotplot( const bool rescale ) const
 
 
 
+// FindEnrichmentOnContig: Input a contig's length L and its set of intra-contig links.  Determine the local enrichment of links on (and, presumably, in the
+// vicinity of) this contig.  This is used in normalization of the gap sizes on either side of this contig.
+double
+LinkSizeDistribution::FindEnrichmentOnContig( const int L, const vector<int> & links ) const
+{
+  // We can only examine intra-contig links longer than _MIN_LINK_DIST.  If this contig is shorter than that, return a null enrichment of 1.
+  if ( L < _MIN_LINK_DIST ) return 1;
+  
+  
+  // Find the number of intra-contig links that are longer than _MIN_LINK_DIST.  Short links are probably spurious ligations, mapping artifacts, etc.
+  // And in any event we can't include them in our 'expected number of links' calculations because we haven't recorded their expected density (precisely
+  // because most short links are spurious.)
+  int total_N_links = 0;
+  for ( size_t i = 0; i < links.size(); i++ )
+    if ( links[i] >= _MIN_LINK_DIST )
+      total_N_links++;
+  
+  if ( total_N_links == 0 ) return 0; // might as well save computation time
+  
+  
+  // Find the number of intra-contig links (longer than _MIN_LINK_DIST) that we would expect to see on a contig of this size.
+  // We calculate the expected number of links in each link-size bin, then add up those numbers to get the total expected number.
+  vector<double> N_expected_links;
+  FindExpectedIntraContigLinks( L, N_expected_links );
+  double total_N_expected_links = accumulate( N_expected_links.begin(), N_expected_links.end(), 0.0 );
+  
+  //PRINT4( L, links.size(), total_N_links, total_N_expected_links );
+  return total_N_links / total_N_expected_links;
+}
 
-/* FindDistanceBetweenLinks: Input the lengths (L1,L2) of two contigs (C1,C2), and a set of Hi-C link distances that describe the position of links between
- * C1 and C2.  Determine the distance D to add to each of these link distances to make the total set of distances best match this LinkSizeDistribution.
+
+
+
+
+/* FindDistanceBetweenLinks: Input the lengths of two contigs, a set of Hi-C link distances that describe the position of links between the two contigs,
+ * and LDE (link density enrichment), which indicates the relative intra-contig link density on each contig.
+ * Determine the distance D to add to each of these link distances to make the total set of distances best match this LinkSizeDistribution.
  *
  * The contigs and links look like this:
  *
@@ -433,12 +467,19 @@ LinkSizeDistribution::DrawDotplot( const bool rescale ) const
  * We use a log-likelihood method to determine the best value of D.  (See the function log_likelihood_D() for details of this method.)
  * We expect the log-likelihood as a function of D to have only one major peak, but it will also have a lot of noise, mainly due to binning issues.
  * So we conduct a binary search over the possible values of D, then once we've found the best, we consider all other values in the vicinity.
+ * We need to adjust our expectations by the LDE values, due to large-scale variations in link density across the genome.
  *
  *   Thanks to Matthew Snyder and Prof. Joe Felsenstein for help in designing this function. -- Josh
  */
 int
-LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, const vector<int> & links ) const
+LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, const double LDE, const vector<int> & links ) const
 {
+  // If there are no links, nothing can be done.
+  if ( links.empty() ) {
+    cout << "WARNING: Called LinkSizeDistribution::FindDistanceBetweenLinks on a pair of contigs with no links.  Why are contigs with no links adjacent to each other?" << endl;
+    return INT_MAX;
+  }
+  
   // Set L1 <= L2 by convention.
   const int L1 = min( L1_0, L2_0 );
   const int L2 = max( L1_0, L2_0 );
@@ -478,9 +519,9 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
   int D_min = 0;
   int D_max = MAX_D - 1;
   int D_Q2  = ( D_min + D_max ) / 2;
-  double LL_D_min = log_likelihood_D( D_min, L1, L2, links, log_factorial );
-  double LL_D_max = log_likelihood_D( D_max, L1, L2, links, log_factorial );
-  double LL_D_Q2  = log_likelihood_D( D_Q2,  L1, L2, links, log_factorial );
+  double LL_D_min = log_likelihood_D( D_min, L1, L2, LDE, links, log_factorial );
+  double LL_D_max = log_likelihood_D( D_max, L1, L2, LDE, links, log_factorial );
+  double LL_D_Q2  = log_likelihood_D( D_Q2,  L1, L2, LDE, links, log_factorial );
   
   
   while ( D_min + 1 < D_max ) {
@@ -498,8 +539,8 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
       // Take 11 samples, using a step from -5 to +5.
       int step = bin_size / 11;
       for ( int i = -5; i <= 5; i++ ) {
-	LL_D_Q1 += log_likelihood_D( D_Q1 + i*step, L1, L2, links, log_factorial );
-	LL_D_Q3 += log_likelihood_D( D_Q3 + i*step, L1, L2, links, log_factorial );
+	LL_D_Q1 += log_likelihood_D( D_Q1 + i*step, L1, L2, LDE, links, log_factorial );
+	LL_D_Q3 += log_likelihood_D( D_Q3 + i*step, L1, L2, LDE, links, log_factorial );
 	//PRINT6( i, step, D_Q1, D_Q1+i*step, D_Q3, D_Q3+i*step );
       }
       LL_D_Q1 /= 11;
@@ -507,8 +548,8 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
       
     }
     else {
-      LL_D_Q1 = log_likelihood_D( D_Q1, L1, L2, links, log_factorial );
-      LL_D_Q3 = log_likelihood_D( D_Q3, L1, L2, links, log_factorial );
+      LL_D_Q1 = log_likelihood_D( D_Q1, L1, L2, LDE, links, log_factorial );
+      LL_D_Q3 = log_likelihood_D( D_Q3, L1, L2, LDE, links, log_factorial );
     }
     
     
@@ -553,7 +594,7 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
     
     for ( int D = 0; D < MAX_D; D += D_step ) {
       
-      double log_likelihood = log_likelihood_D( D, L1, L2, links, log_factorial );
+      double log_likelihood = log_likelihood_D( D, L1, L2, LDE, links, log_factorial );
       //cout << "STUFF:\t" << D << "\t" << log_likelihood << endl;
       
       // Record the value of D that gives the best log-likelihood.
@@ -634,9 +675,9 @@ LinkSizeDistribution::LinkBin( const int dist ) const
 // The algorithmic method is as follows:
 // 1. For a given value of D, use the contig lengths and the data from this LinkSizeDistribution to find the expected number of links in each bin.
 // 2. Find the actual number of links falling into each bin, by adding D to each of the lengths of the input links.
-// 3. Calculate the log-likelihood L(D) of the observations, assuming that the number of links at any given size follows a Poisson distribution.
+// 3. Calculate the log-likelihood L(D) of the observations, assuming that the number of links in each bin follows a Poisson distribution.
 double
-LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2, const vector<int> & links, const vector<double> & log_factorial ) const
+LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2, const double LDE, const vector<int> & links, const vector<double> & log_factorial ) const
 {
   
   const bool verbose = false;
@@ -644,7 +685,7 @@ LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2,
   
   // 1. For a given value of D, use the contig lengths and the data from this LinkSizeDistribution to find the expected number of links in each bin.
   vector<double> N_expected_links( _N_bins, 0 );
-  find_expected_links_per_bin( D, L1, L2, N_expected_links, verbose && 0 );
+  FindExpectedInterContigLinks( D, L1, L2, LDE, N_expected_links, verbose && 0 );
   
   double total_N_expected_links = accumulate( N_expected_links.begin(), N_expected_links.end(), 0.0 );
   if ( verbose ) PRINT3( D, total_N_expected_links, links.size() );
@@ -707,8 +748,61 @@ LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2,
 
 
 
-/* find_expected_links_per_bin: A helper function for FindDistanceBetweenLinks.  This function determines, for two contigs of length L1,L2 separated by a
- * putative distance D, the expected distribution of Hi-C links per link-size bin that will be seen between the contigs.
+/* FindExpectedIntraContigLinks: A helper function for FindEnrichmentOnContig.  This function determines, for a contig of length L, the expected number of
+ * intra-contig Hi-C links in each link-size bin that will be seen.
+ *
+ * For each bin, the expected number of links is a product of two functions: the link density per bin (i.e., the data stored in this LinkSizeDistribution) and
+ * the number of observable links within the contig with sizes that fall in that bin.  The density function of observable link sizes is the tricky part.
+ * It's triangular in shape and dependent on _MIN_LINK_DIST, like this:
+ *
+ *            |
+ *            |  .
+ *            |  |\           ^
+ *    number  |  | \          |
+ *        of  |  |  \         |
+ *  possible  |  |   \        | height = L - _MIN_LINK_DIST
+ *     links  |  |    \       |
+ *            |  |     \      |
+ *            |  |      \     v
+ *            +--+-------+-----
+ *             M.L.D.    L
+ *
+ *                 link size
+ *
+ ******************************************************/
+void
+LinkSizeDistribution::FindExpectedIntraContigLinks( const int L, vector<double> & result, const bool verbose ) const
+{
+  result.resize( _N_bins, 0 );
+  
+  if ( verbose ) PRINT2 ( L, _MIN_LINK_DIST );
+  
+  for ( int i = 0; i < _N_bins; i++ ) {
+    int bin_start = _bin_starts[i], bin_stop = _bin_starts[i+1];
+    assert( bin_start < bin_stop );
+    
+    // If this contig isn't big enough to include links in this bin, its expectation remains at 0.
+    if ( bin_start >= L ) continue;
+    
+    // Find the number of observable links of this length (i.e., a vertical slice of the above triangle.)
+    int64_t right = min( bin_stop, L );
+    int64_t middle_x = ( bin_start + right ) / 2;
+    int64_t middle_y = L - middle_x;
+    int64_t N_observable_links = ( right - bin_start ) * middle_y;
+    assert( N_observable_links >= 0 ); // avoid overflow
+    
+    // Calculate the expected number of links by multiplying the number of observable lengths by the density of links in this size range.
+    result[i] = N_observable_links * _link_density[i] / _BIN_NORM;
+    if ( verbose ) PRINT5( i, bin_start, bin_stop, N_observable_links, result[i] );
+  }
+  
+}
+
+
+
+
+/* FindExpectedInterContigLinks: A helper function for FindDistanceBetweenLinks.  This function determines, for two contigs of length L1,L2 separated by a
+ * putative distance D, the expected number of Hi-C links in each link-size bin that will be seen between the contigs.
  *
  * For each bin, the expected number of links is a product of two functions: the link density per bin (i.e., the data stored in this LinkSizeDistribution) and
  * the number of observable links between the two contigs with sizes that fall in that bin.  The density function of observable link sizes is the tricky part.
@@ -719,14 +813,14 @@ LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2,
  *  possible  |      /       \       ^
  *     links  |     /         \      | height = L1 (because L1 <= L2)
  *            |    /           \     v
- *            +------------------------
+ *            +---+-------------+------
  *                D        D+L1+L2
  *
  *                  link size
  *
  ******************************************************/
 void
-LinkSizeDistribution::find_expected_links_per_bin( const int D, const int L1, const int L2, vector<double> & result, const bool verbose ) const
+LinkSizeDistribution::FindExpectedInterContigLinks( const int D, const int L1, const int L2, const double LDE, vector<double> & result, const bool verbose ) const
 {
   result.resize( _N_bins, 0 );
   
@@ -773,8 +867,9 @@ LinkSizeDistribution::find_expected_links_per_bin( const int D, const int L1, co
     
     assert( N_observable_links >= 0 ); // avoid overflow
     
-    // Calculate the expected number of links between C1 and C2 by multiplying the number of observable contigs by the density of links in this size range.
-    result[i] = N_observable_links * _link_density[i] / _BIN_NORM;
+    // Calculate the expected number of links between C1 and C2 by multiplying the number of observable lengths by the density of links in this size range.
+    // Also adjust by the LDE (link density enrichment), to take into account fluctuations in link density across the genome.
+    result[i] = N_observable_links * _link_density[i] / _BIN_NORM * LDE;
     if ( verbose ) PRINT5( i, bin_start, bin_stop, N_observable_links, result[i] );
     
   }

@@ -64,9 +64,14 @@ class LinkSizeDistribution
   // DrawDotplot: Use QuickDotplot to make a dotplot of this LinkSizeDistribution at ~/public_html/LinkSizeDistribution.jpg.
   void DrawDotplot( const bool rescale = false ) const;
   
-  // FindDistanceBetweenLinks: Input the lengths of two contigs, and a set of Hi-C link distances that describe the position of links between the two contigs.
+  // FindEnrichmentOnContig: Input a contig's length L and its set of intra-contig links.  Determine the local enrichment of links on (and, presumably, in the
+  // vicinity of) this contig.  This is used in normalization of the gap sizes on either side of this contig.
+  double FindEnrichmentOnContig( const int L, const vector<int> & links ) const;
+  
+  // FindDistanceBetweenLinks: Input the lengths of two contigs, a set of Hi-C link distances that describe the position of links between the two contigs,
+  // and LDE (link density enrichment), which indicates the relative intra-contig link density on these two contigs.
   // Determine the distance D to add to each of these link distances to make the total set of distances best match this LinkSizeDistribution.
-  int FindDistanceBetweenLinks( const int L1_0, const int L2_0, const vector<int> & links ) const;
+  int FindDistanceBetweenLinks( const int L1_0, const int L2_0, const double LDE, const vector<int> & links ) const;
   
   vector<string> SAM_files() const { return _SAM_files; }
   
@@ -78,8 +83,9 @@ class LinkSizeDistribution
   int BinSize( const int bin_ID ) const; // size in bp of a bin
   int LinkBin( const int dist ) const; // convert a link distance to a bin ID
   
-  double log_likelihood_D( const int D, const int L1, const int L2, const vector<int> & links, const vector<double> & log_factorial ) const;
-  void find_expected_links_per_bin( const int D, const int L1, const int L2, vector<double> & result, const bool verbose = false ) const;
+  double log_likelihood_D( const int D, const int L1, const int L2, const double LDE, const vector<int> & links, const vector<double> & log_factorial ) const;
+  void FindExpectedIntraContigLinks( const int L, vector<double> & result, const bool verbose = false ) const;
+  void FindExpectedInterContigLinks( const int D, const int L1, const int L2, const double LDE, vector<double> & result, const bool verbose = false ) const;
   
   
   

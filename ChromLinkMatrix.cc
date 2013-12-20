@@ -4,6 +4,7 @@
 #include "ContigOrdering.h"
 #include "TextFileParsers.h" // ParseTabDelimFile
 #include "TrueMapping.h"
+#include "LinkSizeDistribution.h"
 
 
 #include <assert.h>
@@ -1013,15 +1014,31 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
   cout << Time() << ": SpaceContigs" << endl;
   
   // Sanity checks.
+  for ( size_t i = 0; i < _SAM_files.size(); i++ )
+    cout << "in CLM: " << _SAM_files[i] << endl;
+  for ( size_t i = 0; i < link_size_distribution.SAM_files().size(); i++ )
+    cout << "in LSD: " << link_size_distribution.SAM_files()[i] << endl;
   assert( _SAM_files == link_size_distribution.SAM_files() );
   assert( order.N_contigs() == _N_contigs );
   assert( order.has_Q_scores() ); // can't space contigs if they're not already oriented
   
   vector<int> gaps;
   
+  vector<double> enrichments;
+  // TEMP: Write link density enrichments to file.
+  ofstream out( "enrichments.txt", ios::out );
+  
+  for ( int i = 0; i < _N_contigs; i++ ) {
+    double enrichment = link_size_distribution.FindEnrichmentOnContig( _contig_lengths[i], _matrix[ 2*i ][ 2*i ] );
+    //double norm = (double) _contig_lengths[i] / (3500 * (_contig_RE_sites[i]+1) );
+    enrichments.push_back( enrichment );
+    out << enrichment << endl;
+  }
+  out.close();
+  
+  
   // Loop over all the pairs of adjacent contigs.
   for ( int i = 0; i+1 < order.N_contigs_used(); i++ ) {
-    //if ( i != 4 ) continue; // TEMP
     
     // Find the vector of link lengths associated with this adjacency.  This vector describes the distance that the links would have if the contigs were
     // immediately adjacent.  For an ASCII illustration of these distances, see AddLinkToMatrix().
@@ -1033,14 +1050,16 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
     PRINT4( contig1, contig2, rc1, rc2 );
     const vector<int> & dists = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
     
+    const int & L1 = _contig_lengths[contig1];
+    const int & L2 = _contig_lengths[contig2];
+    
+    // Find the local LDE (link density enrichment).  It's a weighted product of the LDEs of each contig.
+    double local_LDE = pow( enrichments[contig1], double(2*L1)/(L1+L2) ) * pow( enrichments[contig2], double(2*L2)/(L1*L2) );
     
     // Assuming these contigs are separated at a distance D, the actual size of all the Hi-C links is D higher than the reported number.
     // Determine the value of D that makes this set of links most concordant with the expectations of the LinkSizeDistribution.
-    int D = link_size_distribution.FindDistanceBetweenLinks( _contig_lengths[contig1], _contig_lengths[contig2], dists );
+    int D = link_size_distribution.FindDistanceBetweenLinks( L1, L2, local_LDE, dists );
     
-    double RF = _repeat_factors[contig1] * _repeat_factors[contig2];
-    cout << Time() << ": Result for gap #" << i << ": " << D << '\t' << RF << endl;
-    //D /= sqrt(RF); // TEMP
     gaps.push_back(D);
   }
   
@@ -1615,7 +1634,7 @@ ChromLinkMatrix::InitMatrix()
     }
   }
   catch ( std::bad_alloc & ba ) {
-    cerr << "ERROR: Sorry, there's not enough memory to allocate for this ChromLinkMatrix!  Try running on a machine with more RAM,\nbad_alloc error message: " << ba.what() << endl;
+    cerr << "ERROR: Sorry, there's not enough memory to allocate for this ChromLinkMatrix!  Try running on a machine with more RAM.\nbad_alloc error message: " << ba.what() << endl;
     exit(1);
   }
   
@@ -1758,7 +1777,7 @@ ChromLinkMatrix::CalculateRepeatFactors()
     _repeat_factors[i] = N_links[i] / N_links_avg;
   
   
-  // TEMP: Write to file so that Reporter::EvalGapSizes can access these.
+  // Write to file so that Reporter::EvalGapSizes can access these.
   cout << Time() << ": Writing to RFs.txt" << endl;
   ofstream out( "RFs.txt", ios::out );
   for ( int i = 0; i < _N_contigs; i++ )
@@ -1954,7 +1973,12 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     if ( CLMs[cluster] == NULL ) continue;
     
     // If the two reads align to the exact same contig, the link isn't informative, so skip it.
-    if ( c1.tid == c2.tid ) continue;
+    if ( c1.tid == c2.tid ) { // TEMP: allow these links so LinkSizeDistribution can do its stuff
+      int dist = abs( c2.pos - c1.pos );
+      int x = 2*local_cIDs[c1.tid];
+      CLMs[cluster]->_matrix[x][x].push_back( dist );
+      continue;
+    }
     
     // For each read, find the distance to either end of its contig.
     int read1_dist1 = c1.pos;
