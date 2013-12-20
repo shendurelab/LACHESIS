@@ -69,6 +69,8 @@ using namespace std;
 void
 LachesisClustering( const RunParams & run_params )
 {
+  cout << "\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\t|                                 |\n\t|       LACHESIS CLUSTERING       |\n\t|                                 |\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\n";
+  
   TrueMapping * true_mapping = run_params.LoadTrueMapping();
   const bool postfosmid = false; // placeholder for parameters optimized for the post-fosmid case
   
@@ -125,6 +127,8 @@ LachesisClustering( const RunParams & run_params )
 void
 LachesisOrdering( const RunParams & run_params )
 {
+  cout << "\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\t|                                 |\n\t|        LACHESIS ORDERING        |\n\t|                                 |\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\n";
+  
   // Load the clusters of contigs.
   string clusters_file = run_params._out_dir + "/main_results/clusters.by_name.txt";
   //string clusters_file = run_params._out_dir + "/main_results/clusters.merged_with_RAD.by_name.txt.split"; // TEMP
