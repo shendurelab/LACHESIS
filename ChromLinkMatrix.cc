@@ -248,7 +248,7 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const vector<string> &
   _contig_size = 0; // this implies DeNovo()
   _longest_contig = -1;
   _tree.clear();
-  _SAM_files = SAM_files;
+  _SAM_files.clear(); // this vector will be filled by LoadFromSAMDeNovo
   _CP_score_dist = 1e7;
   
   InitMatrix();
