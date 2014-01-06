@@ -63,7 +63,7 @@ ClusterVec::ClusterVec( const vector<int> & cluster_IDs )
 vector<int>
 ClusterVec::cluster_IDs() const
 {
-  PRINT2( _N_contigs, SizeSum() );
+  //PRINT2( _N_contigs, SizeSum() );
   vector<int> out( _N_contigs, -1 );
   
   for ( size_t i = 0; i < size(); i++ )

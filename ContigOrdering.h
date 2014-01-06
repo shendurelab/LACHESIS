@@ -90,7 +90,9 @@ class ContigOrdering
   void AddOrientQ( const int pos, const double Q ); // see notes for _orient_Q below
   
   // Gaps
+  void SetGap( const int pos, const int gap_size ); // set an element in the _gaps vector; create the vector if necessary
   void SetGaps( const vector<int> & gaps ); // set the _gaps vector
+  void ClearGaps() { _gaps.clear(); }
   
   /* QUERY FUNCTIONS */
   
@@ -105,7 +107,7 @@ class ContigOrdering
   int    contig_ID      ( const int pos ) const { assert(pos>=0 && pos<_N_contigs_used); return ( _data[pos] >= 0 ? _data[pos] : ~_data[pos] ); }
   bool   contig_rc      ( const int pos ) const { assert(pos>=0 && pos<_N_contigs_used); return ( _data[pos] < 0 ); }
   double contig_orient_Q( const int pos ) const { assert(pos>=0 && pos<_N_contigs_used); assert( has_Q_scores() ); return _orient_Q[pos]; }
-  int    contig_gap_size( const int pos ) const { assert(pos>=0 && pos+1<_N_contigs_used); assert( has_gaps() ); return _gaps[pos]; } // gap size after contig
+  int    gap_size       ( const int pos ) const { assert(pos>=0 && pos<_N_contigs_used); if ( !has_gaps() ) return -1; return _gaps[pos]; } // gap size after contig
   // The following function inputs contig IDs, NOT integers for position.
   bool contig_used( const int contig_ID ) const { return _contigs_used.at(contig_ID); }
   
@@ -142,7 +144,7 @@ class ContigOrdering
   vector<int> _data;
   
   // A vector representing the estimated gap sizes between contigs.  _gaps[i] represents the gap *after* contig #i.  As a placeholder, _gaps.back() = 0.
-  // This vector will be empty until ChromLinkMatrix::SpaceContigs() is called; then it will have length _N_contigs_used.
+  // This vector will be empty until one of SetGap and SetGaps is called (by ChromLinkMatrix::SpaceContigs()); then it will have length _N_contigs_used.
   vector<int> _gaps;
   
   

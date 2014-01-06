@@ -382,7 +382,6 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
   }
   
   
-  CalculateRepeatFactors();
 }
 
 
@@ -1005,9 +1004,16 @@ ChromLinkMatrix::MakeFullOrder( const int min_N_REs, const bool use_CP_score ) c
 
 // SpaceContigs: No, not contigs in space.
 // Given an ordering of the contigs in this ChromLinkMatrix, estimate the spacing between them.  Fill the variable _gaps in the ContigOrdering.
-// Once a ContigPermutation has had its gaps estimated by SpaceContigs, it can be converted into a super-scaffold.
+// Once a ContigOrdering has had its gaps estimated by SpaceContigs, it can be converted into a super-scaffold.
 // Method: For each pair of adjacent contigs, consider the set of link distances between them.  (Note that their orientations must have already been determined
 // by OrientContigs.)  Determine what number to add to these link distances to make them most concordant with the expectations of the LinkSizeDistribution.
+// ALGORITHM:
+// 1. Loop Steps 2-4 repeatedly until all contigs are merged into a scaffold.
+// 2. Find the longest pair of adjacent contigs in the ContigOrdering.  (A pair's "length" here is defined as the length of the shorter contig.)
+// 3. Determine the gap size between these two contigs.  Do this by considering the set of link distances between them (note that their orientations are
+//    determined by OrientContigs) and determining what number to add to these link distances to make them most concordant with the expectations of the
+//    LinkSizeDistribution.  Call function: FindGapSize().
+// 4. Using the derived gap size, merge these contigs into a scaffold-in-progress.  They are now measured as a single contig for the purposes of length.
 void
 ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistribution & link_size_distribution ) const
 {
@@ -1021,9 +1027,29 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
   assert( _SAM_files == link_size_distribution.SAM_files() );
   assert( order.N_contigs() == _N_contigs );
   assert( order.has_Q_scores() ); // can't space contigs if they're not already oriented
+  if ( order.N_contigs_used() < 2 ) return; // no spacing is necessary unless there are multiple contigs in the ordering
   
-  vector<int> gaps;
+  order.ClearGaps();
   
+  
+  // Make a mapping of contig position in ContigOrdering -> position of first contig in that contig's scaffold-in-progress.
+  // Initially each contig is a scaffold-in-progress unto itself, so this is just an identity mapping.
+  vector<int> scaffold_start( order.N_contigs_used() );
+  for ( int i = 0; i < order.N_contigs_used(); i++ )
+    scaffold_start[i] = i;
+  
+  // Make a mapping of contig position in ContigOrdering -> size of scaffold-in-progress starting at that contig (or 0 if contig doesn't start a scaffold.)
+  vector<int> scaffold_size( order.N_contigs_used(), 1 );
+  
+  
+  // Make a reverse mapping of contig length to position in ContigOrdering, so that we can immediately find the position of the longest contig.
+  //multimap< int, int, greater<int> > length_map;
+  //for ( int i = 0; i < order.N_contigs_used(); i++ )
+  //length_map.insert( make_pair( _contig_lengths[ order.contig_ID(i) ], i ) );
+  
+  
+  // Calculate the LDE (Link Density Enrichment) of each contig.  This is the (observed/expected) density of intra-contig Hi-C links on that contig and is used
+  // to normalize inter-contig link densities.
   vector<double> enrichments;
   // TEMP: Write link density enrichments to file.
   ofstream out( "enrichments.txt", ios::out );
@@ -1036,19 +1062,66 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
   }
   out.close();
   
+  int N_gaps_found = 0;
   
-  // Loop over all the pairs of adjacent contigs.
-  for ( int i = 0; i+1 < order.N_contigs_used(); i++ ) {
+  // 1. Loop Steps 2-4 repeatedly until all contigs are merged into a scaffold.
+  while ( N_gaps_found+1 < order.N_contigs_used() ) {
+    
+    
+    // 2. Find the longest pair of adjacent contigs in the ContigOrdering.  (A pair's "length" here is defined as the length of the shorter contig.)
+    int LP_pos1 = -1, LP_pos2 = -1, LP_length = 0; // LP = longest pair
+    for ( int i = 0; i+1 < order.N_contigs_used(); i++ ) {
+      
+      // This contig may part of a scaffold-in-progress.  If so, we only examine it if it's the first contig in its scaffold - otherwise it's redundant.
+      if ( i != scaffold_start[i] ) continue;
+      
+      // If this contig is the start of the final scaffold-in-progress, then no further linking needs to be made beyond it.
+      int i2 = i + scaffold_size[i]; // the start of the next scaffold
+      if    ( i2 == order.N_contigs_used() ) continue;
+      assert( i2 <  order.N_contigs_used() );
+      assert( scaffold_size[i]  > 0 );
+      assert( scaffold_size[i2] > 0 );
+      //PRINT5( i, i2, scaffold_size[i], scaffold_size[i2], order.N_contigs_used() );
+      
+      // Find the length of this scaffold-in-progress, and the subsequent one (which will become linked to this one by a gap), by adding their contig lengths.
+      // Note that gaps don't count as part of a merged length.
+      int length1 = 0, length2 = 0;
+      for ( int j = 0; j < scaffold_size[i]; j++ )
+	length1 += _contig_lengths[ order.contig_ID(i+j) ];
+      
+      for ( int j = 0; j < scaffold_size[i2]; j++ )
+	length2 += _contig_lengths[ order.contig_ID(i2+j) ];
+      
+      // Find the length of the shorter of the two contigs/scaffolds.  Keep track of which pair has the longest length.
+      int length = min( length1, length2 );
+      //PRINT5( i, i2, length1, length2, length );
+      
+      if ( LP_length < length ) {
+	LP_length = length;
+	LP_pos1 = i;
+	LP_pos2 = i2;
+      }
+    }
+    //PRINT5( LP_pos1, LP_pos2, order.contig_ID(LP_pos1), order.contig_ID(LP_pos2), LP_length );
+    
+    
+    // 3. Determine the gap size between these two contigs.  Do this by considering the set of link distances between them (note that their orientations are
+    //    determined by OrientContigs) and determining what number to add to these link distances to make them most concordant with the expectations of the
+    //    LinkSizeDistribution.  Call function: FindGapSize().
     
     // Find the vector of link lengths associated with this adjacency.  This vector describes the distance that the links would have if the contigs were
     // immediately adjacent.  For an ASCII illustration of these distances, see AddLinkToMatrix().
-    int contig1 = order.contig_ID(i);
-    int rc1     = order.contig_rc(i);
-    int contig2 = order.contig_ID(i+1);
-    int rc2     = order.contig_rc(i+1);
+    int pos1 = LP_pos2 - 1;
+    int pos2 = LP_pos2;
+    
+    int contig1 = order.contig_ID(pos1);
+    int rc1     = order.contig_rc(pos1);
+    int contig2 = order.contig_ID(pos2);
+    int rc2     = order.contig_rc(pos2);
     if ( contig1 > contig2 ) { int swap = contig1; contig1 = contig2; contig2 = swap; swap = !rc1; rc1 = !rc2; rc2 = swap; }
-    PRINT4( contig1, contig2, rc1, rc2 );
+    //PRINT6( pos1, pos2, contig1, contig2, rc1, rc2 );
     const vector<int> & dists = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
+    //assert( !dists.empty() );
     
     const int & L1 = _contig_lengths[contig1];
     const int & L2 = _contig_lengths[contig2];
@@ -1058,12 +1131,25 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
     
     // Assuming these contigs are separated at a distance D, the actual size of all the Hi-C links is D higher than the reported number.
     // Determine the value of D that makes this set of links most concordant with the expectations of the LinkSizeDistribution.
-    int D = link_size_distribution.FindDistanceBetweenLinks( L1, L2, local_LDE, dists );
+    int D = FindGapSize( order, LP_pos2-1, link_size_distribution, enrichments );
+    D = link_size_distribution.FindDistanceBetweenLinks( L1, L2, local_LDE, dists );
+    //assert( D != INT_MAX );
     
-    gaps.push_back(D);
+    
+    // 4. Using the derived gap size, merge these contigs into a scaffold-in-progress.  They are now measured as a single contig for the purposes of length.
+    PRINT2( LP_pos2-1, D );
+    order.SetGap( LP_pos2-1, D );
+    N_gaps_found++;
+    
+    // Update the scaffold_start and scaffold_size vectors.
+    for ( int i = LP_pos2; i < order.N_contigs_used(); i++ ) {
+      if ( scaffold_start[i] != LP_pos2 ) break;
+      scaffold_start[i] = LP_pos1;
+    }
+    
+    scaffold_size[LP_pos1] += scaffold_size[LP_pos2];
+    scaffold_size[LP_pos2] = 0;
   }
-  
-  order.SetGaps( gaps );
 }
 
 
@@ -1744,7 +1830,7 @@ ChromLinkMatrix::AddLinkToMatrix( const int contig1, const int contig2, const in
 void
 ChromLinkMatrix::CalculateRepeatFactors()
 {
-  return; // TEMP: not used at the moment, buggy in fragScaff cases, screw it
+  assert(0); // TEMP: not used at the moment, buggy in fragScaff cases, screw it
   cout << Time() << ": CalculateRepeatFactors for normalization" << endl;
   assert( DeNovo() );
   
@@ -1839,6 +1925,155 @@ ChromLinkMatrix::PlotTree( const vector< vector<int> > & tree, const string & fi
 }
 
 
+// FindGapSize(): Helper function for SpaceContigs().  Finds the best estimate of the gap size following contig #pos in the ContigOrdering.
+// Uses not just the links between contigs #pos and #pos+1, but also other links between more distant contigs if their gaps have already been estimated.
+int
+ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const LinkSizeDistribution & lsd, const vector<double> & enrichments ) const
+{
+  cout << "FindGapSize mothafuckaaaaaa" << endl;
+  assert( pos >= 0 );
+  assert( pos+1 < order.N_contigs_used() );
+  assert( order.N_contigs() == _N_contigs );
+  assert( _N_contigs == (int) enrichments.size() );
+  assert( order.gap_size(pos) == -1 ); // this gap size shouldn't already be estimated!
+  
+  const int MAX_DIST = 1e7; // HEUR: the maximum range at which to consider links; a gap will never be found beyond this size, nor will the links between contigs at a distance greater than this be considered
+  const int D_step = 1000; // HEUR: this affects algorithm runtime
+  
+  
+  // We're going to merge contig #pos and contig #pos+1, but each of these contigs may belong to a scaffold-in-progress with multiple contigs separated by
+  // gaps whose sizes have already been estimated (hopefully accurately).  Hence we have more information than just the links between these two contigs; we
+  // can examine the links between all contigs in the scaffolds-in-progress!
+  // First we must dind the size of the scaffolds-in-progress to which these contigs belong.
+  int s1_start = pos, s2_stop = pos+1;
+  while ( s1_start > 0 && order.gap_size(s1_start-1) != -1 ) s1_start--;
+  while (                 order.gap_size(s2_stop )   != -1 ) s2_stop++;
+  int s1_size = pos - s1_start + 1;
+  int s2_size = s2_stop - pos;
+  //PRINT7( pos, pos+1, order.contig_ID(pos), s1_start, s2_stop, s1_size, s2_size );
+  
+  // Now determine, for each pair of contigs within the scaffold-in-progress, the "extra distance" between the contigs that is implied by the other contigs
+  // and gaps within the scaffolds-in-progress.
+  // For each contig, we calculate the extra distance associated with that contig's length (and its adjacent gap's size); then we record this extra distance
+  // for every pair of contigs for which the space between them includes this contig.
+  vector< vector<int> > extra_dists( s1_size, vector<int>( s2_size, 0 ) );
+  for ( int i = 1; i < s1_size; i++ ) {
+    int extra_dist = _contig_lengths[pos-i] + order.gap_size(pos-i);
+    //PRINT6( i, pos-i, order.contig_ID(pos-i), _contig_lengths[pos-i], order.gap_size(pos-i), extra_dist );
+    for ( int j = i; j < s1_size; j++ )
+      for ( int k = 0; k < s2_size; k++ )
+	if ( extra_dists[j][k] + extra_dist < 0 ) extra_dists[j][k] = INT_MAX; // prevent integer overflow
+	else extra_dists[j][k] += extra_dist;
+  }
+  
+  for ( int i = 1; i < s2_size; i++ ) {
+    int extra_dist = _contig_lengths[pos+i+1] + order.gap_size(pos+i);
+    //PRINT6( i, pos+i, order.contig_ID(pos+i+1), _contig_lengths[pos+i+1], order.gap_size(pos+i), extra_dist );
+    for ( int j = 0; j < s1_size; j++ )
+      for ( int k = i; k < s2_size; k++ )
+	if ( extra_dists[j][k] + extra_dist < 0 ) extra_dists[j][k] = INT_MAX; // prevent integer overflow
+	else extra_dists[j][k] += extra_dist;
+  }
+  
+  /*
+  for ( int i = 0; i < s1_size; i++ )
+    for ( int j = 0; j < s2_size; j++ )
+      PRINT3( i, j, extra_dists[i][j] );
+  */
+  
+  vector< vector<double> > worsts( s1_size, vector<double>( s2_size, 0 ) );
+  
+  
+  // The maximum value of D is defined by the maximum observed intra-contig link lengths.
+  // This guarantees that no link will be considered with a range greater than _MAX_LINK_DIST, which keeps the LinkBin() function safe.
+  int MAX_D = LinkSizeDistribution::_MAX_LINK_DIST;
+  
+  int best_D = -1;
+  double best_log_likelihood = -INT_MAX;
+  
+  
+  // Find the maximum number of links that we'll ever have to deal with between two contigs.
+  int max_N_links = 0;
+  for ( int i = s1_start; i <= pos; i++ )
+    for ( int j = pos+1; j <= s2_stop; j++ ) {
+      int N_links = _matrix[ 2*order.contig_ID(i) ][ 2*order.contig_ID(j) ].size();
+      if ( N_links > max_N_links ) max_N_links = N_links;
+    }
+  PRINT( max_N_links );
+  
+  
+  // As a pre-calculation step, find the logarithms of factorials.
+  // This could go in a separate function to save runtime, but I tested it and the savings are pretty minimal.
+  vector<double> log_factorial( max_N_links + 1, 0 );
+  for ( int j = 2; j <= max_N_links; j++ )
+    log_factorial[j] = log_factorial[j-1] + log(j);
+  
+  
+  // TEMP: Try an exhaustive search first.  It's slow but will find a good answer.
+  // Once this works, we'll implement the more complicated but faster binary-search method in LinkSizeDistribution::FindDistanceBetweenLinks().
+  for ( int D = 0; D < MAX_DIST; D += D_step ) {
+    
+    
+    // We are contemplating a gap size of D between contig #pos and contig #pos+1.
+    // We must calculate the total log-likelihood of this gap size based on all available information - i.e., the various contigs in the scaffolds-in-progress
+    // being merged.  Hence we must find the log-likelihoods of all pairwise link distributions between contigs in the first and second scaffold-in-progress.
+    double log_likelihood = 0;
+    
+    for ( int i = 0; i < s1_size; i++ )
+      for ( int j = 0; j < s2_size; j++ ) {
+	
+	// Skip cases where contigs are far apart; these could be confounded by genuine long-range interactions.
+	// However they must still count against this possible D-value in the log likelihood score.
+	if ( D + extra_dists[i][j] > MAX_DIST ) {
+	  log_likelihood += worsts[i][j];
+	  continue;
+	}
+	
+	int pos1 = pos - i;
+	int pos2 = pos + 1 + j;
+	int contig1 = order.contig_ID(pos1);
+	int rc1     = order.contig_rc(pos1);
+	int contig2 = order.contig_ID(pos2);
+	int rc2     = order.contig_rc(pos2);
+	
+	const int & L1 = _contig_lengths[contig1];
+	const int & L2 = _contig_lengths[contig2];
+	
+	// Find the links between these two contigs.  Adjust them as necessary to take them account the extra distance between the contigs on their scaffolds.
+	vector<int> links = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
+	for ( size_t k = 0; k < links.size(); k++ )
+	  if ( links[k] + extra_dists[i][j] < 0 ) links[k] = INT_MAX; // prevent integer overflow
+	  else links[k] += extra_dists[i][j];
+	
+	
+	// Find the local LDE (link density enrichment).  It's a weighted product of the LDEs of each contig.
+	double local_LDE = pow( enrichments[contig1], double(2*L1)/(L1+L2) ) * pow( enrichments[contig2], double(2*L2)/(L1*L2) );
+	
+	// Finally, find the log-likelihood contribution from this pair of contigs.
+	double this_ll = lsd.log_likelihood_D( D, L1, L2, local_LDE, links, log_factorial );
+	//PRINT4( D, i, j, this_ll );
+	if ( this_ll < worsts[i][j] ) worsts[i][j] = this_ll;
+	log_likelihood += this_ll;
+	
+      }
+    
+    PRINT2( D, log_likelihood );
+    
+    
+    // Record the value of D that gives the best log-likelihood.
+    if ( log_likelihood > best_log_likelihood ) {
+      best_log_likelihood = log_likelihood;
+      best_D = D;
+    }
+    
+  }
+  
+  PRINT2( best_D, best_log_likelihood );
+  return best_D;
+}
+
+
+ 
 
 // ReportOrderingSize: Report about the number and length of contigs in this ContigOrdering, compared to the total set of contigs in this CLM.
 void
@@ -1998,8 +2233,8 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
   if ( verbose ) cout << endl;
   
   
-  for ( int i = 0; i < N_clusters; i++ )
-    CLMs[i]->CalculateRepeatFactors();
+  //for ( int i = 0; i < N_clusters; i++ )
+  //CLMs[i]->CalculateRepeatFactors();
 }
 
 
@@ -2104,8 +2339,8 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
   
   cout << Time() << ": Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << "; N pairs used: " << N_pairs_used << endl;
   
-  for ( int i = 0; i < N_chroms; i++ )
-    CLMs[i]->CalculateRepeatFactors();
+  //for ( int i = 0; i < N_chroms; i++ )
+  //CLMs[i]->CalculateRepeatFactors();
 }
 
 

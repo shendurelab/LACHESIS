@@ -225,7 +225,7 @@ ContigOrdering::ReadFile( const string & order_file )
   // Sanity checks on the input data.
   assert( _N_contigs_used == N_contigs_to_read );
   assert( _N_contigs_used <= _N_contigs );
-  if ( has_gaps ) assert( _gaps.back() == 0 );
+  if ( has_gaps ) assert( _gaps.back() == -1 );
 }
 
 
@@ -326,7 +326,6 @@ ContigOrdering::AddContig( const int contig_ID, const int pos, const bool rc, co
   assert( !_contigs_used[contig_ID] );
   
   if ( orient_Q_score == -1 ) assert( !has_Q_scores() );
-  if ( gap == -1 ) assert( !has_gaps() );
   
   int contig_ID_rc = rc ? ~contig_ID : contig_ID;
   
@@ -334,13 +333,13 @@ ContigOrdering::AddContig( const int contig_ID, const int pos, const bool rc, co
   if ( pos == -1 ) {
     _data.push_back( contig_ID_rc );
     if ( orient_Q_score != -1 ) _orient_Q.push_back( orient_Q_score );
-    if ( gap != -1 ) _gaps.push_back( gap );
+    if ( has_gaps() || gap != -1 ) _gaps.push_back( gap );
   }
   else {
     assert( pos <= _N_contigs_used ); // equality is ok here - just add to end
     _data.insert( _data.begin() + pos, contig_ID_rc );
     if ( orient_Q_score != -1 ) _orient_Q.insert( _orient_Q.begin() + pos, orient_Q_score );
-    if ( gap != -1 ) _gaps.insert( _gaps.begin() + pos, gap );
+    if ( has_gaps() || gap != -1 ) _gaps.insert( _gaps.begin() + pos, gap );
   }
   
   
@@ -622,13 +621,29 @@ ContigOrdering::AddOrientQ( const int pos, const double Q )
 
 
 
+// Set an element in the _gaps vector.  If necessary, create the vector (and set all other gaps to -1, indicating no data yet.)
+void
+ContigOrdering::SetGap( const int pos, const int gap_size )
+{
+  assert( pos >= 0 && pos + 1 < _N_contigs_used );
+  
+  if ( !has_gaps() ) {
+    _gaps = vector<int>( _N_contigs_used - 1, -1 );
+    _gaps.push_back(-1); // add the 'backstop'
+  }
+  
+  _gaps[pos] = gap_size;
+}
+
+
+
 // Set the _gaps vector.
 void
 ContigOrdering::SetGaps( const vector<int> & gaps )
 {
   assert( (int) gaps.size() + 1 == _N_contigs_used );
   _gaps = gaps;
-  _gaps.push_back(0); // add the 'backstop'
+  _gaps.push_back(-1); // add the 'backstop'
 }
 
 

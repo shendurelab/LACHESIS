@@ -161,6 +161,10 @@ class ChromLinkMatrix
   // Hence this is NOT RECOMMENDED for graphs with over 500 vertices.
   void PlotTree( const vector< vector<int> > & tree, const string & filename ) const;
   
+  // FindGapSize(): Helper function for SpaceContigs().  Finds the best estimate of the gap size following contig #pos in the ContigOrdering.
+  // Uses not just the links between contigs #pos and #pos+1, but also other links between more distant contigs if their gaps have already been estimated.
+  int FindGapSize( const ContigOrdering & order, const int pos, const LinkSizeDistribution & lsd, const vector<double> & enrichments ) const;
+  
   void ReportOrderingSize( const ContigOrdering & order ) const;
   
   /* DATA */

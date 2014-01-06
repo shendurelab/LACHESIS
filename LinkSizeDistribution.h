@@ -76,20 +76,7 @@ class LinkSizeDistribution
   vector<string> SAM_files() const { return _SAM_files; }
   
   
- private:
-  
-  
-  /* PRIVATE FUNCTIONS: used locally */
-  int BinSize( const int bin_ID ) const; // size in bp of a bin
-  int LinkBin( const int dist ) const; // convert a link distance to a bin ID
-  
   double log_likelihood_D( const int D, const int L1, const int L2, const double LDE, const vector<int> & links, const vector<double> & log_factorial ) const;
-  void FindExpectedIntraContigLinks( const int L, vector<double> & result, const bool verbose = false ) const;
-  void FindExpectedInterContigLinks( const int D, const int L1, const int L2, const double LDE, vector<double> & result, const bool verbose = false ) const;
-  
-  
-  
-  /* PRIVATE VARIABLES */
   
   /* LINK SIZE RANGES */
   
@@ -102,6 +89,22 @@ class LinkSizeDistribution
   // (Link densities above _max_intra_contig_link will be extrapolated anyway.)
   // Must be a power-of-2 multiple of _MIN_LINK_DIST.  We choose 2^16 * _MIN_LINK_DIST = 2^28 = 268,435,456.  This results in _N_bins = 16 * 16 = 256.
   static const int _MAX_LINK_DIST = 1 << 28;
+  
+  
+ private:
+  
+  
+  /* PRIVATE FUNCTIONS: used locally */
+  int BinSize( const int bin_ID ) const; // size in bp of a bin
+  int LinkBin( const int dist ) const; // convert a link distance to a bin ID
+  
+  void FindExpectedIntraContigLinks( const int L, vector<double> & result, const bool verbose = false ) const;
+  void FindExpectedInterContigLinks( const int D, const int L1, const int L2, const double LDE, vector<double> & result, const bool verbose = false ) const;
+  
+  
+  
+  /* PRIVATE VARIABLES */
+  
   // max_intra_contig_link_dist: The largest intra-contig link length.  Beyond this length the numbers are just extrapolated as 1/x.
   int _max_intra_contig_link_dist;
   

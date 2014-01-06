@@ -79,6 +79,7 @@ uint_16log2_frac( const double x ) {
 
 
 
+
 // Constructor for LinkSizeDistribution.  Inputs a set of SAM files and derives the density distribution of link sizes from them.
 // Method:
 // 1. Make geometrically sized bins of link lengths in the range [MIN_LINK_DIST, MAX_LINK_DIST].
@@ -448,6 +449,7 @@ LinkSizeDistribution::FindEnrichmentOnContig( const int L, const vector<int> & l
 
 
 
+const bool allow_longer_links = true; // TEMP: allow links of distance >= L1+L2 (for longer-range calculation).
 
 
 /* FindDistanceBetweenLinks: Input the lengths of two contigs, a set of Hi-C link distances that describe the position of links between the two contigs,
@@ -487,8 +489,10 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
   PRINT3( L1, L2, links.size() );
   
   // Sanity check on the link lengths.
-  for ( size_t i = 0; i < links.size(); i++ )
-    assert( links[i] > 0 && links[i] <= L1+L2 );
+  for ( size_t i = 0; i < links.size(); i++ ) {
+    assert( links[i] > 0 );
+    if ( !allow_longer_links ) assert( links[i] <= L1+L2 );
+  }
   
   
   // As a pre-calculation step, find the logarithms of factorials.
@@ -522,6 +526,7 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
   double LL_D_min = log_likelihood_D( D_min, L1, L2, LDE, links, log_factorial );
   double LL_D_max = log_likelihood_D( D_max, L1, L2, LDE, links, log_factorial );
   double LL_D_Q2  = log_likelihood_D( D_Q2,  L1, L2, LDE, links, log_factorial );
+  //PRINT6( D_min, LL_D_min, D_max, LL_d_max, D_Q2, LL_D_Q2 );
   
   
   while ( D_min + 1 < D_max ) {
@@ -550,14 +555,9 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
     else {
       LL_D_Q1 = log_likelihood_D( D_Q1, L1, L2, LDE, links, log_factorial );
       LL_D_Q3 = log_likelihood_D( D_Q3, L1, L2, LDE, links, log_factorial );
+      //PRINT4( LL_D_Q1, LL_D_Q3 );
     }
     
-    
-    if (0) {
-      PRINT5( D_min, D_Q1, D_Q2, D_Q3, D_max );
-      cout << "\t\t\t\t\t\t\t\t\t\t";
-      PRINT5( LL_D_min, LL_D_Q1, LL_D_Q2, LL_D_Q3, LL_D_max );
-    }
     
     // Determine which of D_Q1, D_Q2, D_Q3 has the highest log-likelihood.  Depending on the result, reset the values of D_min, D_Q2, D_max.
     if ( LL_D_Q1 > LL_D_Q2 && LL_D_Q1 > LL_D_Q3 ) {
@@ -589,13 +589,13 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
   cout << Time() << ": Result of binary search: D = " << best_D << "\twith log-likelihood LL = " << best_log_likelihood << endl;
   
   
-  if (0) { // TEMP: try an exhaustive search instead
-    const int D_step = 100; // this affects algorithm runtime
+  if (1) { // TEMP: try an exhaustive search instead
+    const int D_step = 1000; // this affects algorithm runtime
     
     for ( int D = 0; D < MAX_D; D += D_step ) {
       
       double log_likelihood = log_likelihood_D( D, L1, L2, LDE, links, log_factorial );
-      //cout << "STUFF:\t" << D << "\t" << log_likelihood << endl;
+      cout << "STUFF:\t" << D << "\t" << log_likelihood << endl;
       
       // Record the value of D that gives the best log-likelihood.
       if ( log_likelihood > best_log_likelihood ) {
@@ -718,7 +718,7 @@ LinkSizeDistribution::log_likelihood_D( const int D, const int L1, const int L2,
     // Skip bins with no expectation of links. (Note that all bins within the range of possible link sizes for this D,L1,L2 should have a nonzero expectation
     // of links, unless the bin's link density is 0 due to a total lack of observed intra-contig links.)
     if ( m == 0 ) {
-      assert( k == 0 || _link_density[j] == 0 );
+      if ( !allow_longer_links ) assert( k == 0 || _link_density[j] == 0 );
       continue;
     }
     

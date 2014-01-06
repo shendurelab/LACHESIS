@@ -376,6 +376,7 @@ Reporter::EvalOrderAccuracy( int cluster_ID, bool full_order ) const
   
   const ContigOrdering & scaffold = full_order ? _orders[cluster_ID] : _trunks[cluster_ID];
   //scaffold.Print();
+  if ( scaffold.N_contigs() != (int) cluster.size() ) PRINT4( cluster_ID, full_order, scaffold.N_contigs(), cluster.size() );
   assert( scaffold.N_contigs() == (int) cluster.size() );
   int N_contigs_used = scaffold.N_contigs_used();
   
@@ -493,7 +494,6 @@ Reporter::EvalGapSizes( int cluster_ID, bool full_order ) const
 {
   RequireReference(); // can't eval gap sizes without a reference
   
-  
   // Convert this cluster to a local vector<> for easier random access.
   const vector<int> cluster = SetToVec( _clusters[cluster_ID] );
   
@@ -513,26 +513,36 @@ Reporter::EvalGapSizes( int cluster_ID, bool full_order ) const
   
   // Find the GC content and mappability for each contig.
   // We'll correlate these measures with the gap size estimation error of each contig, and attempt to determine the cause of errors.
-  vector<double> contig_GC          = ParseTabDelimFile<double>( "human/prefosmid/assembly.GCpct", 1 );
-  vector<double> contig_mappability = ParseTabDelimFile<double>( "human/prefosmid/assembly.MQ>0pct", 1 );
+  vector<double> contig_GC          = ParseTabDelimFile<double>( "../human/prefosmid/assembly.GCpct", 1 );
+  vector<double> contig_mappability = ParseTabDelimFile<double>( "../human/prefosmid/assembly.MQ>0pct", 1 );
   assert( (int) contig_GC         .size() == _N_contigs );
   assert( (int) contig_mappability.size() == _N_contigs );
-  vector<double> contig_RF = ParseTabDelimFile<double>( "RFs.txt", 0 ); // TEMP
+  //vector<double> contig_RF = ParseTabDelimFile<double>( "RFs.txt", 0 ); // TEMP
+  vector<double> contig_LDE = ParseTabDelimFile<double>( "enrichments.txt", 0 ); // LDE = link density enrichment (on contig, compared to expectations)
   
   
-  vector<double> dists, dists_est, errors, GCs1, GCs2, GCs_comb, maps1, maps2, maps_comb, RFs_comb;
+  vector<double> dists, dists_est, errors, GCs1, GCs2, GCs_comb, maps1, maps2, maps_comb, LDEs1, LDEs2, LDEs_comb, RFs_comb;
   
   // Step through all the pairs of adjacent contigs in the scaffold.
   for ( int i = 0; i+1 < N_contigs_used; i++ ) {
     int contig1 = cluster[ scaffold.contig_ID(i) ];
     int contig2 = cluster[ scaffold.contig_ID(i+1) ];
-    int dist_est = scaffold.contig_gap_size(i);
+    int dist_est = scaffold.gap_size(i);
+    if ( dist_est == INT_MAX ) continue; // this can happen if the gaps were estimated by SpaceContigs() using a subset of the SAM files
     
     // Ignore pairs of adjacent contigs unless both of them map to the reference, on the same chromosome, with no apparent ordering or orienting errors.
     if ( flags.unaligned   [contig1] || flags.unaligned   [contig2] ) continue;
     if ( flags.chr_mismatch[contig1] || flags.chr_mismatch[contig2] ) continue;
     if ( flags.order_error [contig1] || flags.order_error [contig2] ) continue;
     if ( flags.orient_error[contig1] || flags.orient_error[contig2] ) continue;
+    
+    // TEMP: Only look at big contigs.
+    // threshold types: OR < additive < multiplicative < AND
+    // OR = 0.08; additive = 0.17; multiplicative = 0.20; AND = 0.28
+    //if ( _contig_lengths[contig1] < 500000 && _contig_lengths[contig2] < 500000 ) continue;
+    //if ( _contig_lengths[contig1] + _contig_lengths[contig2] < 700000 ) continue;
+    //if ( _contig_lengths[contig1] / 1000 * _contig_lengths[contig2] / 1000 < 80000 ) continue;
+    //if ( _contig_lengths[contig1] < 200000 || _contig_lengths[contig2] < 200000 ) continue;
     
     
     // Find the true distance between these contigs, according to their reference alignments.
@@ -543,7 +553,7 @@ Reporter::EvalGapSizes( int cluster_ID, bool full_order ) const
     int stop2  = _true_mapping->QTargetStop ( contig2 );
     
     int dist = max( start2 - stop1, start1 - stop2 );
-    if ( dist < 0 ) dist = 0; // if the contigs overlap, define the distance as 0
+    if ( dist < 100 ) dist = 100; // if the contigs overlap, define the distance as 100
     
     
     //PRINT7( contig1, contig2, start1, stop1, start2, stop2, dist );
@@ -553,36 +563,47 @@ Reporter::EvalGapSizes( int cluster_ID, bool full_order ) const
     // grep COMPARISON b | cut -f2,3 > c ; QuickDotplot c
     cout << "COMP1\t" << log(dist+1) << "\t" << log(dist_est+1) << endl;
     
-    double error = double( dist_est ) / dist; // "error" = the multiplicative factor of wrongness by which the estimate exceeds the true distance
+    double error = double( dist_est+1 ) / (dist+1); // "error" = the multiplicative factor of wrongness by which the estimate exceeds the true distance
     
-    double RF1  = contig_RF         [contig1], RF2  = contig_RF[contig2];
+    
     double GC1  = contig_GC         [contig1], GC2  = contig_GC[contig2];
     double map1 = contig_mappability[contig1], map2 = contig_mappability[contig2];
+    double LDE1 = contig_LDE        [contig1], LDE2 = contig_LDE[contig2];
+    //double RF1  = contig_RF         [contig1], RF2  = contig_RF[contig2];
     double GC_combined  = ( GC1  * _contig_lengths[contig1] + GC2  * _contig_lengths[contig2] ) / ( _contig_lengths[contig1] + _contig_lengths[contig2] );
     double map_combined = ( map1 * _contig_lengths[contig1] + map2 * _contig_lengths[contig2] ) / ( _contig_lengths[contig1] + _contig_lengths[contig2] );
-    double RF_combined  = ( RF1  * _contig_lengths[contig1] + RF2  * _contig_lengths[contig2] ) / ( _contig_lengths[contig1] + _contig_lengths[contig2] );
+    double LDE_combined = ( LDE1 * _contig_lengths[contig1] + LDE2 * _contig_lengths[contig2] ) / ( _contig_lengths[contig1] + _contig_lengths[contig2] );
+    //double RF_combined  = ( RF1  * _contig_lengths[contig1] + RF2  * _contig_lengths[contig2] ) / ( _contig_lengths[contig1] + _contig_lengths[contig2] );
+    LDE_combined = log( LDE_combined );
     
     
     
-    cout << "COMP2\t" <<  GC_combined << '\t' << log(error+1) << endl;
-    cout << "COMP3\t" << map_combined << '\t' << log(error+1) << endl;
-    cout << "COMP4\t" <<  RF_combined << '\t' << log(error+1) << endl;
+    cout << "COMP2\t" <<  GC_combined << '\t' << log(error) << endl;
+    cout << "COMP3\t" << map_combined << '\t' << log(error) << endl;
+    cout << "COMP4\t" << LDE_combined << '\t' << log(error) << endl;
+    //cout << "COMP4\t" <<  RF_combined << '\t' << log(error+1) << endl;
     dists_est.push_back( log(dist_est+1) );
     dists    .push_back( log(dist+1) );
-    errors   .push_back( log(error+1) );
+    errors   .push_back( log(error) );
     GCs1     .push_back( GC1 );
     GCs2     .push_back( GC2 );
     GCs_comb .push_back( GC_combined );
     maps1    .push_back( map1 );
     maps2    .push_back( map2 );
     maps_comb.push_back( map_combined );
-    RFs_comb .push_back( RF_combined );
+    LDEs1    .push_back( LDE1 );
+    LDEs2    .push_back( LDE2 );
+    LDEs_comb.push_back( LDE_combined );
+    //RFs_comb .push_back( RF_combined );
   }
   
+  int N_data = dists.size();
+  PRINT( N_data );
   PRINT( PearsonCorrelation( dists, dists_est ) );
   PRINT( PearsonCorrelation( errors, GCs_comb ) );
   PRINT( PearsonCorrelation( errors, maps_comb ) );
-  PRINT( PearsonCorrelation( errors, RFs_comb ) );
+  PRINT( PearsonCorrelation( errors, LDEs_comb ) );
+  //PRINT( PearsonCorrelation( errors, RFs_comb ) );
   
 }
   
