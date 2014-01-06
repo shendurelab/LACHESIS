@@ -259,3 +259,21 @@ TargetLengths( const string & SAM_file )
   
   return target_lengths;
 }
+
+
+
+// TargetNames(): Return a vector of the names of the target sequences in this SAM file.  Uses open_SAM.
+vector<string>
+TargetNames( const string & SAM_file )
+{
+  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  
+  vector<string> target_names;
+  
+  samfile_t * sam = open_SAM( SAM_file );
+  for ( int i = 0; i < sam->header->n_targets; i++ )
+    target_names.push_back( sam->header->target_name[i] );
+  samclose(sam);
+  
+  return target_names;
+}

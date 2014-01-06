@@ -126,10 +126,14 @@ class SAMStepper
 // To avoid memory leaks, be sure to eventually call samclose() on all pointers returned from open_SAM().
 samfile_t * open_SAM( const string & SAM_file );
 
-// NTargetsInSAM(): Return the number of target sequences in this SAM file.  Uses open_SAM.
+// The following 3 functions all use open_SAM.
+
+// NTargetsInSAM(): Return the number of target sequences in this SAM file.
 int NTargetsInSAM( const string & SAM_file );
-// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.  Uses open_SAM.
-vector<int> TargetLengths( const string & SAM_file ); 
+// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.
+vector<int>  TargetLengths( const string & SAM_file ); 
+// TargetNames(): Return a vector of the names of the target sequences in this SAM file.
+vector<string> TargetNames( const string & SAM_file ); 
 
 
 #endif
