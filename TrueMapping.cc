@@ -1,6 +1,6 @@
 // For documentation, see TrueMapping.h
 #include "TrueMapping.h"
-#include "TextFileParsers.h" // TODO: make the stuff here text-file-parseable
+#include "TextFileParsers.h" // ParseBlastAlignmentFiles
 
 
 #include <assert.h>
@@ -21,7 +21,7 @@
 // Modules in ~/include (must add -L~/include and -lJ<module> to link)
 #include "TimeMem.h"
 #include "gtools/HumanGenome.h"
-#include "gtools/SAMStepper.h" // TargetLengths
+#include "gtools/SAMStepper.h" // TargetLengths, TargetNames
 
 
 
@@ -36,142 +36,22 @@ static const unsigned LINE_LEN = 10000;
 
 
 
-// BlastAlignmentVec: Helper struct for the TrueMapping constructor.
-// Describes a set of alignments from a query to a set of target sequences, will be used to find where exactly this query is on its target.
-struct BlastAlignmentVec
-{
-  
-  // Minimum length of alignments to be considered for the 'main part' of this alignment - unless there are none this long, in which case take the longest
-  static const int MIN_ALIGN_LEN = 5000;
-  
-  
-  // Constructor: 
-  BlastAlignmentVec( int N_targets )
-  {
-    align_len_to_start.resize( N_targets );
-    align_rc.resize( N_targets, false );
-    align_starts.resize( N_targets );
-    align_stops .resize( N_targets );
-  }
-  
-  // Add an alignment on one target sequence.
-  void Add( int target, int start, int stop ) {
-    
-    align_starts[target].push_back(start);
-    align_stops [target].push_back(stop);
-    
-    // Iff stop < start, the alignment is RC.  We note the orientation if this is the first alignment added.
-    if ( align_len_to_start[target].empty() ) align_rc[target] = ( stop < start );
-    
-    // Find the length and the actual start site (the lower of start and stop).  Record these data in the map, which automatically sorts by length.
-    int start0 = min( start, stop );
-    int len = max( start, stop ) - start0;
-    
-    align_len_to_start[target].insert( make_pair( len, start0 ) );
-  }
-  
-  
-  // Determine where this query is on the given target sequence, assuming it is on that sequence (the target is chosen by TabulateAlignsToTarget()).
-  // We employ a "growing from a seed" algorithm: start with the region corresponding to one alignment, and keep expanding it until it's as big as the query.
-  void FindAlignRegionOnTarget( const int target_ID, const int query_len, int & region_start, int & region_stop ) const {
-    
-    // No target -> no start or stop
-    if ( target_ID == -1 ) { region_start = -1; region_stop = -1; return; }
-    assert( target_ID >= 0 && target_ID < (int) align_len_to_start.size() );
-    
-    // Get the set of alignments on this target.  Note that in the map, they are indicated by length and by start position, and sorted by decreasing length.
-    const map<int,int,greater<int> > & aligns = align_len_to_start[target_ID];
-    
-    // Find the genomic region corresponding to the first (longest) alignment.
-    region_start = aligns.begin()->second; // start
-    region_stop  = aligns.begin()->second + aligns.begin()->first; // stop = start + len
-    assert( region_stop - region_start > 0 );
-    
-    // Starting with this region as a 'seed', extend it to form a single contiguous interval that includes as many of the alignments on the target sequence as
-    // possible, while not exceeding the overall length of the query sequence.
-    // Note that, because the alignment may be gapped and may be a slightly different length on the query and the target, the strict requirement that the
-    // region length not exceed the query size is overly restrictive and may cause a slightly lower length.  I don't really care.
-    for ( map<int,int>::const_iterator it = aligns.begin(); it != aligns.end(); ++it ) {
-      int start = min( region_start, it->second );
-      int stop  = max( region_stop,  it->second + it->first ); // stop = start + len
-      
-      // Find the total region size that would ensue if this alignment were included.  If it's not too big, include this region.
-      int region_len_if_included = stop - start;
-      if ( region_len_if_included > query_len ) {
-	//cout << "Excluding:\t" << it->second << "\t" << it->second+it->first << endl;
-	continue;
-      }
-      //cout << "Including:\t" << it->second << "\t" << it->second+it->first << "\t\tNew region:\t" << start << "-" << stop << endl;
-      region_stop  = stop;
-      region_start = start;
-    }
-    
-    
-    if (0) { // verbosity
-      int region_size = region_stop - region_start;
-      double size_frac = double( region_size ) / query_len;
-      cout << "FINAL REGION:\t" << region_start << "\t" << region_stop << "\t\tSIZE:\t" << region_size << "\tquery_len = " << query_len << "\tsize_frac = " << size_frac << endl;
-    }
-    
-    
-    // If the first (longest) alignment was rc, flip start and stop to indicate this.
-    if ( align_rc[target_ID] ) { int swap = region_start; region_start = region_stop; region_stop = swap; }
-  }
-  
-  
-  // DATA
-  vector< vector<int> > align_starts, align_stops;
-  vector< map<int,int,greater<int> > > align_len_to_start; // vector: for each target, a list of alignment lengths keyed to alignment start locations
-  vector<bool> align_rc; // vector: for each target, the orientation of the first (longest) alignment on that target
-  
-};
 
 
 
 
-
-
-// Load in a BLAST output file.
+// Load in a set of BLAST alignments for a de novo GLM.  Also load in query and target names.  The dummy_SAM_file is for getting contig lengths.
+// Files should exist: <BLAST_file_head>.blast.out, <BLAST_file_head>.*.blast.out (for * = 1,2,3,...)
 TrueMapping::TrueMapping( const string & species, const vector<string> & query_names, const vector<string> & target_names, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file )
   : _species( species ),
     _query_names( query_names ),
     _target_names( target_names )
 {
-  // Initially, clear the set of alignments.
-  _target.clear();
-  _start.clear();
-  _stop.clear();
-  _qual_alignability.clear();
-  _qual_specificity.clear();
+  cout << Time() << ": Creating a TrueMapping" << endl;
   
   // These parameters are taken from the lengths of the names vectors.
   assert( NQueries() > 0 );
   assert( NTargets() > 0 );
-  
-  cout << Time() << ": TrueMapping\t<-\t" << BLAST_file_head << endl;
-  assert( boost::filesystem::is_regular_file( dummy_SAM_file ) );
-  
-  // Make a lookup table of target name -> ID.
-  map<string,int> target_names_to_IDs;
-  for ( size_t i = 0; i < _target_names.size(); i++ )
-    target_names_to_IDs[ _target_names[i] ] = i;
-  
-  
-  // Get query sequence lengths.
-  vector<int> query_lengths = TargetLengths( dummy_SAM_file );
-  
-  // Sanity checks.
-  if ( query_lengths.empty() ) {
-    cout << "ERROR: SAM file '" << dummy_SAM_file << "' seems to have no SAM/BAM header." << endl;
-    assert( !query_lengths.empty() );
-  }
-  
-  if ( (int) query_lengths.size() != NQueries() ) {
-    cout << "ERROR: List of query names (from <DRAFT_ASSEMBLY_FASTA>.names) and SAM file '" << dummy_SAM_file << "' seem to be from different datasets." << endl;
-    PRINT2( query_lengths.size(), NQueries() );
-    assert( (int) query_lengths.size() == NQueries() );
-  }
-  
   
   // Now that we know how many query and target contigs there are, reserve memory in local data structures.
   // All query contigs are initially marked as unaligned.  This will be changed if an alignment is seen for it in the BLAST file.
@@ -181,190 +61,28 @@ TrueMapping::TrueMapping( const string & species, const vector<string> & query_n
   _qual_alignability.resize( NQueries(), 0 );
   _qual_specificity .resize( NQueries(), 0 );
   
-  
-  
-  ifstream in;
-  char line[LINE_LEN];
-  vector<string> tokens;
-  
-  
-  /* For each query sequence, find the best target (chromosome) - that is, the one containing the plurality of aligned sequence.
-   * Also derive two "mapping quality scores" for each query:
-   * Unique alignability: What fraction of the bases in this contig appear in exactly one alignment to reference?
-   * Target specificity: Of the bases that align uniquely, what fraction aligns to the plurality target.
-   * To calculate these numbers, we must read in the *complete* set of BLAST alignments, which is in multiple files
-   * These files take the form <BLAST_file_head>.*.blast.out, with * = 1,2,... until all query contigs have been seen.
-   */
-  
-  
-  // Filename for 'saved' file.  The first time this function is run on a given assembly, it creates this file to store queries' alignments and qualities.
-  // Then in future runs, this file can be loaded, to save runtime.  There are asserts to prevent file mismatches.
-  //string save_file = BLAST_file_head + ".TrueMapping_align_data.txt";
-  string save_file = out_dir + "/cached_data/TrueMapping.assembly.txt";
-  
-  if( boost::filesystem::is_regular_file( save_file ) ) {
-    
-    // Read the save file line-by-line.
-    // Each (non-commented) line in the file describes a contig.
-    in.open( save_file.c_str(), ios::in );
-    
-    int query_ID = 0;
-    
-    while ( 1 ) {
-      in.getline( line, LINE_LEN );
-      assert( strlen(line)+1 < LINE_LEN );
-      if ( in.fail() ) break;
-      
-      // Skip commented lines.
-      if ( line[0] == '#' ) continue;
-      
-      // Parse the line into its six tokens, as written by TabulateAlignsToTarget().
-      boost::split( tokens, line, boost::is_any_of("\t") );
-      assert( tokens.size() == 6 );
-      assert( boost::lexical_cast<int>( tokens[0] ) == query_ID );
-      
-      _target[query_ID] = boost::lexical_cast<int>( tokens[1] );
-      _start [query_ID] = boost::lexical_cast<int>( tokens[2] );
-      _stop  [query_ID] = boost::lexical_cast<int>( tokens[3] );
-      _qual_alignability[query_ID] = boost::lexical_cast<double>( tokens[4] );
-      _qual_specificity [query_ID] = boost::lexical_cast<double>( tokens[5] );
-      
-      query_ID++;
-    }
-    
-    // Sanity check.  If this fails, the save file may not match the dataset.  Specifically, if query_ID == 0, the save file may be empty; just delete it.
-    if ( query_ID != NQueries() ) PRINT2( query_ID, NQueries() );
-    assert( query_ID == NQueries() );
-    
+  // Determine the cache file name and the set of available BLAST files for ReadBlastAlignsFromFileSet, below.
+  // The BLAST files take the form <BLAST_file_head>.*.blast.out, with * = 1,2,...
+  string cache_file = out_dir + "/cached_data/TrueMapping.assembly.txt";
+  vector<string> BLAST_files;
+  for ( int i = 1;; i++ ) {
+    string file = BLAST_file_head + "." + boost::lexical_cast<string>(i) + ".blast.out";
+    if ( boost::filesystem::is_regular_file( file ) ) BLAST_files.push_back( file );
+    else break;
   }
   
+  PRINT( BLAST_files.size() );
   
-  
-  else { // No save file exists.  Parse the alignments, calculate the best target and the quality metrics, and create a save file.  Runtime on human: ~1 min.
-    
-    cout << Time() << ": Parsing BLAST output to find contig alignments to reference; will cache results at " << save_file << endl;
-    ofstream out( save_file.c_str(), ios::out );
-    // Make a header for this save file.
-    out << "# This file was created by the TrueMapping constructor in TrueMapping.cc" << endl;
-    out << "#" << endl;
-    out << "# species = " << species << endl;
-    out << "# NQueries() = " << NQueries() << endl;
-    out << "# NTargets() = " << NTargets() << endl;
-    out << "# BLAST_file_head = " << BLAST_file_head << endl;
-    out << "#" << endl;
-    out << "# There is one row for each query, containing six numbers:" << endl;
-    out << "# query_ID\tbest_target\tstart_on_target\tstop_on_target\tunique_alignability\ttarget_specificity" << endl;
-    
-    
-    
-    int BLAST_file_ID = 1; // first file is <BLAST_file_head>.1.blast.out
-    int query_ID = -1; // will get incremented to 0 for first query
-    int N_hits = 0;
-    vector<int> align_on_query; // will record which parts of the query sequence are aligned, and to which target
-    BlastAlignmentVec BLAST_aligns( NTargets() ); // will record the locations of all BLAST alignments of this query onto the target sequences
-    
-    
-    // Loop through the lines of the BLAST output file, and if necessary through multiple BLAST output files, until we've seen enough queries.
-    while ( query_ID+1 < NQueries() ) {
-      
-      // Open a new file if necessary.
-      if ( !in.is_open() ) {
-	assert( N_hits == 0 ); // If this fails, the BLAST file has incorrectly reported its number of hits.
-	
-	string BLAST_chunk_file = BLAST_file_head + "." + boost::lexical_cast<string>(BLAST_file_ID) + ".blast.out";
-	cout << Time() << ": Reading from input file: " << BLAST_chunk_file << " (query_ID = " << query_ID+1 << ")" << endl;
-	assert( boost::filesystem::is_regular_file( BLAST_chunk_file ) );
-	in.open( BLAST_chunk_file.c_str(), ios::in );
-	
-	BLAST_file_ID++; // increment for next time.
-      }
-      
-      // Read the BLAST output file line-by-line.  When we're done with the file, close it and prepare to open the next one.
-      in.getline( line, LINE_LEN );
-      assert( strlen(line)+1 < LINE_LEN );
-      if ( in.fail() ) { in.close(); continue; }
-      
-      
-      boost::split( tokens, line, boost::is_any_of(" \t") );
-      assert( tokens.size() > 0 );
-      
-      // Parse commented lines to get metadata
-      if ( tokens[0] == "#" ) {
-	
-	assert( tokens.size() >= 3 ); // if this assert fails, the BLAST file is formatted in an unexpected way, maybe due to a blastn version mismatch
-	
-	// "BLASTN" line indicates the start of a new query
-	if ( tokens[1] == "BLASTN" ) {
-	  
-	  // Tabulate data from previous query.
-	  if ( query_ID != -1 ) TabulateAlignsToTarget( query_ID, align_on_query, BLAST_aligns, out );
-	  
-	  // Start a new query!
-	  query_ID++;
-	  align_on_query = vector<int>( query_lengths[query_ID], -1 );
-	  BLAST_aligns = BlastAlignmentVec( NTargets() );
-	}
-	
-	// "Query:" line gives query name; make sure it matches the name in the query_names (the queries must appear in the same order!)
-	// Actually, don't make sure of this; this is too stringent because different BLAST files have slightly different formats
-	// We want to get the token in the line that represents the first word after "Query:", but taking into account the possibility of multiple spaces.
-	// This is too hard so let's just comment it out.
-	else if ( tokens[1] == "Query:" ) {} // assert( tokens[2] == _query_names[query_ID] );
-	
-	// "XXX hits found" line indicates the number of lines that will follow that describe alignments
-	else if ( tokens[2] == "hits" ) N_hits = boost::lexical_cast<int>( tokens[1] );
-	
-	continue;
-      }
-      
-      
-      // If control reaches here, this line is non-commented and thus describes a hit on query_ID.
-      N_hits--;
-      
-      assert( tokens.size() >= 10 );
-      assert( tokens[0] == _query_names[query_ID] );
-      
-      // Find where this query aligns.
-      int target_ID = target_names_to_IDs[ tokens[1] ];
-      int start_on_Q = boost::lexical_cast<int>( tokens[6] );
-      int  stop_on_Q = boost::lexical_cast<int>( tokens[7] );
-      int start_on_T = boost::lexical_cast<int>( tokens[8] );
-      int  stop_on_T = boost::lexical_cast<int>( tokens[9] );
-      assert( start_on_Q < stop_on_Q );
-      assert(  stop_on_Q <= query_lengths[query_ID] );
-      assert( start_on_T >= 0 );
-      assert(  stop_on_T >= 0 ); // note: the sign of ( start_on_T - stop_on_T ) may be positive or negative, and determines the orientation of the alignment
-      
-      // Mark each base on this query as aligning to this target sequence.
-      // The code for the align_on_query vector is: -1: no alignment seen (yet); X>=0: aligns to exactly one location on target #X; -2: multiple alignment
-      for ( int i = start_on_Q; i < stop_on_Q; i++ ) {
-	if ( align_on_query[i] == -1 ) align_on_query[i] = target_ID;
-	else align_on_query[i] = -2;
-      }
-      
-      // Record this alignment in the BLAST_aligns struct.
-      // If this target turns out to be the 'best' one, we'll use the alignments onto it to determine where the query sequence is on the target.
-      BLAST_aligns.Add( target_ID, start_on_T, stop_on_T );
-      
-      
-    }
-    
-    
-    // Don't forget the last listed query!
-    assert( query_ID + 1 == NQueries() );
-    TabulateAlignsToTarget( query_ID, align_on_query, BLAST_aligns, out );
-    
-    in.close();
-    
-  }
-  
+  // ReadBlastAlignsFromFileSet: Read the alignments of assembly contigs onto the reference genome.
+  // This is initially done by parsing a set of BLAST files (which takes a lot of runtime due to file I/O) and then carefully expanding the BLAST alignments
+  // into whole-contig alignments.  The results of this method are written to a cache file.  If the cache filename already exists, we can save time by reading
+  // the alignments directly from it.  Either way, the function will fill local variables.
+  ReadBlastAlignsFromFileSet( species, dummy_SAM_file, BLAST_files, cache_file );
   
   // Count the number of unaligned sequences.
   int N_unaligned = count( _target.begin(), _target.end(), -1 );
   
   cout << Time() << ": TrueMapping contains " << NQueries() << " query sequences aligned to " << NTargets() << " target sequences (incl. " << N_unaligned << " unaligned)" << endl;
-  
-  
 }
 
 
@@ -842,64 +560,111 @@ TrueMapping::ReorderQueries( const vector<int> & new_ordering )
 
 
 
+
 // Helper function for the TrueMapping constructor.
-// Counts up all of the bp in a query, examines which target(s) it's aligned to, and assigns it a plurality target (modifies _target).
-// Also calculates 2 quality scores for "unique alignability" and "target specificity", and prints them to output file.
+// Read alignment info from the BLAST files and write them in a simple format to TrueMapping_file.  If TrueMapping_file already exists, just read from it
+// directly, to save runtime.  Either way, load the alignment data into this TrueMapping object.
 void
-TrueMapping::TabulateAlignsToTarget( const int query_ID, const vector<int> & align_on_query, const BlastAlignmentVec & BLAST_aligns, ostream & out )
+TrueMapping::ReadBlastAlignsFromFileSet( const string & species, const string & dummy_SAM_file, const vector<string> & BLAST_files, const string & TrueMapping_file )
 {
-  assert( query_ID >= 0 && query_ID < NQueries() );
   
-  int query_len = align_on_query.size();
-  
-  // Tally up data from the align_on_query vector.
-  // The code for the align_on_query vector is: -1: no alignment seen (yet); X>=0: aligns to exactly one location on target #X; -2: multiple alignment
-  int N_unaligned = 0, N_nonunique = 0;
-  vector<int> N_unique_on_target( NTargets(), 0 );
-  for ( int i = 0; i < query_len; i++ )
-    switch ( align_on_query[i] ) {
-    case -1: N_unaligned++; break;
-    case -2: N_nonunique++; break;
-    default: N_unique_on_target[ align_on_query[i] ]++; break;
+  // If the cache file doesn't already exist, we must create it.
+  // Parse the alignments, calculate the best target and the quality metrics, and create a cache file.  Runtime on human: ~1 min.
+  if( !boost::filesystem::is_regular_file( TrueMapping_file ) ) {
+    
+    
+    // Get query sequence lengths.
+    assert( boost::filesystem::is_regular_file( dummy_SAM_file ) );
+    vector<int> query_lengths = TargetLengths( dummy_SAM_file );
+    
+    // Sanity checks.
+    assert( _query_names == TargetNames( dummy_SAM_file ) );
+    
+    if ( query_lengths.empty() ) {
+      cout << "ERROR: SAM file '" << dummy_SAM_file << "' seems to have no SAM/BAM header." << endl;
+      assert( !query_lengths.empty() );
     }
-  
-  // Find the target with the most alignment from this query.
-  vector<int>::iterator max = max_element( N_unique_on_target.begin(), N_unique_on_target.end() );
-  int N_on_best_target = *max;
-  int best_target = max - N_unique_on_target.begin();
-  if ( N_on_best_target == 0 ) best_target = -1; // if this query doesn't uniquely align anywhere, mark it as entirely unmapped
-  
-  // Find the boundaries of this alignment on the target sequence.
-  int start;
-  int  stop;
-  BLAST_aligns.FindAlignRegionOnTarget( best_target, query_len, start, stop );
-  
-  // Calculate the quality scores.
-  int N_aligned = query_len - N_unaligned - N_nonunique;
-  double unique_alignability = N_aligned / double ( query_len > 0 ? query_len : 1 );
-  double target_specificity = N_on_best_target / double ( N_aligned > 0 ? N_aligned : 1 );
-  //PRINT6( query_ID, query_len, N_unaligned, N_nonunique, best_target, N_on_best_target );
-  //PRINT3( query_ID, unique_alignability, target_specificity );
+    
+    if ( (int) query_lengths.size() != NQueries() ) {
+      cout << "ERROR: List of query names (from <DRAFT_ASSEMBLY_FASTA>.names) and SAM file '" << dummy_SAM_file << "' seem to be from different datasets." << endl;
+      PRINT2( query_lengths.size(), NQueries() );
+      assert( (int) query_lengths.size() == NQueries() );
+    }
+    
+    // Do the parsing!
+    cout << Time() << ": Parsing BLAST files to find contig alignments to reference; will cache results at " << TrueMapping_file << endl;
+    ParseBlastAlignmentFiles( BLAST_files, query_lengths, _target_names, TrueMapping_file );
+  }
   
   
   
-  // Set info about this query.
-  _target[query_ID] = best_target;
-  _start [query_ID] = start;
-  _stop  [query_ID] = stop;
-  _qual_alignability[query_ID] = unique_alignability;
-  _qual_specificity [query_ID] = target_specificity;
+  // The cache file now exists.  Read it line-by-line.  Each (non-commented) line in the file describes a contig.
+  assert( boost::filesystem::is_regular_file( TrueMapping_file ) );
   
+  vector< vector<string> > tokens;
+  TokenizeFile( TrueMapping_file, tokens );
   
-  // Write to the output file.
-  out << query_ID << '\t' << best_target << '\t' << start << '\t' << stop << '\t' << unique_alignability << '\t' << target_specificity << endl;
+  int query_ID = 0;
   
-  //for ( int i = 0; i * 10000 < query_len; i++ ) {
-  //  out << "ALIGNABILITY\t" << unique_alignability << endl;
-  //  out << "SPECIFICITY\t"  << target_specificity << endl;
-  //}
+  for ( size_t i = 0; i < tokens.size(); i++ ) {
+    
+    const vector<string> & line = tokens[i];
+    if ( line[0][0] == '#' ) continue; // skip commented lines
+    assert( line.size() == 6 );
+    
+    assert( query_ID == boost::lexical_cast<int>( line[0] ) );
+    _target[query_ID] = boost::lexical_cast<int>( line[1] );
+    _start [query_ID] = boost::lexical_cast<int>( line[2] );
+    _stop  [query_ID] = boost::lexical_cast<int>( line[3] );
+    _qual_alignability[query_ID] = boost::lexical_cast<double>( line[4] );
+    _qual_specificity [query_ID] = boost::lexical_cast<double>( line[5] );
+    
+    query_ID++;
+  }
+  
+  /*
+  // TODO: tokenize; then remove #includes to ifstream and split
+  ifstream in;
+  char line[LINE_LEN];
+  vector<string> tokens;
+  
+  in.open( TrueMapping_file.c_str(), ios::in );
+  
+  int query_ID = 0;
+  
+  while ( 1 ) {
+    in.getline( line, LINE_LEN );
+    assert( strlen(line)+1 < LINE_LEN );
+    if ( in.fail() ) break;
+    
+    // Skip commented lines.
+    if ( line[0] == '#' ) continue;
+    
+    // Parse the line into its six tokens.
+    boost::split( tokens, line, boost::is_any_of("\t") );
+    assert( tokens.size() == 6 );
+    assert( boost::lexical_cast<int>( tokens[0] ) == query_ID );
+    
+    _target[query_ID] = boost::lexical_cast<int>( tokens[1] );
+    _start [query_ID] = boost::lexical_cast<int>( tokens[2] );
+    _stop  [query_ID] = boost::lexical_cast<int>( tokens[3] );
+    _qual_alignability[query_ID] = boost::lexical_cast<double>( tokens[4] );
+    _qual_specificity [query_ID] = boost::lexical_cast<double>( tokens[5] );
+    
+    query_ID++;
+  }
+  */
+  
+  // Sanity check.  If this fails, the save file may not match the dataset.  Specifically, if query_ID == 0, the save file may be empty; just delete it.
+  if ( query_ID != NQueries() ) {
+    PRINT2( query_ID, NQueries() );
+    cout << "ERROR: Assembly size in draft assembly fasta doesn't seem to match the cached file at " << TrueMapping_file << ".  Maybe the cached file is empty or corrupted due to an earlier aborted run?  If so, just delete it and let Lachesis re-create it." << endl;
+  }
+  assert( query_ID == NQueries() );
   
 }
+
+
 
 
 

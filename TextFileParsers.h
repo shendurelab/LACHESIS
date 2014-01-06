@@ -8,9 +8,13 @@
  * ParseTabDelimFile
  * GetFastaNames
  *
- * and one function to create an output text file:
+ * one function to create an output text file:
  *
  * MakeFastaNamesFile
+ *
+ * and one function that does both:
+ *
+ * ParseBlastAlignmentFiles
  *
  *
  * Josh Burton
@@ -68,5 +72,12 @@ GetFastaNames( const string & fasta_file );
 void
 MakeFastaNamesFile( const string & fasta_file );
 
+
+
+// ParseBlastAlignmentFiles: Input a set of BLAST files describing a set of queries aligning to targets.  Also input query lengths and target names.
+// Determine the full extent of each query sequence's position on target, and write the results to outfile.
+// For a detailed description of the method used here, see the comments in the function.
+void
+ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> & query_lengths, const vector<string> & target_names, const string & outfile );
 
 #endif

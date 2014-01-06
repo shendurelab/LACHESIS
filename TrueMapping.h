@@ -59,9 +59,8 @@ class TrueMapping
   
   // Default constructor.  This is only invoked when another object that contains a TrueMapping object (e.g., Reporter) is instantiated.
   TrueMapping() {}
-  // Load in a set of BLAST alignments for a de novo GLM.  Also load in query names and target names files (which can be made by `grep "\>" <file.fasta>.`)
+  // Load in a set of BLAST alignments for a de novo GLM.  Also load in query and target names.  The dummy_SAM_file is for getting contig lengths.
   // Files should exist: <BLAST_file_head>.blast.out, <BLAST_file_head>.*.blast.out (for * = 1,2,3,...)
-  // The dummy_SAM_file is for getting contig lengths.
   TrueMapping( const string & species, const vector<string> & query_names, const vector<string> & target_names, const string & BLAST_file_head, const string & out_dir, const string & dummy_SAM_file );
   // Create a TrueMapping for a de novo GLM made by chopping up a reference genome into bins of size BIN_SIZE.  The species must be human (for now).
   TrueMapping( const string & species, const int BIN_SIZE, const vector<string> & query_names, const vector<string> & target_names );
@@ -121,9 +120,9 @@ class TrueMapping
  private:
   
   // Helper function for the TrueMapping constructor.
-  // Counts up all of the bp in a query, examines which target(s) it's aligned to, and assigns it a plurality target (modifies _target).
-  // Also calculates 2 quality scores for "unique alignability" and "target specificity", and prints them to output file.
-  void TabulateAlignsToTarget( const int query_ID, const vector<int> & align_on_query, const BlastAlignmentVec & BLAST_aligns, ostream & out = cout );
+  // Read alignment info from the BLAST files and write them in a simple format to TrueMapping_file.  If TrueMapping_file already exists, just read from it
+  // directly, to save runtime.  Either way, load the alignment data into this TrueMapping object.
+  void ReadBlastAlignsFromFileSet( const string & species, const string & dummy_SAM_file, const vector<string> & BLAST_files, const string & TrueMapping_file );
   
   /* The following three functions assume that species() == "human" and that the chromosomes are named in accordance with the standard in HumanGenome.h. */
   
