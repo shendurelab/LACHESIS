@@ -34,6 +34,8 @@ LFLAGS = $(BOOST_LIBS)
 	$(CC) -c $< $(CFLAGS) $(INCLUDES)
 
 all:    $(LIBS)
+	$(MAKE) -C gtools
+	$(MAKE) -C markov
 
 libJtime.a: $(OBJS_TIME)
 	$(AR) libJtime.a $(OBJS_TIME)
