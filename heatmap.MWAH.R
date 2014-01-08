@@ -11,7 +11,7 @@ library(RColorBrewer) # colorRampPalette
 library(grid) # unit
 
 heatmap.file <- 'heatmap.txt'
-jpeg.file <- "~/public_html/heatmap.MWAH.shuffled.jpg"
+jpeg.file <- "~/public_html/heatmap.MWAH.jpg"
 shuffle <- 0 # TEMP: if 1, randomly permute the heatmap to show the 'pre-Lachesis' dataset.
 
 # Get a ColorBrewer palette.
@@ -66,9 +66,9 @@ if ( shuffle == 0 ) {
 
 
 # Tweak the theme for better readability on a slide (November 2013 Research Report).
-p <- p + theme( axis.text.x = element_text( size=0 ), axis.text.y = element_text( size=0 ) ) # hide axis labels
-p <- p + theme( axis.ticks = element_blank() ) # hide tick marks
-p <- p + theme( legend.text=element_text(size=20), legend.key.size=unit(1,"cm"), legend.key.width=unit(1.5,"cm") )
-p <- p + scale_fill_gradientn( colours = palette(100), name="" ) # same colors, but remove legend name
+#p <- p + theme( axis.text.x = element_text( size=0 ), axis.text.y = element_text( size=0 ) ) # hide axis labels
+#p <- p + theme( axis.ticks = element_blank() ) # hide tick marks
+#p <- p + theme( legend.text=element_text(size=20), legend.key.size=unit(1,"cm"), legend.key.width=unit(1.5,"cm") )
+#p <- p + scale_fill_gradientn( colours = palette(100), name="" ) # same colors, but remove legend name
 
 ggsave( filename=jpeg.file, plot=p, width=11.45, height=10 )
