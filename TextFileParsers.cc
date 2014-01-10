@@ -285,7 +285,7 @@ TabulateAlignsToTarget( const int query_ID, const vector<int> & align_on_query, 
 //
 // Also derive two "mapping quality scores" for each query:
 // Unique alignability: What fraction of the bases in this contig appear in exactly one alignment to reference?
-// Target specificity: Of the bases that align uniquely, what fraction aligns to the plurality target.
+// Target specificity: Of the bases that align uniquely, what fraction aligns to the plurality target?
 void
 ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> & query_lengths, const vector<string> & target_names, const string & outfile )
 {
@@ -308,7 +308,7 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
   // Make a header for the cache file.  This doesn't get parsed anywhere but it's useful for human readability.
   out << "# This file was created by the function ParseBlastAlignmentFiles in TextFileParsers.cc" << endl;
   out << "#" << endl;
-  out << "# N aseembly contigs = " << N_queries << endl;
+  out << "# N assembly contigs = " << N_queries << endl;
   out << "# N reference contigs = " << N_targets << endl;
   out << "#" << endl;
   out << "# There is one row for each query, containing six numbers:" << endl;
@@ -406,7 +406,7 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
   
   
   // Don't forget the last listed query!
-  assert( query_ID + 1 == N_queries );
+  assert( query_ID + 1 == N_queries ); // if this assert fails, the SAM file you used to find the query_lengths may have an internal inconsistency
   TabulateAlignsToTarget( query_ID, align_on_query, BLAST_aligns, N_targets, out );
   
   in.close();

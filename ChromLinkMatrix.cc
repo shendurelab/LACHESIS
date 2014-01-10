@@ -2191,6 +2191,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     if ( c1.qual == 0 || c2.qual == 0 ) continue;
     
     // Sanity checks to make sure the read pairs appear as they should in the SAM file.
+    // If one of these asserts fails, there is an internal inconsistency in the SAM file.  Maybe the file is truncated or it has an incorrect header?
     //cout << stepper.as_SAM_line(aligns.first) << endl << stepper.as_SAM_line(aligns.second) << endl << endl;
     assert( c1.tid == c2.mtid );
     assert( c2.tid == c1.mtid );
