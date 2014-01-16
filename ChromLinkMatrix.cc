@@ -1930,7 +1930,7 @@ ChromLinkMatrix::PlotTree( const vector< vector<int> > & tree, const string & fi
 int
 ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const LinkSizeDistribution & lsd, const vector<double> & enrichments ) const
 {
-  cout << "FindGapSize mothafuckaaaaaa" << endl;
+  cout << "FindGapSize" << endl;
   assert( pos >= 0 );
   assert( pos+1 < order.N_contigs_used() );
   assert( order.N_contigs() == _N_contigs );
