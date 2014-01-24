@@ -27,7 +27,7 @@ my $verbose = 0;
 
 
 # Get input arguments.
-die "Syntax: $0 <assembly-fasta> <restriction site motif>\ne.g.: $0 mouse/assembly/assembly.fasta AAGCTT\n" unless ( scalar @ARGV == 2 );
+die "CountMotifsInFasta: Count the number of occurrences of a motif in each contig of a fasta file.\nSyntax: $0 <assembly-fasta> <restriction site motif>\ne.g.: $0 mouse/assembly/assembly.fasta AAGCTT\nCreates a file at <assembly-fasta>.counts_<motif>.txt\n\n" unless ( scalar @ARGV == 2 );
 my ($fasta,$motif) = @ARGV;
 
 # Check that input arguments make sense.
