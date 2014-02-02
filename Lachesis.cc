@@ -71,12 +71,13 @@ LachesisClustering( const RunParams & run_params )
 {
   cout << "\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\t|                                 |\n\t|       LACHESIS CLUSTERING       |\n\t|                                 |\n\t|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n\n";
   
-  TrueMapping * true_mapping = run_params.LoadTrueMapping();
-  const bool postfosmid = false; // placeholder for parameters optimized for the post-fosmid case
-  
   // Make the directories needed for this run, if necessary.
   system ( ( "mkdir -p " + run_params._out_dir + "/cached_data" ).c_str() );
   system ( ( "mkdir -p " + run_params._out_dir + "/main_results" ).c_str() );
+  
+  // Set up a TrueMapping object.
+  TrueMapping * true_mapping = run_params.LoadTrueMapping();
+  const bool postfosmid = false; // placeholder for parameters optimized for the post-fosmid case
   
   GenomeLinkMatrix * glm;
   
