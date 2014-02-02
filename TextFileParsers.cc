@@ -386,7 +386,7 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
     int start_on_T = boost::lexical_cast<int>( tokens[8] );
     int  stop_on_T = boost::lexical_cast<int>( tokens[9] );
     assert( start_on_Q < stop_on_Q );
-    assert(  stop_on_Q <= query_lengths[query_ID] );
+    assert(  stop_on_Q <= query_lengths[query_ID] );  // if this fails, the query sequences in the BLAST file don't match the target sequences in the SAM file
     assert( start_on_T >= 0 );
     assert(  stop_on_T >= 0 ); // note: the sign of ( start_on_T - stop_on_T ) may be positive or negative, and determines the orientation of the alignment
     
