@@ -287,7 +287,7 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
   _SAM_files.clear();
   _matrix_init = false;
   
-  static const unsigned LINE_LEN = 10000000;
+  static const unsigned LINE_LEN = 100000000;
   char line[LINE_LEN];
   vector<string> tokens;
   
@@ -1986,7 +1986,7 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
   
   // The maximum value of D is defined by the maximum observed intra-contig link lengths.
   // This guarantees that no link will be considered with a range greater than _MAX_LINK_DIST, which keeps the LinkBin() function safe.
-  int MAX_D = LinkSizeDistribution::_MAX_LINK_DIST;
+  //int MAX_D = LinkSizeDistribution::_MAX_LINK_DIST;
   
   int best_D = -1;
   double best_log_likelihood = -INT_MAX;
