@@ -287,7 +287,7 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
   _SAM_files.clear();
   _matrix_init = false;
   
-  static const unsigned LINE_LEN = 100000000;
+  static const unsigned LINE_LEN = 10000000;
   char line[LINE_LEN];
   vector<string> tokens;
   

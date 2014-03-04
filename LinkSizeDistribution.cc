@@ -523,8 +523,8 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
   int D_min = 0;
   int D_max = MAX_D - 1;
   int D_Q2  = ( D_min + D_max ) / 2;
-  double LL_D_min = log_likelihood_D( D_min, L1, L2, LDE, links, log_factorial );
-  double LL_D_max = log_likelihood_D( D_max, L1, L2, LDE, links, log_factorial );
+  //double LL_D_min = log_likelihood_D( D_min, L1, L2, LDE, links, log_factorial );
+  //double LL_D_max = log_likelihood_D( D_max, L1, L2, LDE, links, log_factorial );
   double LL_D_Q2  = log_likelihood_D( D_Q2,  L1, L2, LDE, links, log_factorial );
   //PRINT6( D_min, LL_D_min, D_max, LL_d_max, D_Q2, LL_D_Q2 );
   
