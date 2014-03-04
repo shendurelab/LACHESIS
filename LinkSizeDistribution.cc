@@ -563,7 +563,7 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
     if ( LL_D_Q1 > LL_D_Q2 && LL_D_Q1 > LL_D_Q3 ) {
       D_max = D_Q2;
       D_Q2  = D_Q1;
-      LL_D_max = LL_D_Q2;
+      //LL_D_max = LL_D_Q2;
       LL_D_Q2  = LL_D_Q1;
     }
     else if ( LL_D_Q2 >= LL_D_Q1 && LL_D_Q2 > LL_D_Q3 ) {
@@ -576,7 +576,7 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
       D_min = D_Q2;
       D_Q2  = D_Q3;
       //LL_D_min = LL_D_Q2;
-      //LL_D_Q2  = LL_D_Q3;
+      LL_D_Q2  = LL_D_Q3;
     }
   }
   
