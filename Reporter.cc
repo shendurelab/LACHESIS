@@ -673,10 +673,10 @@ Reporter::ReportChartWithReference() const
   int64_t len_singletons = 0;
   
   // Print a chart with info about each cluster, including what portion of the cluster (length, contigs) aligns to the plurality chromosome or fails to align.
-  string horiz_line = "+----------+------------+-----------+---------------+------------------+-------------+-------------------+----------------------+\n";
+  string horiz_line = "+---------+----------------+---------+---------------+------------------+-------------+-------------------+----------------------+\n";
   out << horiz_line;
-  out << "|  CLUSTER | PLURALITY  | Number of contigs in cluster...              | Length of contigs in cluster...                        |\n";
-  out << "|  NUMBER  | CHROMOSOME |   TOTAL   |   UNALIGNED   | WRONG CHROMOSOME |    TOTAL    |     UNALIGNED     |   WRONG CHROMOSOME   |\n";
+  out << "| CLUSTER |   PLURALITY    | Number of contigs in cluster...            | Length of contigs in cluster...                        |\n";
+  out << "| NUMBER  |   CHROMOSOME   |  TOTAL  |   UNALIGNED   | WRONG CHROMOSOME |    TOTAL    |     UNALIGNED     |   WRONG CHROMOSOME   |\n";
   out << horiz_line;
   for ( int i = 0; i < _N_clusters; i++ ) {
     
@@ -689,7 +689,11 @@ Reporter::ReportChartWithReference() const
     
     
     int chrom_ID = _data->cluster_chrom[i];
+    // Re-format the chromosome name to appear nicely in the output chart: <= 14 characters and centered in whitespace.
     string chrom_name = ( chrom_ID == -1 ? "none" : _true_mapping->TargetName(chrom_ID) );
+    chrom_name = chrom_name.substr(0,14);
+    for ( size_t j = 0; j + chrom_name.size() < 14; j++ ) chrom_name += ' '; // note that chrom_name.size() increases with each iteration
+    
     
     // Calculate the total cluster length.
     boost::dynamic_bitset<> in_cluster( _N_contigs );
@@ -706,7 +710,7 @@ Reporter::ReportChartWithReference() const
     double pct_N_unaligned   = 100.0 * _data->cluster_N_unaligned[i] / cluster_N;
     double pct_len_unaligned = 100.0 * _data->cluster_len_unaligned[i] / cluster_len;
     
-    sprintf( _LINE, "| %6d   | %9s  | %7ld   |%5d (%6.2f%%)| %5d  (%6.2f%%) | %11ld |%9ld (%6.3f%%)| %9ld  (%6.3f%%) |\n", i, chrom_name.c_str(), _clusters[i].size(), _data->cluster_N_unaligned[i], pct_N_unaligned, _data->cluster_N_bad[i], pct_N_bad, cluster_len, _data->cluster_len_unaligned[i], pct_len_unaligned, _data->cluster_len_bad[i], pct_len_bad );
+    sprintf( _LINE, "|%6d   | %14s |%7ld  |%5d (%6.2f%%)| %5d  (%6.2f%%) | %11ld |%9ld (%6.3f%%)| %9ld  (%6.3f%%) |\n", i, chrom_name.c_str(), _clusters[i].size(), _data->cluster_N_unaligned[i], pct_N_unaligned, _data->cluster_N_bad[i], pct_N_bad, cluster_len, _data->cluster_len_unaligned[i], pct_len_unaligned, _data->cluster_len_bad[i], pct_len_bad );
     out << _LINE;
   }
   out << horiz_line;
@@ -723,7 +727,7 @@ Reporter::ReportChartWithReference() const
   double pct_N_unaligned   = 100.0 * total_N_unaligned   / N_in_clusters;
   double pct_len_unaligned = 100.0 * total_len_unaligned / len_in_clusters;
   
-  sprintf( _LINE, "|        TOTAL          | %7d   |%5d (%6.2f%%)| %5d  (%6.2f%%) | %11ld |%9ld (%6.3f%%)| %9ld  (%6.3f%%) |\n",
+  sprintf( _LINE, "|       TOTAL              |%7d  |%5d (%6.2f%%)| %5d  (%6.2f%%) | %11ld |%9ld (%6.3f%%)| %9ld  (%6.3f%%) |\n",
 	   N_in_clusters, total_N_unaligned, pct_N_unaligned, total_N_bad, pct_N_bad, len_in_clusters, total_len_unaligned, pct_len_unaligned, total_len_bad, pct_len_bad );
   out << _LINE;
   out << horiz_line;
