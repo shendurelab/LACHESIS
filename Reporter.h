@@ -163,7 +163,8 @@ class Reporter
 // Other reporting functions that are outside the Reporter class.
 
 // MakeWholeAssemblyHeatmap: Make a heatmap of the entire result.
-void MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, const int MIN_LEN );
+// PLOT_N and USE_RES control how many contigs are considered for plotting and how the link densities are normalized.
+void MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N = 1000, const bool USE_RES = true );
 
 
 

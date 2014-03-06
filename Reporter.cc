@@ -14,7 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip> // setprecision
-#include <algorithm> // max_element
+#include <algorithm> // sort, max_element
 #include <numeric> // accumulate
 
 // Local includes
@@ -1163,9 +1163,10 @@ Reporter::contig_length_if( const boost::dynamic_bitset<> & bits ) const
 
 
 
-// Make a heatmap of the entire result.  That is, take all (sufficiently long) contigs that have been both clustered and ordered by Lachesis, and plot an
-// NxN heatmap of the Hi-C link densities between these contigs.
-// The contig length cutoff is set by MIN_LEN, whichi is either a minimum length in bases (if !USE_RES) or a minimum number of restriction sites (if USE_RES).
+// Make a heatmap of the entire result.  That is, take contigs that have been both clustered and ordered by Lachesis, and plot an NxN heatmap of the Hi-C link
+// densities between these contigs.
+// Only the PLOT_N longest contigs will be considered for plotting (less, if total number of contigs < PLOT_N) and these will only be plotted if they are
+// clustered and ordered.  If USE_RES = true, length (and Hi-C link normalization) is measured by RE sites; otherwise it's measured by contig length.
 // This is a useful reference-free visual evaluation.
 // Method:
 // 1. Load the ClusterVec and the ContigOrderings to determine how these contigs have been clustered and ordered by Lachesis.
@@ -1174,7 +1175,7 @@ Reporter::contig_length_if( const boost::dynamic_bitset<> & bits ) const
 // 4. Make a heatmap of the GLM's data, with the contigs reordered as in Step 2.
 // Uses the R script heatmap.MWAH.R.  Makes an output file heatmap.txt and an auxiliary output file heatmap.chrom_breaks.txt.
 void
-MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, const int MIN_LEN )
+MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const bool USE_RES )
 {
   cout << Time() << ": MakeWholeAssemblyHeatmap!" << endl;
   
@@ -1191,6 +1192,19 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, cons
   int N_contigs = contig_lengths.size();
   vector<int> contig_N_REs = ParseTabDelimFile<int>( run_params.DraftContigRESitesFilename(), 1 );
   assert( N_contigs == (int) contig_lengths.size() );
+  
+  // Find which contigs are the PLOT_N longest.  Note that even these contigs will not be plotted if they are not also clustered and ordered.
+  vector<int> contig_lengths_sorted = USE_RES ? contig_N_REs : contig_lengths;
+  sort( contig_lengths_sorted.begin(), contig_lengths_sorted.end(), greater<int>() );
+  int length_cutoff = contig_lengths_sorted[ PLOT_N < N_contigs ? PLOT_N : N_contigs - 1 ];
+  
+  vector<bool> is_long( N_contigs, false );
+  for ( int i = 0; i < N_contigs; i++ ) {
+    int len = USE_RES ? contig_N_REs[i] : contig_lengths[i];
+    if ( len >= length_cutoff )
+      is_long[i] = true;
+  }
+    
   
   
   // 2. Convert these data structures into a single vector that maps the original order of contigs onto an order that describes how Lachesis has ordered them.
@@ -1222,8 +1236,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, cons
       int local_ID = orders[i].contig_ID(j);
       int global_ID = cluster[ local_ID ];
       
-      int len = USE_RES ? contig_N_REs[global_ID] : contig_lengths[global_ID];
-      if ( len < MIN_LEN ) continue;
+      if ( !is_long[global_ID] ) continue;
       
       total_len += contig_lengths[global_ID];
       
@@ -1252,7 +1265,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const bool USE_RES, cons
   out2.close();
   
   int N_contigs_used = new_ID;
-  cout << Time() << ": Total number of contigs that are clustered and ordered, and will therefore go into the histogram = " << N_contigs_used << " (length = " << total_len << ")" << endl;
+  cout << Time() << ": Total number of contigs that are sufficiently long (among the top " << PLOT_N << ") and are clustered and ordered, and will therefore go into the histogram = " << N_contigs_used << " (length = " << total_len << ")" << endl;
   
   
   // 3. Load a GenomeLinkMatrix to get the quantity of Hi-C links between all pairs of contigs.
