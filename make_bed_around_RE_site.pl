@@ -76,7 +76,7 @@ while (<IN>) {
     chomp $line;
     
     # If this is a header line, we're done with this contig/chromosome (unless we just started), and start a new contig/chromosome.
-    if ( $line =~ /^\>([\w\|\.]+)/ ) {
+    if ( $line =~ /^\>(\S+)/ ) {
 	
 	# The hash %motif_positions contains all positions on the (now complete) old contig at which this motif appears.
 	# Convert this list of positions to a set of BED lines, as necessary.
