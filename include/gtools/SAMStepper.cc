@@ -228,7 +228,7 @@ open_SAM( const string & file )
 
 
 
-// NTargetsInSAM(): Return the number of target sequences in this SAM file.  Uses open_SAM.
+// NTargetsInSAM(): Return the number of target sequences in this SAM file.
 int
 NTargetsInSAM( const string & SAM_file )
 {
@@ -244,7 +244,24 @@ NTargetsInSAM( const string & SAM_file )
 
 
 
-// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.  Uses open_SAM.
+// TargetNames(): Return a vector of the names of the target sequences in this SAM file.
+vector<string>
+TargetNames( const string & SAM_file )
+{
+  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  
+  vector<string> target_names;
+  
+  samfile_t * sam = open_SAM( SAM_file );
+  for ( int i = 0; i < sam->header->n_targets; i++ )
+    target_names.push_back( sam->header->target_name[i] );
+  samclose(sam);
+  
+  return target_names;
+}
+
+
+// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.
 vector<int>
 TargetLengths( const string & SAM_file )
 {
@@ -262,18 +279,23 @@ TargetLengths( const string & SAM_file )
 
 
 
-// TargetNames(): Return a vector of the names of the target sequences in this SAM file.  Uses open_SAM.
-vector<string>
-TargetNames( const string & SAM_file )
+// TargetNHits(): Return a vector of the number of query sequences aligning to each target in this SAM file (note: this counts ALL reads, without filtering.)
+// This allows sequence coverage to be calculated: coverage[i] = TargetNHits[i] / TargetLengths[i] * read length.  This function is time-consuming.
+vector<int>
+TargetNHits( const string & SAM_file )
 {
   assert( boost::filesystem::is_regular_file( SAM_file ) );
   
-  vector<string> target_names;
+  // Set up a SAMStepper object to read in the aligned reads.
+  SAMStepper stepper( SAM_file );
+  stepper.FilterAligned();
   
-  samfile_t * sam = open_SAM( SAM_file );
-  for ( int i = 0; i < sam->header->n_targets; i++ )
-    target_names.push_back( sam->header->target_name[i] );
-  samclose(sam);
+  vector<int> target_N_hits( stepper.N_targets(), 0 );
   
-  return target_names;
+  // For each read that aligned, look at what target sequence it aligned to, and tally the number of hits for that target.
+  for ( bam1_t * align = stepper.next_read(); align != NULL; align = stepper.next_read() )
+    target_N_hits[ align->core.tid ]++;
+  
+  return target_N_hits;
 }
+

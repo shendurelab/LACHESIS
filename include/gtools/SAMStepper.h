@@ -42,6 +42,7 @@
 
 #include <vector>
 #include <string>
+#include <assert.h>
 using namespace std;
 
 // To compile using this, you must include -I<samtools dir>
@@ -78,6 +79,8 @@ class SAMStepper
   pair< bam1_t *, bam1_t * > next_pair();
   
   /* QUERY FUNCTIONS */
+  
+  int N_targets() const { assert( _SAM != NULL ); return _SAM->header->n_targets; }
   
   // as_SAM_line: A wrapper to bam_format1, which formats a bam1_t object as a string in the format of a line in a SAM file (with no newline).
   char * as_SAM_line( const bam1_t * align ) const { return bam_format1( _SAM->header, align ); }
@@ -126,14 +129,18 @@ class SAMStepper
 // To avoid memory leaks, be sure to eventually call samclose() on all pointers returned from open_SAM().
 samfile_t * open_SAM( const string & SAM_file );
 
-// The following 3 functions all use open_SAM.
+// The following 4 functions all use open_SAM.
 
 // NTargetsInSAM(): Return the number of target sequences in this SAM file.
 int NTargetsInSAM( const string & SAM_file );
-// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.
-vector<int>  TargetLengths( const string & SAM_file ); 
 // TargetNames(): Return a vector of the names of the target sequences in this SAM file.
-vector<string> TargetNames( const string & SAM_file ); 
+vector<string> TargetNames( const string & SAM_file );
+// TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.
+vector<int>  TargetLengths( const string & SAM_file );
+// TargetNHits(): Return a vector of the number of query sequences aligning to each target in this SAM file (note: this counts ALL reads, without filtering.)
+// This allows sequence coverage to be calculated: coverage[i] = TargetNHits[i] / TargetLengths[i] * read length.  This function is time-consuming.
+vector<int>    TargetNHits( const string & SAM_file );
+
 
 
 #endif
