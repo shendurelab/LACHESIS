@@ -108,7 +108,14 @@ GetFastaNames( const string & fasta_file )
     assert( boost::filesystem::is_regular_file( fasta_file ) );
     MakeFastaNamesFile( fasta_file );
   }
-  return ParseTabDelimFile<string>( names_file, 0 );
+  vector<string> names = ParseTabDelimFile<string>( names_file, 0 );
+  
+  // Sanity check.
+  for ( size_t i = 0; i < names.size(); i++ )
+    if ( names[i][0] == '>' )
+      cout << "WARNING: In fasta names file " << names_file << ", name `" << names[i] << "' starts with a `>' symbol; this is weird and possibly obsolete." << endl;
+  
+  return names;
 }
 
 
@@ -378,6 +385,10 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
     N_hits--;
     
     assert( tokens.size() >= 10 );
+    if ( target_names_to_IDs.find( tokens[1] ) == target_names_to_IDs.end() ) {
+      cout << "ERROR: Target (chromosome) name mismatch.  Name `" << tokens[1] << "' in BLAST file " << BLAST_files[--file_ID] << " not found in assembly file." << endl;
+      exit(1);
+    }
     
     // Find where this query aligns.
     int target_ID = target_names_to_IDs[ tokens[1] ];
