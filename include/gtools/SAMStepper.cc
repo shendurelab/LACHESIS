@@ -280,7 +280,7 @@ TargetLengths( const string & SAM_file )
 
 
 // TargetNHits(): Return a vector of the number of query sequences aligning to each target in this SAM file (note: this counts ALL reads, without filtering.)
-// This allows sequence coverage to be calculated: coverage[i] = TargetNHits[i] / TargetLengths[i] * read length.  This function is time-consuming.
+// This function is time-consuming.
 vector<int>
 TargetNHits( const string & SAM_file )
 {
@@ -299,3 +299,24 @@ TargetNHits( const string & SAM_file )
   return target_N_hits;
 }
 
+
+
+// TargetCoverages(): Return a vector of the coverage of target sequences by query sequence hits.  Calls TargetLengths() and TargetNHits().
+// Note that the "coverage" here is defined as the NUMBER of query sequences aligning to each target, per target bp.  Read lengths are NOT taken into account.
+vector<double>
+TargetCoverages( const string & SAM_file )
+{
+  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  
+  vector<int> target_N_hits = TargetNHits( SAM_file );
+  vector<int> target_lens = TargetLengths( SAM_file );
+  
+  assert( target_N_hits.size() == target_lens.size() );
+  
+  // Calcualate each contig's coverage.
+  vector<double> target_covs( target_N_hits.size(), 0 );
+  for ( size_t i = 0; i < target_N_hits.size(); i++ )
+    target_covs[i] = double( target_N_hits[i] ) / target_lens[i];
+  
+  return target_covs;
+}

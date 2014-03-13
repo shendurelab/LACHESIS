@@ -129,18 +129,20 @@ class SAMStepper
 // To avoid memory leaks, be sure to eventually call samclose() on all pointers returned from open_SAM().
 samfile_t * open_SAM( const string & SAM_file );
 
-// The following 4 functions all use open_SAM.
+// The following 5 functions all use open_SAM.
 
 // NTargetsInSAM(): Return the number of target sequences in this SAM file.
 int NTargetsInSAM( const string & SAM_file );
 // TargetNames(): Return a vector of the names of the target sequences in this SAM file.
-vector<string> TargetNames( const string & SAM_file );
+vector<string> TargetNames    ( const string & SAM_file );
 // TargetLengths(): Return a vector of the lengths of the target sequences in this SAM file.
-vector<int>  TargetLengths( const string & SAM_file );
+vector<int>  TargetLengths    ( const string & SAM_file );
 // TargetNHits(): Return a vector of the number of query sequences aligning to each target in this SAM file (note: this counts ALL reads, without filtering.)
-// This allows sequence coverage to be calculated: coverage[i] = TargetNHits[i] / TargetLengths[i] * read length.  This function is time-consuming.
-vector<int>    TargetNHits( const string & SAM_file );
-
+// This function is time-consuming.
+vector<int>    TargetNHits    ( const string & SAM_file );
+// TargetCoverages(): Return a vector of the coverage of target sequences by query sequence hits.  Calls TargetLengths() and TargetNHits().
+// Note that the "coverage" here is defined as the NUMBER of query sequences aligning to each target, per target bp.  Read lengths are NOT taken into account.
+vector<double> TargetCoverages( const string & SAM_file );
 
 
 #endif
