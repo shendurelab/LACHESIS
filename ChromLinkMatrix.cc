@@ -268,6 +268,7 @@ ChromLinkMatrix::~ChromLinkMatrix()
 
 
 
+static const unsigned LINE_LEN = 10000000;
 
 
 
@@ -287,7 +288,6 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
   _SAM_files.clear();
   _matrix_init = false;
   
-  static const unsigned LINE_LEN = 10000000;
   char line[LINE_LEN];
   vector<string> tokens;
   
@@ -441,10 +441,17 @@ ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
       // If writing a CLM output file, write the entire vector, and write for all four contig orientations.
       else {
 	seen_data = true;
-	out << X << '\t' << Y << '\t' << Z.size();
-	for ( size_t i = 0; i < Z.size(); i++ )
-	  out << '\t' << Z[i];
-	out << endl;
+	
+	string s;
+	int Z_size = Z.size();
+	for ( size_t i = 0; i < Z.size(); i++ ) {
+	  s += '\t';
+	  s += boost::lexical_cast<string>( Z[i] );
+	  
+	  // Test the length of the string to make sure it's not so long that it will break the input.
+	  if ( s.size() > LINE_LEN - 50 ) { Z_size = i+1; break; }
+	}
+	out << X << '\t' << Y << '\t' << Z_size << s << endl;
       }
     }
   
