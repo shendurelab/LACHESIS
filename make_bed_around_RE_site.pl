@@ -3,12 +3,7 @@ use strict;
 
 # make_bed_around_restriction_site.pl: Make a BED file representing the regions around all occurrences of a restriction site.
 #
-# Input:
-# 1. A fasta file representing a genome (reference or draft assembly.)
-# 2. A restriction site sequence (e.g., "AAGCTT" for HindIII).
-# 3. A range, representing how much space around the sequence to include.
-# If you call make_bed_around_restriction_site.pl with exactly three arguments, it will use these arguments for 1., 2., and 3. in that order.
-# Otherwise, the hard-wired values below are used.
+# For syntax, run with no arguments.
 #
 # The output BED file is designed for use with bedtools intersect, as follows:
 # bedtools intersect -abam [SRR.bam] -b [$BED_out] > [SRR.REduced.bam]
@@ -23,41 +18,33 @@ use strict;
 
 
 
-# Input:
-# 1. A fasta file representing a genome (reference or draft assembly.)
-my $FASTA_in = "$ENV{'HOME'}/vol10/hg19/all/Homo_sapiens_assembly19.fasta";
-$FASTA_in = "human/to_ref_bins/assembly.fasta";
-#$FASTA_in = "human/postfosmid/assembly.fasta";
-#$FASTA_in = "fly/ref/fly.fasta"; # fly reference
-#$FASTA_in = "fly/assembly/assembly.fasta"; # fly draft assembly
-$FASTA_in = "rhododendron/assembly/assembly.fasta"; # rhododendron draft assembly
-
-# 2. A restriction site sequence
-my $RE_seq = "AAGCTT"; # human, mouse, rhododendron: HindIII
-#$RE_seq = "GATC"; # fly: DpnII
-
-# 3. A range, representing how much space around the sequence to include.
-# Recommendation is 500, based on Fig. 1b of this paper: http://www.nature.com/ng/journal/v43/n11/full/ng.947.html
-my $range = 500;
-
-
-# If you call make_bed_around_restriction_site.pl with exactly three arguments, it will use these arguments for 1., 2., and 3. in that order.
-if ( scalar @ARGV == 3 ) {
-    print "$0: Setting \$FASTA_in to $ARGV[0], \$RE_seq to $ARGV[1], \$range to $ARGV[2]\n";
-    print "$0: Setting $FASTA_in to $ARGV[0], $RE_seq to $ARGV[1], $range to $ARGV[2]\n";
-    ( $FASTA_in, $RE_seq, $range ) = @ARGV;
+if ( scalar @ARGV != 3 ) {
+    
+    # Report syntax.
+    print "$0: Make a BED file representing the regions around all occurrences of a restriction site.\n\n";
+    print "Input:\n";
+    print "1. A fasta file representing a genome (reference or draft assembly.)\n";
+    print "2. A restriction site sequence (e.g., HindIII = AAGCTT, NcoI = CCATGG, Dpn1 = GATC).\n";
+    print "3. A range, representing how much space around the sequence to include.  Recommend 500 basedon Yaffe & Tanay, Nat. Genetics 2011.\n";
+    print "\n";
+    exit;
 }
+
+
+
+# Get command-line arguments.
+my ( $FASTA_in, $motif_seq, $range ) = @ARGV;
 
 my $verbose = 0;
 
 
 
 # Derive an output filename.
-my $BED_out = "$FASTA_in.near_$RE_seq.$range.bed";
+my $BED_out = "$FASTA_in.near_$motif_seq.$range.bed";
 
 
 # Determine how many letters needed to be added to each line in order to find instances of the sequence that bridge lines in the fasta.
-my $N_prev_chars = length($RE_seq) - 1;
+my $N_prev_chars = length($motif_seq) - 1;
 
 
 my $contig_name = '';
@@ -86,13 +73,21 @@ while (<IN>) {
 		$prev_start = $pos;
 		$prev_end   = $pos;
 	    }
-	    if ( $prev_end + $range < $pos ) {
-		$prev_start = $range if $prev_start < $range;
+	    if ( $prev_end + 2*$range < $pos ) {
+		$prev_start =         $range if $prev_start < $range;
+		$prev_end = $offset - $range if $prev_end > $offset - $range; # prevent overflow past the end of the contig/chromosome
 		print BED "$contig_name\t", $prev_start - $range, "\t", $prev_end + $range, "\n";
 		$prev_start = $pos;
 	    }
 	    #print "pos = $pos\n";
 	    $prev_end = $pos;
+	}
+	
+	# Print the final BED line for this contig/chromosome.
+	if (@motif_positions) {
+	    $prev_start =         $range if $prev_start < $range;
+	    $prev_end = $offset - $range if $prev_end > $offset - $range; # prevent overflow past the end of the contig/chromosome
+	    print BED "$contig_name\t", $prev_start - $range, "\t", $prev_end + $range, "\n";
 	}
 	
 	# Get the new contig's name.
@@ -114,7 +109,7 @@ while (<IN>) {
 	# Look for instances of this motif in this line of the fasta (including the overlap characters from the previous line, tacked on at the beginning.)
 	my $motif_loc = -1;
 	while (1) {
-	    $motif_loc = index "$prev_chars$line", $RE_seq, $motif_loc + 1;
+	    $motif_loc = index "$prev_chars$line", $motif_seq, $motif_loc + 1;
 	    last if ( $motif_loc == -1 ); # no more instances found
 	    
 	    # Found a motif location!  Add this index to the list of contig positions at which the motif has been seen.
