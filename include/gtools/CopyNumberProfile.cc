@@ -2,6 +2,7 @@
 #include "CopyNumberProfile.h"
 
 #include <assert.h> 
+#include <math.h>
 #include <string>
 #include <vector>
 #include <fstream>
