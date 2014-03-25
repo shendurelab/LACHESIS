@@ -190,7 +190,8 @@ LachesisOrdering( const RunParams & run_params )
     ContigOrdering order = clm.MakeFullOrder ( run_params._order_min_N_REs_in_shreds );
     trunk.WriteFile( run_params._out_dir + "/cached_data/group"  + i_str + ".trunk.ordering", clusters[i], run_params.LoadDraftContigNames() );
     order.WriteFile( run_params._out_dir + "/main_results/group" + i_str + ".ordering",       clusters[i], run_params.LoadDraftContigNames() );
-    //if ( run_params._use_ref ) order.DrawDotplotVsTruth( clusters[i], *( run_params.LoadTrueMapping() ), "clm." + i_str + ".dotplot.txt" );
+    if ( run_params._use_ref && run_params._order_draw_dotplots )
+      order.DrawDotplotVsTruth( clusters[i], *( run_params.LoadTrueMapping() ), "clm." + i_str + ".dotplot.txt" );
   }
   
   
@@ -253,7 +254,7 @@ LachesisReporting( const RunParams & run_params )
   reporter.ReportChart();
   
   // Optional: Make a heatmap of the whole assembly.  This is a usual reference-free visual evaluation.
-  if ( run_params._report_draw_heatmap ) MakeWholeAssemblyHeatmap( run_params, 50 );
+  if ( run_params._report_draw_heatmap ) MakeWholeAssemblyHeatmap( run_params );
 }
 
 
