@@ -422,7 +422,8 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
     
     assert( tokens.size() >= 10 );
     if ( target_names_to_IDs.find( tokens[1] ) == target_names_to_IDs.end() ) {
-      cout << "ERROR: Target (chromosome) name mismatch.  Name `" << tokens[1] << "' in BLAST file " << BLAST_files[--file_ID] << " not found in assembly file." << endl;
+      cout << "ERROR: Target (chromosome) name mismatch.  Name `" << tokens[1] << "' in BLAST file " << BLAST_files[--file_ID] << " not found in reference file." << endl;
+      system( ( "rm " + outfile ).c_str() );
       exit(1);
     }
     
