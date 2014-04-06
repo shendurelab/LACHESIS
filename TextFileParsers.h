@@ -5,6 +5,7 @@
  * This module contains the following functions to parse input text files:
  *
  * TokenizeFile
+ * TokenizeCSV
  * ParseTabDelimFile
  * GetFastaNames
  *
@@ -46,12 +47,15 @@ using namespace std;
 
 
 // TokenizeFile: Split up a file into lines, and split each line into tokens using whitespace (spaces or tabs) as delimiters.
-// Return all tokens as strings, in the output variable tokens.
+// Return all tokens as strings, in the output variable tokens.  There are no guarantees about the number of lines or the number of tokens per line.
 // If compress = true, use the token_compress_on flag to compress multiple consecutive whitespace delimiters into one.
 void
 TokenizeFile( const string & infile, vector< vector<string> > & tokens, const bool & compress = false );
 
 
+// TokenizeCSV: Like TokenizeFile, but recognize as delimiters the regex /\,\s+/ (i.e., a comma followed by any amount of whitespace).
+void
+TokenizeCSV( const string & infile, vector< vector<string> > & tokens );
 
 
 // ParseTabDelimFile: Parse a tab-delimited file.  Return a vector of the <column_ID>'th token (zero-indexed) on each line, recast as objects of class T.

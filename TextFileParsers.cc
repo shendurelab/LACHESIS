@@ -23,9 +23,18 @@ char LINE[LINE_LEN];
 
 
 
+// Helper function and sanity check.  Make sure the variable LINE doesn't overrun the available LINE_LEN.
+void check_line_len() {
+  if ( strlen(LINE)+1 >= LINE_LEN ) {
+    cerr << "Line too long: " << LINE << endl;
+    assert( strlen(LINE)+1 < LINE_LEN );
+  }
+}
+
+
 
 // TokenizeFile: Split up a file into lines, and split each line into tokens using whitespace (' ' or '\t') as delimiters.
-// Return all tokens as strings, in the output variable tokens.
+// Return all tokens as strings, in the output variable tokens.  There are no guarantees about the number of lines or the number of tokens per line.
 // Aside from the line delimiter ('\n') and the token delimiters (' ', '\t') this function makes no assumptions whatsoever about the file contents.
 // For large files, this function is somewhat slower than parsing files locally because it requires the creation of a large data structure.
 // If compress = true, use the token_compress_on flag to compress multiple consecutive whitespace delimiters into one.
@@ -41,10 +50,7 @@ TokenizeFile( const string & infile, vector< vector<string> > & tokens, const bo
   ifstream in( infile.c_str(), ios::in );
   while ( 1 ) {
     in.getline( LINE, LINE_LEN );
-    if ( strlen(LINE)+1 >= LINE_LEN ) {
-      cerr << "Line too long: " << LINE << endl;
-      assert( strlen(LINE)+1 < LINE_LEN );
-    }
+    check_line_len();
     if ( in.fail() ) break;
     
     // Convert each line into a set of tokens by splitting on whitespace.
@@ -52,6 +58,36 @@ TokenizeFile( const string & infile, vector< vector<string> > & tokens, const bo
     tokens.push_back( tokens_in_line );
   }
   
+}
+
+
+
+// TokenizeCSV: Like TokenizeFile, but recognize as delimiters the regex /\,\s+/ (i.e., a comma followed by any amount of whitespace).
+// This is computationally inefficient as written.
+void
+TokenizeCSV( const string & infile, vector< vector<string> > & tokens )
+{
+  assert( boost::filesystem::is_regular_file( infile ) );
+  tokens.clear();
+  
+  vector<string> tokens_in_line;
+  
+  // Read the file line-by-line.
+  ifstream in( infile.c_str(), ios::in );
+  while ( 1 ) {
+    in.getline( LINE, LINE_LEN );
+    check_line_len();
+    if ( in.fail() ) break;
+    
+    // Convert each line into a set of comma-delimited tokens by splitting on commas, then removing whitespace from the start of all tokens after the first.
+    boost::split( tokens_in_line, LINE, boost::is_any_of(",") );
+    for ( size_t i = 0; i < tokens_in_line.size(); i++ ) {
+      if ( tokens_in_line[i].empty() ) continue;
+      char & c = tokens_in_line[i][0];
+      if ( c == ' ' || c == '\t' ) tokens_in_line[i] = tokens_in_line[i].substr(1);
+    }
+    tokens.push_back( tokens_in_line );
+  }
 }
 
 
@@ -73,7 +109,7 @@ ParseTabDelimFile( const string & infile, const size_t column_ID )
   ifstream in( infile.c_str(), ios::in );
   while ( 1 ) {
     in.getline( LINE, LINE_LEN );
-    assert( strlen(LINE)+1 < LINE_LEN );
+    check_line_len();
     if ( in.fail() ) break;
     
     // Get the tokens in this line.
@@ -344,7 +380,7 @@ ParseBlastAlignmentFiles( const vector<string> & BLAST_files, const vector<int> 
     
     // Read the BLAST output file line-by-line.  When we're done with the file, close it and prepare to open the next one.
     in.getline( line, LINE_LEN );
-    assert( strlen(line)+1 < LINE_LEN );
+    check_line_len();
     if ( in.fail() ) { in.close(); continue; }
     
     
