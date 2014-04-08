@@ -72,7 +72,7 @@ So you want to use LACHESIS to scaffold your _de novo_ assembly.  You must start
 
 If you are going to use BWA to align your Hi-C reads, then the reads must be in a set of fastq or BAM files, and there should be two files for each library: one for the first read in each pair, and one for the second.  If you are using another aligner, you may have your Hi-C reads in another format as required by that aligner.
 
-Obviously you can't supply a reference assembly if no such assembly exists yet.  But if there is one, the reference assembly can be input to LACHESIS in order to provide some very useful reference-based evaluation of the result.  Even a partial sequence assembly or an assembly of a related species can be helpful.
+Obviously you can't supply a reference assembly if no such assembly exists yet.  But if there is one, the reference assembly can be input to LACHESIS in order to provide some very useful reference-based evaluation of the result.  Even a partial sequence assembly or an assembly of a related species can be helpful.  However, note that Lachesis is not an ideal piece of software for performing assisted assembly - that is, a semi-_de novo_ assembly process that relies on the assumption of synteny with an existing reference genome.  For more information on assisted assembly, see [Gnerre et al, 2009](http://genomebiology.com/content/10/8/R88).
 
 #### 2. Creating an INI file
 
@@ -156,6 +156,6 @@ This software is supplied 'as is' without any warranty or guarantee of support. 
 
 Thanks to Jay Shendure for leadership, management, and many ideas.
 
-Thanks to Aaron McKenna for making LACHESIS available over GitHub.
-
 Thanks to Aaron McKenna, Qi Zhou, and Christopher Beitel for patiently helping me test LACHESIS for bugs and compatibility.
+
+Thanks to Aaron McKenna for helping make LACHESIS available over GitHub.
