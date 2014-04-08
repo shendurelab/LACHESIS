@@ -12,6 +12,7 @@ Publication in *Nature Biotechnology* (please cite) is here: [http://dx.doi.org/
 2. Downloading the LACHESIS package
 3. Compiling the LACHESIS package
 4. Testing out LACHESIS on a sample dataset
+
 ##### RUNNING LACHESIS
 1. Input requirements
 2. Creating an INI file
@@ -20,10 +21,13 @@ Publication in *Nature Biotechnology* (please cite) is here: [http://dx.doi.org/
 5. Aligning the draft assembly to the reference assembly, if there is one
 6. Running LACHESIS
 7. Interpreting the LACHESIS results
+
 ##### TROUBLESHOOTING
 1. LACHESIS is crashing!
 2. LACHESIS is producing a weird result!
+
 ##### COPYRIGHT AND DISCLAIMER
+
 ##### ACKNOWLEDGMENTS
 
 ## Installing LACHESIS
