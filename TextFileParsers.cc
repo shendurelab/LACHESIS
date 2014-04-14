@@ -83,8 +83,7 @@ TokenizeCSV( const string & infile, vector< vector<string> > & tokens )
     boost::split( tokens_in_line, LINE, boost::is_any_of(",") );
     for ( size_t i = 0; i < tokens_in_line.size(); i++ ) {
       if ( tokens_in_line[i].empty() ) continue;
-      char & c = tokens_in_line[i][0];
-      if ( c == ' ' || c == '\t' ) tokens_in_line[i] = tokens_in_line[i].substr(1);
+      while ( tokens_in_line[i][0] == ' ' || tokens_in_line[i][0] == '\t' ) tokens_in_line[i] = tokens_in_line[i].substr(1);
     }
     tokens.push_back( tokens_in_line );
   }
