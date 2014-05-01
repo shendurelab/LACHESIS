@@ -155,6 +155,42 @@ GetFastaNames( const string & fasta_file )
 
 
 
+
+// GetFastaSizes: Input a FASTA filename and return the set of contig lengths in that FASTA.
+// This function uses TokenizeFile() on <fasta-file>.FastaSize, and if necessary it runs the command FastaSize to create the file <fasta-file>.FastaSize.
+vector<int>
+GetFastaSizes( const string & fasta_file )
+{
+  string FastaSize_file = fasta_file  + ".FastaSize";
+  
+  // Make the FastaSize file, if necessary.
+  if ( !boost::filesystem::is_regular_file( FastaSize_file ) ) {
+    string cmd = "FastaSize " + fasta_file + " > " + FastaSize_file;
+    system( cmd.c_str() );
+    assert( boost::filesystem::is_regular_file( FastaSize_file ) );
+  }
+  
+  vector<int> contig_sizes;
+  
+  vector< vector<string> > FastaSize_tokens;
+  TokenizeFile( fasta_file + ".FastaSize", FastaSize_tokens, true );
+  int N_contigs = FastaSize_tokens.size() - 1; // the FastaSize file has one line for each contig, plus a summary line at the end
+  
+  // Get the contig lengths from the fasta.FastaSize file.  For each line in the FastaSize file (before the last), there should be 3 tokens: a blank one
+  // (whitespace), a number indicating length, and a chromosome name.
+  for ( int i = 0; i < N_contigs; i++ ) {
+    vector<string> & t = FastaSize_tokens[i];
+    assert( t.size() == 3 );
+    assert( t[0] == "" );
+    contig_sizes.push_back( boost::lexical_cast<int>( t[1] ) );
+  }
+  
+  return contig_sizes;
+}
+
+
+
+
 // MakeFastaNamesFile: Input a FASTA filename.  Create a file at <fasta-file>.names, containing all of the contig names in the FASTA, without the leading '>'.
 // This is a wrapper for the Unix command: grep "\>" fasta-file | cut -c2- > fasta-file.names
 // After running this, the contig names can be read in via: ParseTabDelimFile<string>( fasta-file.names, 0 )

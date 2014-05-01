@@ -8,6 +8,7 @@
  * TokenizeCSV
  * ParseTabDelimFile
  * GetFastaNames
+ * GetFastaSizes
  *
  * one function to create an output text file:
  *
@@ -68,6 +69,12 @@ ParseTabDelimFile( const string & infile, const size_t column_ID );
 // This function uses ParseTabDelimFile() on <fasta-file>.names, and if necessary it calls MakeFastaNamesFile() first to create <fasta-file>.names.
 vector<string>
 GetFastaNames( const string & fasta_file );
+
+
+// GetFastaSizes: Input a FASTA filename and return the set of contig lengths in that FASTA.
+// This function uses TokenizeFile() on <fasta-file>.FastaSize, and if necessary it runs the command FastaSize to create the file <fasta-file>.FastaSize.
+vector<int>
+GetFastaSizes( const string & fasta_file );
 
 
 // MakeFastaNamesFile: Input a FASTA filename.  Create a file at <fasta-file>.names, containing all of the contig names in the FASTA, without the leading '>'.
