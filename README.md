@@ -41,6 +41,8 @@ To setup and run LACHESIS, you will need a computer running in a UNIX environmen
 - The boost C++ libraries ([http://www.boost.org/](http://www.boost.org/))
 - The SAMtools toolkit for handling SAM/BAM files ([http://samtools.sourceforge.net/](http://samtools.sourceforge.net/))
 
+Note that LACHESIS requires a minimum stack size of 10MB (check with ulimit -s). If your system uses 8MB (e.g. Fedora or Ubuntu), you will need to increase the stack size (ulimit -s 10240). 
+
 You may also need the following software:
 
 - The short-read aligner BWA ([http://bio-bwa.sourceforge.net/](http://bio-bwa.sourceforge.net/)) or another such aligner
