@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 /**************************************************************************************************************************************************************
  *
  * GenomeLinkMatrix.h
@@ -137,10 +153,11 @@ class GenomeLinkMatrix
   /* MAIN CLUSTERING ALGORITHMS 
      Contigs that have been marked as "skipped" by one of the Skip...() functions are not used in clustering.  However, if set_skipped_contigs = true, then
      after clustering, skipped contigs are assigned to clusters by how well they match the non-skipped contigs (see SetClusters()).
+     Contigs that have been marked as centromeric (CEN_contigs) will not be merged into the same cluster.
   */
   
   // Agglomerative Hierarchical clustering
-  void AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping );
+  void AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CEN_contigs, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping );
   
   // Improvements to clustering algorithms.
   void ExcludeLowQualityContigs( const TrueMapping & true_mapping ); // remove from the clusters all contigs whose alignments to reference are sketchy

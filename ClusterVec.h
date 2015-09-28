@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 /**************************************************************************************************************************************************************
  *
  * ClusterVec.h
@@ -40,7 +56,7 @@ class ClusterVec : public vector< set<int> >
   ClusterVec( const int N_contigs ) { _N_contigs = N_contigs; }
   ClusterVec( const int N_clusters, const int N_contigs ) { resize( N_clusters, set<int>() ); _N_contigs = N_contigs; }
   ClusterVec( const string & file, const vector<string> * contig_names = NULL ) { ReadFile( file, contig_names ); }
-  ClusterVec( const vector<int> & cluster_IDs ); // input vector: contig to cluster ID, or -1 for contigs not in a cluster
+  ClusterVec( const vector<int> & cluster_IDs, const bool remove_singletons = true ); // input vector: contig to cluster ID, or -1 for contigs not in a cluster
   
   vector<int> cluster_IDs() const; // make an output vector like the input vector: contig to cluster ID, or -1 for contigs not in a cluster
   

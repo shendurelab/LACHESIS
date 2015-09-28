@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see ClusterVec.h
 #include "ClusterVec.h"
 #include "TextFileParsers.h" // TokenizeFile
@@ -22,7 +38,7 @@
 
 // Constructor: Create a ClusterVec from a vector that indicates, for a set of contigs, which cluster each contig belongs to ( ID<0 means no cluster.)
 // The set of cluster IDs in the input vector may not be continuous; the clusters are ordered by the order in which their cluster_IDs first appear.
-ClusterVec::ClusterVec( const vector<int> & cluster_IDs )
+ClusterVec::ClusterVec( const vector<int> & cluster_IDs, const bool remove_singletons )
 {
   assert( !cluster_IDs.empty() );
   clear();
@@ -50,8 +66,9 @@ ClusterVec::ClusterVec( const vector<int> & cluster_IDs )
   }
   
   
-  // Remove singleton clusters, which contain no information whatsoever.
-  RemoveSingletons();
+  // Remove singleton clusters, which contain no information whatsoever (except in the case of chromosome-spanning contigs with a CEN,
+  // which occurs in some yeast assemblies.)
+  if ( remove_singletons ) RemoveSingletons();
   
   // Sort the clusters to make them nicer looking for dotplots.
   SortByMedian();

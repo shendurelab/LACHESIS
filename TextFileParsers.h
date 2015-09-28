@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 /**************************************************************************************************************************************************************
  *
  * TextFileParsers
@@ -47,11 +63,11 @@ using namespace std;
 
 
 
-// TokenizeFile: Split up a file into lines, and split each line into tokens using whitespace (spaces or tabs) as delimiters.
+// TokenizeFile: Split up a file into lines, and split each line into tokens using whitespace (spaces or tabs, or whatever goes in 'delimiters') as delimiters.
 // Return all tokens as strings, in the output variable tokens.  There are no guarantees about the number of lines or the number of tokens per line.
 // If compress = true, use the token_compress_on flag to compress multiple consecutive whitespace delimiters into one.
 void
-TokenizeFile( const string & infile, vector< vector<string> > & tokens, const bool & compress = false );
+TokenizeFile( const string & infile, vector< vector<string> > & tokens, const bool & compress = false, const string & delimiters = " \t" );
 
 
 // TokenizeCSV: Like TokenizeFile, but recognize as delimiters the regex /\,\s+/ (i.e., a comma followed by any amount of whitespace).

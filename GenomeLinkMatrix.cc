@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see GenomeLinkMatrix.h
 #include "GenomeLinkMatrix.h"
 #include "TrueMapping.h"
@@ -33,7 +49,7 @@
 // Options for reporting validation & dotplots.
 const bool exclude_noninformative_contigs_from_dotplot = true;
 //const bool exclude_low_Q_scores = false; // don't use contigs with insufficiently high quality scores of their mapping to reference
-const bool cluster_noninformative_into_singletons = false; // allow singleton clusters to become non-singletons by adding noninformative contigs to them
+const bool cluster_noninformative_into_singletons = true; // allow singleton clusters to become non-singletons by adding noninformative contigs to them (TEMP: do this for yeasts only)
 
 
 // Print a set in the following format: "[1-3,5,7]".
@@ -262,8 +278,13 @@ GenomeLinkMatrix::ReadFile( const string & GLM_file )
       else if ( tokens[1] == "bin_size" ) // line: "# bin_size = 1"
 	_bin_size = boost::lexical_cast<int>( tokens[3] );
       
-      else if ( tokens[1] == "RE_sites_file" ) // line: "# RE_sites_file = <filename>"
+      else if ( tokens[1] == "RE_sites_file" ) { // line: "# RE_sites_file = <filename>"
+	if ( !boost::filesystem::is_regular_file( tokens[3] ) ) {
+	  cout << "ERROR: Trying to load RE sites file that doesn't seem to exist.  You need to create the following file: " << tokens[3] << endl;
+	  cout << "Try running `CountMotifsInFasta.pl <ref fasta> <RE motif>`.\n";
+	}
 	LoadRESitesFile( tokens[3] );
+      }
       
       else if ( tokens[1] == "SAM" ) // line: "# SAM files used in generating this dataset: test.sam"
 	for ( size_t i = 8; i < tokens.size(); i++ )
@@ -418,7 +439,7 @@ GenomeLinkMatrix::LoadFromSAMNonDeNovo( const vector<string> & SAM_files )
 void
 GenomeLinkMatrix::NormalizeToDeNovoContigLengths( const bool use_RE_sites )
 {
-  cout << Time() << ": NormalizeToDeNovoContigLengths" << ( use_RE_sites ? " (using RE sites)" : "" ) << endl;
+  cout << Time() << ": NormalizeToDeNovoContigLengths" << ( use_RE_sites ? " (using RE sites)" : " (using lengths in bp)" ) << endl;
   
   assert( DeNovo() ); // don't use on binned-human-chromosome data
   
@@ -545,7 +566,7 @@ GenomeLinkMatrix::SkipContigsWithFewREs( const int & min_N_REs )
   double avg_N_REs = N_short == 0 ? 0 : double(short_N_REs) / N_short;
   
   // The number of contigs reported as small includes contigs that may have already been marked for skipping, e.g., by SkipRepeats().
-  cout << Time() << ": Marked " << N_short << " contigs (avg len " << avg_len << ", avg number of RE sites " << avg_N_REs << ") as having too few RE sites to inform clustering." << endl;
+  cout << Time() << ": Marked " << N_short << " contigs (avg len " << avg_len << ", avg number of RE sites " << avg_N_REs << ") as having too few RE sites to inform clustering (CLUSTER_MIN_RE_SITES = " << min_N_REs << ")." << endl;
 }
 
 
@@ -609,7 +630,7 @@ GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool fl
   double avg_len = N_repetitive == 0 ? 0 : double(repetitive_len) / N_repetitive;
   
   // The number of contigs reported as repetitive includes contigs that may have already been marked for skipping, e.g., by SkipShortContigs().
-  cout << Time() << ": Marked " << N_repetitive << " contigs (avg length " << avg_len << ") as too repetitive to inform clustering." << endl;
+  cout << Time() << ": Marked " << N_repetitive << " contigs (avg length " << avg_len << ") as too repetitive to inform clustering (CLUSTER_MAX_LINK_DENSITY = " << repeat_multiplicity << ")." << endl;
 }
 
 
@@ -619,9 +640,10 @@ GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool fl
 
 // AHClustering: Apply a greedy agglomerative hierarchical clustering algorithm to cluster the contigs into scaffolds.
 // The distance metric between clusters is "average linkage", as described here: http://www2.statistics.com/resources/glossary/a/avglnkg.php
+// CEN_contigs, if not an empty vector, lists a set of contig IDs (0-indexed) for contigs containing centromeres.  These contigs will NOT be merged.
 // Sets: _clusters (via SetClusters())
 void
-GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping )
+GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CEN_contigs, const double MIN_AVG_LINKAGE, const double NONINFORMATIVE_RATIO, const bool DRAW_DOTPLOT, const TrueMapping * true_mapping )
 {
   // Determine the number of non-skipped contigs (contigs not marked either short or reptitive by the Skip() functions.)  If there are none, throw an error.
   int N_non_skipped = count( _contig_skip.begin(), _contig_skip.end(), false );
@@ -632,28 +654,32 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
   
   cout << Time() << ": AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << NONINFORMATIVE_RATIO << ")" << endl;
   
-  /*
-  // TEMP: Skip 1% of contigs, randomly chosen.
-  cout << Time() << ": Skipping 1% more contigs randomly" << endl;
-  vector<bool> contig_skip_TEMP = _contig_skip;
-  srand48( time(0) );
-  for ( size_t i = 0; i < _contig_skip.size(); i++ )
-    if ( !_contig_skip[i] )
-      if ( lrand48() % 100 == 0 )
-	_contig_skip[i] = true;
-  N_non_skipped = count( _contig_skip.begin(), _contig_skip.end(), false );
-  cout << "\t\t\tNumber of non-skipped contigs reduced to " << N_non_skipped << endl;
-  */
+  // Check that the CEN_contigs vector makes sense, if it's non-empty.
+  // All values must be in the range of contig IDs, and there can't be more values than clusters.
+  int N_CEN_contigs = CEN_contigs.size(); // may be 0, in which case no CEN-based filtering happens, and that's ok
+  
+  assert( N_CEN_contigs <= N_CLUSTERS_MIN );
+  for ( int i = 0; i < N_CEN_contigs; i++ ) {
+    assert( CEN_contigs[i] >= 0 ); // this was checked when CLUSTER_CONTIGS_WITH_CENS was input
+    if ( CEN_contigs[i] >= _N_bins ) { // this wasn't, so report informatively on it now
+      cout << "ERROR: Contig #" << CEN_contigs[i] << " was marked as centromeric (CLUSTER_CONTIGS_WITH_CENS).  But there are only " << _N_bins << " contigs in the draft assembly.  What gives?" << endl;
+      exit(1);
+    }
+    cout << "\tCLUSTER_CONTIGS_WITH_CENS: Contig marked with a CEN, will not be merged with other CEN contigs:\t" << CEN_contigs[i] << "\tlength = " << _contig_lengths[ CEN_contigs[i] ] << " bp" << endl;
+  }
+  
+  
+  
   
   set<int>::const_iterator set_it1, set_it2;
   
   // HEUR: Range for number of clusters that will get printed out to SKY dotplots at ~/public_html/dotplot.SKY.<n>.jpg
   static const int N_CLUSTERS_MAX = DRAW_DOTPLOT ? 1.25 * N_CLUSTERS_MIN : N_CLUSTERS_MIN;
   
-  // for non-sim, 0.1 is low enough that the human datasets just go down to 23 clusters
+  
+  
+  
   const int PRUNE_RATE = 10; // prune after each time we do 1/PRUNE_RATE of the total remaining number of merges; this only affects runtime
-  //struct timeval prune_start, prune_end;
-  //gettimeofday(&prune_end, NULL);
   
   // These objects will contain intermediate products of the algorithm.
   vector<bool> cluster_exists( 2 * _N_bins, false );
@@ -685,9 +711,18 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
 	  if ( _matrix(i,j) > MIN_AVG_LINKAGE )
 	    merge_score_map.insert( make_pair( _matrix(i,j), make_pair(i,j) ) );
   
-  
-  
-  
+  // TEMP
+  vector< pair<int,int> > merges_to_do;
+  /*
+  merges_to_do.push_back( make_pair(17,57) ); // 57 = merger of 0,5
+  merges_to_do.push_back( make_pair(0,5) );
+    Merges to do for NRRL8004
+  merges_to_do.push_back( make_pair(2,6) );
+  merges_to_do.push_back( make_pair(3,10) );
+  merges_to_do.push_back( make_pair(4,7) );
+  merges_to_do.push_back( make_pair(9,47) ); // 47 = merger of 5,8
+  merges_to_do.push_back( make_pair(5,8) );
+  */
   
   
   int N_merges = 0;
@@ -705,24 +740,49 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
     if ( merge_score_map.empty() )  { cout << "empty merge score map. weird. maybe everything is over-clustered." << endl; break; }
     
     // 1. Find the pair of clusters with the highest "merge score".
-    // This is easy - it's simply the first item in the map.
+    // This is easy - it's simply the first item in the map for which two clusters actually exist.
     multimap< double, pair<int64_t,int>, greater<double> >::iterator it;
     
     for ( it = merge_score_map.begin(); it != merge_score_map.end(); ++it )
-      if ( cluster_exists[ it->second.first ] && cluster_exists[ it->second.second ] )
+      if ( cluster_exists[ it->second.first ] && cluster_exists[ it->second.second ] ) {
+	
+	
+	// If the CEN_contigs vector is set, it indicates contigs known to contain yeast centromeres.  Don't allow a merge that combines multiple such contigs.
+	int N_CENs_in_clusters = 0;
+	for ( int i = 0; i < N_CEN_contigs; i++ ) {
+	  int cID = bin_to_clusterID[ CEN_contigs[i] ];
+	  if ( cID == it->second.first || cID == it->second.second ) N_CENs_in_clusters++;
+	}
+	
+	if ( N_CENs_in_clusters > 1 ) {
+	  cout << "Disallowing a merge because it would put " << N_CENs_in_clusters << " CEN contigs (#" << it->second.first << ",#" << it->second.second << ") into the same cluster" << endl;
+	  continue;
+	}
+	
+	
 	break;
+      }
     
     if ( it == merge_score_map.end() ) {
       cout << "No more merges to do (because MIN_AVG_LINKAGE = " << MIN_AVG_LINKAGE << "); so clustering is done after " << N_merges << " merges" << endl;
       break;
     }
     
-    //cout << "STUFF: " << it->first << "\t" << it->second.first << "," << it->second.second << endl;
+    //cout << "CHOOSING MERGE: " << it->first << "\t" << it->second.first << "," << it->second.second << endl;
     double best_linkage = it->first;
     assert( best_linkage > 0 );
     int best_i = it->second.first;
     int best_j = it->second.second;
     if ( best_i > best_j ) { int swap = best_i; best_i = best_j; best_j = swap; }
+    
+    // TEMP: assign certain merges-to-do
+    if ( !merges_to_do.empty() ) {
+      best_i = merges_to_do.back().first;
+      best_j = merges_to_do.back().second;
+      merges_to_do.pop_back();
+      best_linkage = 0;
+      cout << "FORCED MERGE BY USER REQUEST: " << best_i << "," << best_j << endl;
+    }
     
     
     // 2. Merge this pair and record the merging.
@@ -764,10 +824,6 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
     if ( N_merges_since_prune > ( _N_bins - N_merges ) / PRUNE_RATE ) {
       N_merges_since_prune = 0;
       
-      //gettimeofday(&prune_start, NULL);
-      //int non_prune_time = 1000 * ( prune_start.tv_sec - prune_end.tv_sec ) + 0.001 * ( prune_start.tv_usec - prune_end.tv_usec ) + 0.5;
-      //cout << Time() << ": START PRUNING!  N_merges = " << N_merges << "\tMERGE SCORE MAP SIZE: " << merge_score_map.size() << "\tTIME SINCE LAST PRUNE (ms): " << non_prune_time << endl;
-      
       for ( it = merge_score_map.begin(); it != merge_score_map.end(); it++ ) {
 	while ( it != merge_score_map.end() &&
 		( !cluster_exists[ it->second.first  ] ||
@@ -778,10 +834,6 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
 	if ( it == merge_score_map.end() ) break;
       }
       
-      //gettimeofday(&prune_end, NULL);
-      //int prune_time = 1000 * ( prune_end.tv_sec - prune_start.tv_sec ) + 0.001 * ( prune_end.tv_usec - prune_start.tv_usec ) + 0.5;
-      
-      //cout << Time() << ": DONE PRUNING!   N_merges = " << N_merges << "\tMERGE SCORE MAP SIZE: " << merge_score_map.size() << "\tPRUNING TIME (ms): " << prune_time << endl;
     }
     
     
@@ -832,7 +884,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
 	cmd = "mv ~/public_html/dotplot.SKY.jpg ~/public_html/dotplot.SKY." + boost::lexical_cast<string>(N_non_singleton_clusters) + ".jpg";
 	system( cmd.c_str() );
       }
-    
+      
       // If the number of clusters remaining is SUPER small, we're done.
       //if ( N_merges_remaining == N_CLUSTERS_MIN ) {
       if ( N_non_singleton_clusters == N_CLUSTERS_MIN ) {
@@ -850,7 +902,6 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const double MIN_AVG_L
   // We've broken out of the clustering loop, so we're done, but set clusters one last time.
   SetClusters( bin_to_clusterID, NONINFORMATIVE_RATIO );
   
-  //_contig_skip = contig_skip_TEMP;
 }
 
 
@@ -1138,6 +1189,7 @@ GenomeLinkMatrix::ValidateClusters( const TrueMapping * true_mapping, const bool
   
   
   // Draw a dotplot!
+  PRINT2( draw_dotplot, true_mapping );
   if ( draw_dotplot ) DrawClusterDotplot( *true_mapping );
 }
 
@@ -1249,7 +1301,7 @@ GenomeLinkMatrix::DrawClusterDotplot( const TrueMapping & true_mapping ) const
   
   // Set minimum thresholds for the size of a cluster to plot, and the size of contigs to plot (if de novo).
   // Default values of 1,1: plot everything.
-  const unsigned MIN_CLUSTER_SIZE = 2; // in sim datasets, set this to 2 to exclude singletons in centromeres; in de novo it can be 1 (but doesn't have to be)
+  const unsigned MIN_CLUSTER_SIZE = 1; // in sim datasets, set this to 2 to exclude singletons in centromeres; in de novo it can be 1 (but doesn't have to be)
   const int MIN_CONTIG_LEN = 1;
   
   int y = 0;
@@ -1370,7 +1422,11 @@ GenomeLinkMatrix::LoadRESitesFile( const string & RE_sites_file )
   _contig_RE_sites = ParseTabDelimFile<int>( RE_sites_file, 1 );
   
   // If this assert fails, the input RE_sites_file is inconsistent with the original dataset (wrong number of contigs).
-  assert( (int) _contig_RE_sites.size() == _N_bins );
+  if( (int) _contig_RE_sites.size() != _N_bins ) {
+    cout << "ERROR: Contig RE sites file (" << RE_sites_file << ") seems to imply a different number of contigs (" << _contig_RE_sites.size()
+	 << ") than the SAM file[s] do (" << _N_bins << ")." << endl;
+    assert(0);
+  }
   
   // Add 1 to all length to prevent dividing by 0 (some short assembly contigs have no restriction sites)
   for ( int i = 0; i < _N_bins; i++ )
@@ -1409,7 +1465,7 @@ GenomeLinkMatrix::LoadFromSAM( const string & SAM_file, const vector<int> & bins
   
   
   // Set up a mapped matrix to handle the data as it comes in.  Later this will be converted to a compressed_matrix object for referencing.
-  boost::numeric::ublas::mapped_matrix<int64_t> mapped_matrix( _N_bins, _N_bins );
+  boost::numeric::ublas::mapped_matrix<double> mapped_matrix( _N_bins, _N_bins );
   
   
   
@@ -1454,10 +1510,23 @@ GenomeLinkMatrix::LoadFromSAM( const string & SAM_file, const vector<int> & bins
     // Don't bother marking intra-bin links; these are not informative for clustering.
     if ( bin1 == bin2 ) continue;
     
+    // TEMP: Re-weight links by their distance from the edge of the contig. (this isn't done yet, doesn't seem to have an effect - I need to work on it more!)
+    double weight = 1;
+    if(0) {
+      const int & len1 = _contig_lengths[bin1];
+      const int & len2 = _contig_lengths[bin2];
+      
+      int dist1 = min( c. pos, abs( len1 - c. pos ) );
+      int dist2 = min( c.mpos, abs( len2 - c.mpos ) );
+      int dist = dist1 + dist2; // minimum = 0; maximum = (len1+len2)/2
+      double dist_norm = 2 * dist / double( len1+len2 ); // minimum = 0; maximum = 1
+      weight = 2 * ( 1 - dist_norm ); // minimum = 0; maximum = 2 (max is at dist = 0)
+      //PRINT3( dist, dist_norm, weight );
+    }
+    
     // Tally the appropriate spots in the 2-d matrix.
-    int tally = 1;
-    mapped_matrix(bin1,bin2) += tally;
-    mapped_matrix(bin2,bin1) += tally;
+    mapped_matrix(bin1,bin2) += weight;
+    mapped_matrix(bin2,bin1) += weight;
   }
   
   
@@ -1516,13 +1585,17 @@ GenomeLinkMatrix::SetClusters( const vector<int> & bin_to_clusterID, const doubl
   assert( (int) bin_to_clusterID.size() == _N_bins );
   assert( NONINFORMATIVE_RATIO == 0 || NONINFORMATIVE_RATIO > 1 ); // negative values and values in the range (0,1] make no sense for this parameter
   
+
   // Assign the non-skipped contigs to clusters.
-  _clusters = ClusterVec( bin_to_clusterID );
+  _clusters = ClusterVec( bin_to_clusterID, !cluster_noninformative_into_singletons ); // TEMP: is this ok?  recent addition
   //PRINT2( _N_bins, _clusters.N_contigs() );
+  //for ( int i = 0; i < _N_bins; i++ ) PRINT2( i, bin_to_clusterID[i] );
+  //for ( size_t j = 0; j < _clusters.size(); j++ ) cout << "CLUSTER #" << j << " HAS SIZE " << _clusters[j].size() << endl;
+  
+  
   
   if ( NONINFORMATIVE_RATIO == 0 ) { CanonicalizeClusters(); return; }
   
-  //for ( size_t j = 0; j < _clusters.size(); j++ ) cout << "CLUSTER #" << j << " HAS SIZE " << _clusters[j].size() << endl;
   
   
   // Now loop over all skipped contigs.  For each skipped contig, determine which cluster it has the largest average linkage to.

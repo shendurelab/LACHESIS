@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see Reporter.h
 #include "Reporter.h"
 #include "RunParams.h"
@@ -1204,7 +1220,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const 
     if ( len >= length_cutoff )
       is_long[i] = true;
   }
-    
+  
   
   
   // 2. Convert these data structures into a single vector that maps the original order of contigs onto an order that describes how Lachesis has ordered them.
@@ -1224,7 +1240,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const 
     
     //cout << "New cluster starts at #" << new_ID << endl;
     
-    // Convert each cluster from a set<int> into a vector<int> for easy random access.
+    // Convert this cluster from a set<int> into a vector<int> for easy random access.
     vector<int> cluster;
     for ( set<int>::const_iterator it = clusters[i].begin(); it != clusters[i].end(); ++it )
       cluster.push_back( *it );

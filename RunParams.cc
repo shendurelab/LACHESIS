@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see RunParams.h
 #include "RunParams.h"
 #include "TextFileParsers.h" // ParseTabDelimFile, GetFastaNames
@@ -106,13 +122,13 @@ RunParams::ParseIniFile( const string & ini_file )
   // This is the order in which RunParams expects to see the parameters.  It's also the order in which the parameters appear in the default INI files.
   // It's important to enforce the order because some parameters depend on earlier ones (e.g., SAM_DIR must be loaded so we know where to look for SAM_FILES.)
   // If you want to permanently add or remove any parameters, make sure to update N_keys as well as keys_order_array.
-  const int N_keys = 27;
+  const int N_keys = 28;
   const char * keys_order_array[] = { "SPECIES", "OUTPUT_DIR",
 				      "DRAFT_ASSEMBLY_FASTA", "SAM_DIR", "SAM_FILES", "RE_SITE_SEQ",
 				      "USE_REFERENCE", "SIM_BIN_SIZE", "REF_ASSEMBLY_FASTA", "BLAST_FILE_HEAD",
 				      "DO_CLUSTERING", "DO_ORDERING", "DO_REPORTING", "OVERWRITE_GLM", "OVERWRITE_CLMS",
-				      "CLUSTER_N", "CLUSTER_MIN_RE_SITES", "CLUSTER_MAX_LINK_DENSITY", "CLUSTER_NONINFORMATIVE_RATIO",
-				      "CLUSTER_DRAW_HEATMAP", "CLUSTER_DRAW_DOTPLOT",
+				      "CLUSTER_N", "CLUSTER_CONTIGS_WITH_CENS", "CLUSTER_MIN_RE_SITES", "CLUSTER_MAX_LINK_DENSITY",
+				      "CLUSTER_NONINFORMATIVE_RATIO", "CLUSTER_DRAW_HEATMAP", "CLUSTER_DRAW_DOTPLOT",
 				      "ORDER_MIN_N_RES_IN_TRUNK", "ORDER_MIN_N_RES_IN_SHREDS", "ORDER_DRAW_DOTPLOTS",
 				      "REPORT_EXCLUDED_GROUPS", "REPORT_QUALITY_FILTER", "REPORT_DRAW_HEATMAP" };
   const vector<string> keys_order( keys_order_array, keys_order_array + N_keys );
@@ -121,7 +137,7 @@ RunParams::ParseIniFile( const string & ini_file )
   map<string, bool> variable_N_values;
   for ( int i = 0; i < N_keys; i++ ) {
     string key = keys_order[i];
-    if ( key == "SAM_FILES" || key == "REPORT_EXCLUDED_GROUPS" ) variable_N_values[key] = true;
+    if ( key == "SAM_FILES" || key == "CLUSTER_CONTIGS_WITH_CENS" || key == "REPORT_EXCLUDED_GROUPS" ) variable_N_values[key] = true;
     else variable_N_values[key] = false;
   }
   
@@ -220,13 +236,15 @@ RunParams::ParseIniFile( const string & ini_file )
     else if ( key == "USE_REFERENCE" ) _use_ref = ConvertOrFail<bool>( value );
     else if ( key == "SIM_BIN_SIZE" ) {
       _sim_bin_size = ConvertOrFail<int>( value );
-      if ( _sim_bin_size != 0 && _species != "human" )
-	ReportParseFailure( "SIM_BIN_SIZE can only be nonzero if species = 'human'." );
+      if ( _use_ref )
+	if ( _sim_bin_size != 0 && _species != "human" )
+	  ReportParseFailure( "SIM_BIN_SIZE can only be nonzero if species = 'human'." );
     }
     else if ( key == "REF_ASSEMBLY_FASTA" ) {
       _ref_assembly_fasta = value;
-      if ( !boost::filesystem::is_regular_file( value ) && !boost::filesystem::is_regular_file( value + ".names" ) )
-	ReportParseFailure( "Can't find file '" + value + "'." );
+      if ( _use_ref )
+	if ( !boost::filesystem::is_regular_file( value ) && !boost::filesystem::is_regular_file( value + ".names" ) )
+	  ReportParseFailure( "Can't find file '" + value + "'." );
     }
     else if ( key == "BLAST_FILE_HEAD" ) {
       _BLAST_file_head = value;
@@ -239,6 +257,17 @@ RunParams::ParseIniFile( const string & ini_file )
     else if ( key == "OVERWRITE_GLM" )  _overwrite_GLM  = ConvertOrFail<bool>( value );
     else if ( key == "OVERWRITE_CLMS" ) _overwrite_CLMs = ConvertOrFail<bool> ( value );
     else if ( key == "CLUSTER_N" )                    _cluster_N                    = ConvertOrFail<int>   ( value );
+    else if ( key == "CLUSTER_CONTIGS_WITH_CENS" ) {
+      _cluster_CEN_contig_IDs.clear();
+      if ( value != "-1" ) // if the first listed value is -1, don't do anything - leave the _cluster_CEN_contig_IDs vector empty
+      for ( size_t i = 2; i < tokens.size(); i++ ) {
+	int cID = ConvertOrFail<int>( tokens[i] );
+	if ( cID < 0 ) ReportParseFailure( "CLUSTER_CONTIGS_WITH_CENS can't contain any contig IDs less than 0 (unless the list consists entirely of `-1', indicating an empty list.)" );
+	assert( cID >= 0 );
+	_cluster_CEN_contig_IDs.push_back( cID );
+      }
+      if ( (int) _cluster_CEN_contig_IDs.size() > _cluster_N ) ReportParseFailure( "CLUSTER_CONTIGS_WITH_CENS = contains more contig IDs than the number of clusters CLUSTER_N." );
+    }
     else if ( key == "CLUSTER_MIN_RE_SITES" )         _cluster_min_RE_sites         = ConvertOrFail<int>   ( value );
     else if ( key == "CLUSTER_MAX_LINK_DENSITY" )     _cluster_max_link_density     = ConvertOrFail<double>( value );
     else if ( key == "CLUSTER_NONINFORMATIVE_RATIO" ) {

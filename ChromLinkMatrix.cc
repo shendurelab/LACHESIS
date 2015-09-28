@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see ChromLinkMatrix.h
 #include "ChromLinkMatrix.h"
 #include "ClusterVec.h"
@@ -354,10 +370,11 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
   
   cout << "\tN contigs = " << _N_contigs << endl;
   
-  if ( _N_contigs > 1 && !seen_data )
-    cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
-  //PRINT2( seen_data, has_links() );
-  assert( seen_data == has_links() );
+  if ( _N_contigs > 1 ) {
+    if ( !seen_data ) cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
+    //PRINT2( seen_data, has_links() );
+    //assert( seen_data == has_links() );
+  }
   
   assert( _contig_size != -1 );
   assert( !_SAM_files.empty() );
@@ -431,16 +448,15 @@ ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
       vector<int> & Z = _matrix[X][Y];
       //PRINT3( X, Y, Z.size() );
       if ( Z.empty() ) continue; // this makes the matrix sparse
+      seen_data = true;
       
       // If writing a heatmap, write just the vector size, and only once for each pair of contigs (i.e., don't differentiate by orientation.)
       if ( heatmap ) {
 	if ( X%2 || Y%2 ) continue;
-	seen_data = true;
 	out << X/2 << '\t' << Y/2 << '\t' << Z.size() << endl;
       }
       // If writing a CLM output file, write the entire vector, and write for all four contig orientations.
       else {
-	seen_data = true;
 	
 	string s;
 	int Z_size = Z.size();
@@ -457,10 +473,11 @@ ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
   
   out.close();
   
-  if ( _N_contigs > 1 && !seen_data )
-    cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
-  //PRINT2( seen_data, has_links() );
-  assert( seen_data == has_links() );
+  if ( _N_contigs > 1 ) {
+    if ( !seen_data ) cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
+    //PRINT2( seen_data, has_links() );
+    //assert( seen_data == has_links() );
+  }
   
   // If this is a de novo CLM, also write the contig lengths and RE sites to auxiliary files.
   if ( DeNovo() ) {

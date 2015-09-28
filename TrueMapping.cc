@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see TrueMapping.h
 #include "TrueMapping.h"
 #include "TextFileParsers.h" // ParseBlastAlignmentFiles
@@ -8,13 +24,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <fstream>
 #include <iostream>
 #include <numeric> // accumulate
 #include <algorithm> // count, max_element, min_element
 
 // Boost libraries
-#include <boost/algorithm/string.hpp> // split
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -71,7 +85,7 @@ TrueMapping::TrueMapping( const string & species, const vector<string> & query_n
     else break;
   }
   
-  PRINT( BLAST_files.size() );
+  //PRINT( BLAST_files.size() );
   
   // ReadBlastAlignsFromFileSet: Read the alignments of assembly contigs onto the reference genome.
   // This is initially done by parsing a set of BLAST files (which takes a lot of runtime due to file I/O) and then carefully expanding the BLAST alignments
@@ -578,7 +592,7 @@ TrueMapping::ReadBlastAlignsFromFileSet( const string & species, const string & 
     vector<int> query_lengths = TargetLengths( dummy_SAM_file );
     
     // Sanity checks.
-    assert( _query_names == TargetNames( dummy_SAM_file ) );
+    assert( _query_names == TargetNames( dummy_SAM_file ) ); // if this fails, the SAM file isn't aligned to the draft assembly fasta file
     
     if ( query_lengths.empty() ) {
       cout << "ERROR: SAM file '" << dummy_SAM_file << "' seems to have no SAM/BAM header." << endl;
@@ -612,6 +626,7 @@ TrueMapping::ReadBlastAlignsFromFileSet( const string & species, const string & 
     if ( line[0][0] == '#' ) continue; // skip commented lines
     assert( line.size() == 6 );
     
+    //PRINT6( line[0], line[1], line[2], line[3], line[4], line[5] );
     assert( query_ID == boost::lexical_cast<int>( line[0] ) );
     _target[query_ID] = boost::lexical_cast<int>( line[1] );
     _start [query_ID] = boost::lexical_cast<int>( line[2] );
@@ -622,38 +637,6 @@ TrueMapping::ReadBlastAlignsFromFileSet( const string & species, const string & 
     query_ID++;
   }
   
-  /*
-  // TODO: tokenize; then remove #includes to ifstream and split
-  ifstream in;
-  char line[LINE_LEN];
-  vector<string> tokens;
-  
-  in.open( TrueMapping_file.c_str(), ios::in );
-  
-  int query_ID = 0;
-  
-  while ( 1 ) {
-    in.getline( line, LINE_LEN );
-    assert( strlen(line)+1 < LINE_LEN );
-    if ( in.fail() ) break;
-    
-    // Skip commented lines.
-    if ( line[0] == '#' ) continue;
-    
-    // Parse the line into its six tokens.
-    boost::split( tokens, line, boost::is_any_of("\t") );
-    assert( tokens.size() == 6 );
-    assert( boost::lexical_cast<int>( tokens[0] ) == query_ID );
-    
-    _target[query_ID] = boost::lexical_cast<int>( tokens[1] );
-    _start [query_ID] = boost::lexical_cast<int>( tokens[2] );
-    _stop  [query_ID] = boost::lexical_cast<int>( tokens[3] );
-    _qual_alignability[query_ID] = boost::lexical_cast<double>( tokens[4] );
-    _qual_specificity [query_ID] = boost::lexical_cast<double>( tokens[5] );
-    
-    query_ID++;
-  }
-  */
   
   // Sanity check.  If this fails, the save file may not match the dataset.  Specifically, if query_ID == 0, the save file may be empty; just delete it.
   if ( query_ID != NQueries() ) {
