@@ -1,6 +1,22 @@
 #!/net/gs/vol3/software/modules-sw/perl/5.14.2/Linux/RHEL6/x86_64/bin/perl -w
 use strict;
 
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 # CreateScaffoldedFasta.pl
 #
 # Post-Lachesis step: Take the Lachesis output orderings/orientations and use them to create a new fasta file.
@@ -31,7 +47,7 @@ sub RC( $ );
 # Defaults in the absence of parameters.
 my $assembly_fasta = "../fly/assembly/assembly.fasta";
 my $output_dir = "out/Kc167";
-my $unknown_gap_size = 10000; # default size to apply to gaps between contigs/scaffolds when the gap size is not known from Lachesis
+my $unknown_gap_size = 1000; # default size to apply to gaps between contigs/scaffolds when the gap size is not known from Lachesis
 
 # Read parameters from command-line arguments.
 if ( scalar @ARGV == 2 ) {

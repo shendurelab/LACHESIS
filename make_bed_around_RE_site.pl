@@ -1,6 +1,22 @@
 #!/usr/bin/perl -w
 use strict;
 
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 # make_bed_around_restriction_site.pl: Make a BED file representing the regions around all occurrences of a restriction site.
 #
 # For syntax, run with no arguments.
@@ -21,11 +37,15 @@ use strict;
 if ( scalar @ARGV != 3 ) {
     
     # Report syntax.
-    print "$0: Make a BED file representing the regions around all occurrences of a restriction site.\n\n";
-    print "Input:\n";
-    print "1. A fasta file representing a genome (reference or draft assembly.)\n";
-    print "2. A restriction site sequence (e.g., HindIII = AAGCTT, NcoI = CCATGG, Dpn1 = GATC).\n";
-    print "3. A range, representing how much space around the sequence to include.  Recommend 500 basedon Yaffe & Tanay, Nat. Genetics 2011.\n";
+    print "\nmake_bed_around_RE_site.pl\n\n";
+    print "Find all occurrences of a motif in a genome.  Make a 'POS' file listing these occurrences, and also a BED file representing the regions around these occurrences.\n\n";
+    print "SYNTAX:\tmake_bed_around_RE_site.pl <fasta> <motif> <range>\n";
+    print "fasta:\tA fasta file representing a genome (reference or draft assembly.)\n";
+    print "motif:\tA motif, typically a restriction site sequence (e.g., HindIII = AAGCTT, NcoI = CCATGG, Dpn1 = GATC).\n";
+    print "range:\tA number representing how many bp around the sequence to include.  Recommend 500 based on Yaffe & Tanay, Nat. Genetics 2011.\n\n";
+    print "OUTPUT FILES:\n";
+    print "<fasta>.near_<motif>.<range>.bed\n";
+    print "<fasta>.near_pos_of_<motif>.txt\n";
     print "\n";
     exit;
 }
@@ -37,10 +57,26 @@ my ( $FASTA_in, $motif_seq, $range ) = @ARGV;
 
 my $verbose = 0;
 
+# Convert the motif from a string into a regex.  Unroll the IUPAC codes from single letters into Perl-parseable regular expressions.
+my $motif_regex = $motif_seq;
+$motif_regex =~ s/R/\[AG\]/g;
+$motif_regex =~ s/Y/\[CT\]/g;
+$motif_regex =~ s/S/\[CG\]/g;
+$motif_regex =~ s/W/\[AT\]/g;
+$motif_regex =~ s/K/\[GT\]/g;
+$motif_regex =~ s/M/\[AC\]/g;
+$motif_regex =~ s/B/\[CGT\]/g;
+$motif_regex =~ s/D/\[AGT\]/g;
+$motif_regex =~ s/H/\[ACT\]/g;
+$motif_regex =~ s/V/\[ACG\]/g;
+$motif_regex =~ s/N/\[ACGT\]/g;
+
+
 
 
 # Derive an output filename.
 my $BED_out = "$FASTA_in.near_$motif_seq.$range.bed";
+my $POS_out = "$FASTA_in.pos_of_$motif_seq.txt";
 
 
 # Determine how many letters needed to be added to each line in order to find instances of the sequence that bridge lines in the fasta.
@@ -51,12 +87,14 @@ my $contig_name = '';
 my $offset = 0;
 my $prev_chars;
 my @motif_positions;
+my $N_motifs_found = 0;
 
 
 # Open the input fasta file and read through it line-by-line.
-print localtime() . ": Opening file $FASTA_in (this may take a while)\n";
+print localtime() . ": Reading file $FASTA_in...\n";
 open IN, '<', $FASTA_in or die "Can't find file `$FASTA_in'";
 open BED, '>', $BED_out or die;
+open POS, '>', $POS_out or die;
 
 while (<IN>) {
     my $line = $_;
@@ -93,6 +131,7 @@ while (<IN>) {
 	# Get the new contig's name.
 	$contig_name = $1;
 	print localtime() . ": $contig_name\n" if $verbose;
+	print POS ">$contig_name\n";
 	
 	# Reset other contig-related variables.
 	$offset = 0;
@@ -108,15 +147,37 @@ while (<IN>) {
 	
 	# Look for instances of this motif in this line of the fasta (including the overlap characters from the previous line, tacked on at the beginning.)
 	my $motif_loc = -1;
-	while (1) {
+	my $target_str = "$prev_chars" . uc $line;
+	
+	my @matches;
+	while ($target_str =~ /$motif_regex/g ) {
+	    
+	    # Every iteration in this loop represents a new match to the motif regex in the terget string.
+	    my $motif_loc = $-[0];
+	    
+	    # Adjust the location so it properly describes the 0-indexed motif position in this contig.
+	    # Then add it to the list of contig positions at which the motif has been seen.
+	    $N_motifs_found++;
+	    my $true_motif_loc = $motif_loc + $offset - length $prev_chars; # adjust index so it properly describes the 0-indexed motif position in this contig
+	    push @motif_positions, $true_motif_loc;
+	    
+	    print "$contig_name\t$offset\t$prev_chars\t->\t$motif_loc\n" if $verbose;
+	    print POS "$true_motif_loc\n";
+	}
+	
+	
+	# TODO: remove
+	while (0) {
 	    $motif_loc = index "$prev_chars$line", $motif_seq, $motif_loc + 1;
 	    last if ( $motif_loc == -1 ); # no more instances found
 	    
-	    # Found a motif location!  Add this index to the list of contig positions at which the motif has been seen.
-	    # Adjust the index so it properly describes the zero-indexed motif position in this contig.
-	    push @motif_positions, $motif_loc + $offset - length $prev_chars;
+	    # Found a motif!  Add its index to the list of contig positions at which the motif has been seen.
+	    $N_motifs_found++;
+	    my $true_motif_loc = $motif_loc + $offset - length $prev_chars; # adjust index so it properly describes the 0-indexed motif position in this contig
+	    push @motif_positions, $true_motif_loc;
 	    
 	    print "$contig_name\t$offset\t$prev_chars\t->\t$motif_loc\n" if $verbose;
+	    print POS "$true_motif_loc\n";
 	}
 	
 	
@@ -131,7 +192,8 @@ while (<IN>) {
 
 close IN;
 close BED;
+close POS;
 
 
-print localtime() . ": Done!\n";
-
+print localtime() . ": Done!  Found $N_motifs_found total instances of motif $motif_seq.  Created files:\n";
+print "$BED_out\n$POS_out\n";
