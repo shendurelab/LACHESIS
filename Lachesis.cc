@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 /**************************************************************************************************************************************************************
  *
  * Lachesis.cc
@@ -101,7 +117,8 @@ LachesisClustering( const RunParams & run_params )
   
   if ( run_params._cluster_draw_heatmap ) glm->DrawHeatmap( "heatmap.jpg" );
   
-  glm->AHClustering( run_params._cluster_N, 0, run_params._cluster_noninformative_ratio, run_params._cluster_draw_dotplot, true_mapping );
+  
+  glm->AHClustering( run_params._cluster_N, run_params._cluster_CEN_contig_IDs, 0, run_params._cluster_noninformative_ratio, run_params._cluster_draw_dotplot, true_mapping );
   
   // Improve the clustering results, in the postfosmid case.
   if ( postfosmid ) glm->MoveContigsInClusters( 1.2 );
@@ -111,7 +128,7 @@ LachesisClustering( const RunParams & run_params )
   //glm->ExcludeLowQualityContigs( true_mapping );
   
   // Report on the clustering.  If there is a TrueMapping, perform reference-based validation.
-  glm->ValidateClusters( true_mapping );
+  glm->ValidateClusters( true_mapping, run_params._cluster_draw_dotplot );
   
   ClusterVec clusters = glm->GetClusters();
   clusters.WriteFile( run_params._out_dir + "/main_results/clusters.txt" );
