@@ -22,7 +22,7 @@ BACKUPS = *~ \\\#*\\\#
 
 # compiler flags
 CFLAGS  = -Wall -ansi -pedantic -g -O3
-INCLUDES = -I$(LACHESIS_BOOST_DIR)
+INCLUDES = -I$(LACHESIS_SAMTOOLS_DIR) -I$(LACHESIS_BOOST_DIR)
 
 # linking flags.  The LACHESIS_BOOST_DIR environment variable must be set
 BOOST_LIBS=-L$(LACHESIS_BOOST_DIR)/stage/lib -lboost_filesystem
