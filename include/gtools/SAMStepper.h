@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 /**************************************************************************************************************************************************************
  *
  * SAMStepper
@@ -62,7 +78,9 @@ class SAMStepper
   ~SAMStepper();
   
   /* FILTERING FUNCTIONS
-   * These filter the set of reads that are reported via next_read() and next_pair().  These functions must be called before calling next().  */
+   * These filter the set of reads that are reported via next_read() and next_pair().  These functions must be called before calling next().
+   * NOTE: These functions sometimes act wonky because the read's FLAG doesn't always match its alignment - e.g., I've seen a lot of reads that are aligned
+   * yet have the 0x4 FLAG set - wtf, bwa. */
   
   // FilterAligned: Only accept reads that are aligned (i.e., FLAG & 0x4 == 0.)
   void FilterAligned();

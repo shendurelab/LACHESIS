@@ -1,3 +1,19 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
 // For documentation, see SAMStepper.h
 #include "SAMStepper.h"
 
@@ -232,7 +248,10 @@ open_SAM( const string & file )
 int
 NTargetsInSAM( const string & SAM_file )
 {
-  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  if ( !boost::filesystem::is_regular_file( SAM_file ) ) {
+    cout << "ERROR: SAMStepper::NTargetsInSAM: Can't find file `" << SAM_file << "'" << endl;
+    assert(0);
+  }
   
   samfile_t * sam = open_SAM( SAM_file );
   int N_targets = sam->header->n_targets;
@@ -248,7 +267,10 @@ NTargetsInSAM( const string & SAM_file )
 vector<string>
 TargetNames( const string & SAM_file )
 {
-  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  if ( !boost::filesystem::is_regular_file( SAM_file ) ) {
+    cout << "ERROR: SAMStepper::TargetNames: Can't find file `" << SAM_file << "'" << endl;
+    assert(0);
+  }
   
   vector<string> target_names;
   
@@ -265,7 +287,10 @@ TargetNames( const string & SAM_file )
 vector<int>
 TargetLengths( const string & SAM_file )
 {
-  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  if ( !boost::filesystem::is_regular_file( SAM_file ) ) {
+    cout << "ERROR: SAMStepper::TargetLengths: Can't find file `" << SAM_file << "'" << endl;
+    assert(0);
+  }
   
   vector<int> target_lengths;
   
@@ -284,17 +309,23 @@ TargetLengths( const string & SAM_file )
 vector<int>
 TargetNHits( const string & SAM_file )
 {
-  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  if ( !boost::filesystem::is_regular_file( SAM_file ) ) {
+    cout << "ERROR: SAMStepper::TargetNHits: Can't find file `" << SAM_file << "'" << endl;
+    assert(0);
+  }
   
-  // Set up a SAMStepper object to read in the aligned reads.
+  // Set up a SAMStepper object to read in the reads.
   SAMStepper stepper( SAM_file );
-  stepper.FilterAligned();
   
   vector<int> target_N_hits( stepper.N_targets(), 0 );
   
   // For each read that aligned, look at what target sequence it aligned to, and tally the number of hits for that target.
-  for ( bam1_t * align = stepper.next_read(); align != NULL; align = stepper.next_read() )
-    target_N_hits[ align->core.tid ]++;
+  // ALT METHOD: Call FilterAligned() on the SAMStepper, so no need to check the tids.  This is faster but buggy because the 0x4 FLAG doesn't always match.
+  for ( bam1_t * align = stepper.next_read(); align != NULL; align = stepper.next_read() ) {
+    
+    const int & tid = align->core.tid;
+    if ( tid != -1 ) target_N_hits[tid]++; // if tid == -1, the read didn't align
+  }
   
   return target_N_hits;
 }
@@ -306,7 +337,10 @@ TargetNHits( const string & SAM_file )
 vector<double>
 TargetCoverages( const string & SAM_file )
 {
-  assert( boost::filesystem::is_regular_file( SAM_file ) );
+  if ( !boost::filesystem::is_regular_file( SAM_file ) ) {
+    cout << "ERROR: SAMStepper::TargetCoverages: Can't find file `" << SAM_file << "'" << endl;
+    assert(0);
+  }
   
   vector<int> target_N_hits = TargetNHits( SAM_file );
   vector<int> target_lens = TargetLengths( SAM_file );
