@@ -23,8 +23,9 @@ Publication in *Nature Biotechnology* (please cite) is here: [http://dx.doi.org/
 7. Interpreting the LACHESIS results
 
 ##### TROUBLESHOOTING
-1. LACHESIS is crashing!
-2. LACHESIS is producing a weird result!
+1. LACHESIS won't compile!
+2. LACHESIS is crashing!
+3. LACHESIS is producing a weird result!
 
 ##### COPYRIGHT AND DISCLAIMER
 
@@ -39,7 +40,7 @@ To setup and run LACHESIS, you will need a computer running in a UNIX environmen
 - gcc, the C++ compiler ([http://gcc.gnu.org/](http://gcc.gnu.org/))
 - The zlib compression library ([http://www.zlib.net/](http://www.zlib.net/))
 - The boost C++ libraries ([http://www.boost.org/](http://www.boost.org/))
-- The SAMtools toolkit for handling SAM/BAM files ([http://samtools.sourceforge.net/](http://samtools.sourceforge.net/))
+- The SAMtools toolkit for handling SAM/BAM files ([http://samtools.sourceforge.net/](http://samtools.sourceforge.net/)) (make sure to use version 0.1.19 or older)
 
 Note that LACHESIS requires a minimum stack size of 10MB (check with ulimit -s). If your system uses 8MB (e.g. Fedora or Ubuntu), you will need to increase the stack size (ulimit -s 10240). 
 
@@ -58,7 +59,9 @@ Download the LACHESIS package from [http://shendurelab.github.io/LACHESIS/](http
 
 #### 3. Compiling the LACHESIS package
 
-To compile LACHESIS, you must first download and install two other libraries: boost (available at [http://www.boost.org/](http://www.boost.org/)) and SAMtools (available at [http://samtools.sourceforge.net/](http://samtools.sourceforge.net/)).  Once these are installed, set the shell environment variables `$LACHESIS_BOOST_DIR` and `$LACHESIS_SAMTOOLS_DIR` to point to the directories containing these packages.  The command for setting an environment variable will depend on what Unix shell you are using.  Then, to compile LACHESIS, simply type `make` in the main LACHESIS directory.
+To compile LACHESIS, you must first download and install two other libraries: boost (available at [http://www.boost.org/](http://www.boost.org/)) and SAMtools (available at [http://samtools.sourceforge.net/](http://samtools.sourceforge.net/)).  Once these are installed, set the shell environment variables `$LACHESIS_BOOST_DIR` and `$LACHESIS_SAMTOOLS_DIR` to point to the directories containing these packages.  The command for setting an environment variable will depend on what Unix shell you are using.  For example, in bash, type: `export LACHESIS_BOOST_DIR=/path/to/boost/` and `export LACHESIS_SAMTOOLS_DIR=/path/to/samtools/` (replacing the paths with the paths where you install the libraries.)  (LACHESIS_BOOST_DIR should have the subdirectory `stage/lib/`.)
+
+Finally, to compile LACHESIS, simply type `make` in the main LACHESIS directory.
 
 #### 4. Testing out LACHESIS on a sample dataset
 
@@ -136,15 +139,21 @@ To create the final assembly fasta, run the included script `CreateScaffoldedFas
 
 LACHESIS is a good piece of software, but it isn't perfect.  You may run it and get a result you weren't expecting.  You may also run it and get no result at all because it crashes.
 
-#### 1. LACHESIS is crashing!
+#### 1. LACHESIS won't compile!
+
+There are several reasons why LACHESIS may fail to compile.  Some of the most common problems involve linking in the samtools and boost dependencies so that the LACHESIS source code can find them.  You will need to set the environment variables LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR, and you should make sure you're using an older version of samtools (0.1.19 or earlier).  For more details, see "Compiling the LACHESIS package", above.
+
+#### 2. LACHESIS is crashing!
 
 If LACHESIS crashes, the first thing you should do is look carefully at its output.  It might give a verbose explanation of what went wrong and give you a good idea for how to fix it.  You may also receive an "assertion error", which looks like this: `Assertion ... failed.`  That means that at some stage of the algorithm, LACHESIS encountered something specific that it wasn't expecting.  An assertion error will come with a reference to the file (`*.cc` or `*.h`) and the line number where the error occurred.  Try looking at that line in the file, which should contain the function `assert()`.  There should be some comments around that line that explain what might be causing the assertion error.
+
+If you run LACHESIS on the provided test case and a segmentation fault occurs, you're running into a known problem: a limitation in stack size (a low-level operating system attribute.)  Some OS's (including Fedora and Ubuntu) set a default stack size of 8 MB, but LACHESIS needs 10 MB.  To fix this, type: `ulimit -s 10240`
 
 In general, we've made a strong effort to make LACHESIS a well-designed and well-commented piece of code.  If you're familiar with C++, you should be able to poke around in the source code and get an idea of what's going on.  We recommend starting with the top-level module, `Lachesis.cc`, and working from there.
 
 If all else fails, and you still need help running LACHESIS, please e-mail Josh Burton at `jnburton at uw.edu`.
 
-#### 2. LACHESIS is producing a weird result!
+#### 3. LACHESIS is producing a weird result!
 
 After you've gotten LACHESIS to run properly, take a good look at the REPORT.txt file.  If you're getting a weird result - for example, very little sequence is being assembled, or the error rate is high - you may need to tune LACHESIS' performance.
 
