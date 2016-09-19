@@ -29,7 +29,6 @@ SAMTOOLS_LIBS=-L$(LACHESIS_SAMTOOLS_DIR) -lbam
 LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 
 # dependencies
-
 .cc.o:  .cc
 	$(CC) -c $< $(CFLAGS) $(INCLUDES)
 

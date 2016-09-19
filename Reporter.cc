@@ -905,73 +905,72 @@ Reporter::RequireReference() const
 
 // HistogramOrderingErrors: Make a histogram showing the odds of a contig being mis-ordered, as a function of the contig's length.
 void
-Reporter::HistogramOrderingErrors( const bool full_order, const string & file_head ) const
-{
+Reporter::HistogramOrderingErrors(const bool full_order,
+                                  const string &file_head) const {
   RequireReference();
-
   // For contig 'lengths', either use actual lengths or the number of RE sites.
   bool use_RE_lens = true;
-  vector<int> lens = use_RE_lens ? ParseTabDelimFile<int>( _run_params.DraftContigRESitesFilename(), 1 ) : _contig_lengths;
-
+  vector<int> lens = use_RE_lens ? ParseTabDelimFile<int>(_run_params.DraftContigRESitesFilename(), 1) : _contig_lengths;
   // If this assert fails, the input contig_lengths file is inconsistent with the original dataset (wrong number of contigs).
-  assert( (int) lens.size() == _N_contigs );
-
-
+  assert((int)lens.size() == _N_contigs);
   cout << ": HistogramOrderingErrors with file_head = " << file_head << endl;
-
-  const OrderingFlags & flags = full_order ? _data->order_flags : _data->trunk_flags;
+  const OrderingFlags &flags = full_order ? _data->order_flags : _data->trunk_flags;
 
   // Make logarithmic-sized bins for contig lengths.  Bin #N will contain data for contigs with sizes in the range 2^N <= size < 2^(N+1).
-  int longest_contig = *( max_element( lens.begin(), lens.end() ) );
-  int N_bins = 1; while ( longest_contig >>= 1 ) N_bins++;
-  //PRINT2( longest_contig, N_bins );
+  int longest_contig = *(max_element( lens.begin(), lens.end()));
+  int N_bins = 1;
+  while (longest_contig >>= 1) {
+    N_bins++;
+  }
+  // PRINT2(longest_contig, N_bins);
 
-  vector<int64_t> N_total( N_bins, 0 ), len_total( N_bins, 0 ), N_order_error( N_bins, 0 ), N_orient_error( N_bins, 0 ), N_o_and_o_error( N_bins, 0 );
+  vector<int64_t> N_total(N_bins, 0), len_total(N_bins, 0), N_order_error(N_bins, 0), N_orient_error(N_bins, 0), N_o_and_o_error(N_bins, 0);
 
   // Now loop over all contigs and gather data.
-  for ( int i = 0; i < _N_contigs; i++ ) {
-
+  for (int i = 0; i < _N_contigs; i++) {
     // Skip contigs that aren't used or that don't align; these don't have the option of being ordering errors.
-    if ( !flags.used[i] || flags.unaligned[i] ) continue;
+    if (!flags.used[i] || flags.unaligned[i]) {
+      continue;
+    }
 
     // For each contig, look up its length, and determine the bin it belongs in.
     int len = lens[i];
-    int len_bin = 0; while ( len >>= 1 ) len_bin++;
-    assert( len_bin < N_bins );
+    int len_bin = 0;
+    while (len >>= 1) {
+      len_bin++;
+    }
+    assert(len_bin < N_bins);
 
     // Look up the contig's error(s) and fill the data structures.
     N_total[len_bin]++;
     len_total[len_bin] += lens[i];
-    if ( flags.order_error[i] )  N_order_error [len_bin]++;
-    if ( flags.orient_error[i] ) N_orient_error[len_bin]++;
-    if ( flags.order_error[i] && flags.orient_error[i] ) N_o_and_o_error[len_bin]++;
-
+    if (flags.order_error[i])  N_order_error[len_bin]++;
+    if (flags.orient_error[i]) N_orient_error[len_bin]++;
+    if (flags.order_error[i] && flags.orient_error[i]) {
+      N_o_and_o_error[len_bin]++;
+    }
   }
 
   // Make the histogram.
   ofstream out( file_head.c_str() );
   out << "#log2(contig_N_RE_sites)\tN_contigs\ttotal_contig_N_RE_sites\tpct_ok\tpct_order_error\tpct_orient_error\tpct_order_and_orient_errors" << endl;
 
-  for ( int i = 0; i < N_bins; i++ ) {
-    double pct_order_error   = 100.0 * N_order_error[i]   / N_total[i];
-    double pct_orient_error  = 100.0 * N_orient_error[i]  / N_total[i];
+  for (int i = 0; i < N_bins; i++) {
+    double pct_order_error = 100.0 * N_order_error[i] / N_total[i];
+    double pct_orient_error = 100.0 * N_orient_error[i] / N_total[i];
     double pct_o_and_o_error = 100.0 * N_o_and_o_error[i] / N_total[i];
-    //PRINT5( i, N_total[i], pct_order_error, pct_orient_error, pct_o_and_o_error );
+    // PRINT5( i, N_total[i], pct_order_error, pct_orient_error, pct_o_and_o_error );
     out << i
 	<< '\t' << N_total[i]
 	<< '\t' << len_total[i]
-	<< '\t' << ( 100 - pct_order_error - pct_orient_error + pct_o_and_o_error )
-	<< '\t' << ( pct_order_error  - pct_o_and_o_error )
-	<< '\t' << ( pct_orient_error - pct_o_and_o_error )
+	<< '\t' << (100 - pct_order_error - pct_orient_error + pct_o_and_o_error)
+	<< '\t' << (pct_order_error - pct_o_and_o_error)
+	<< '\t' << (pct_orient_error - pct_o_and_o_error)
 	<< '\t' << pct_o_and_o_error
 	<< endl;
   }
-
   out.close();
 }
-
-
-
 
 // DotplotOrderAccuracy: Make a QuickDotplot of the ordering, highlighting contigs that are mis-ordered.  Uses the output of EvalOrderAccuracy.
 void
