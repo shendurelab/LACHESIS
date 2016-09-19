@@ -63,24 +63,24 @@ int
 most_distant_node( const vector< vector<int> > & adj_list, const int A, vector<int> & path_AB )
 {
   assert( A < (int) adj_list.size() );
-  
+
   bool verbose = false;
-  
+
   // Make a vector to keep track of each node's distance from A.
   vector<int> dist_from_A( adj_list.size(), -1 );
   vector< vector<int> > path_from_A( adj_list.size(), vector<int>(0) );
   dist_from_A[A] = 0;
   path_from_A[A].push_back(A);
-  
+
   // Initially, set B = A.
   int B = A;
   int dist_AB = 0;
   path_AB.resize( 1, A );
-  
+
   // Set up a queue of "live" nodes with which to step through the graph, starting at A.
   queue<int> live_nodes;
   live_nodes.push(A);
-  
+
   // Step through the graph (or at least the component containing A) and find each node's distance from A.
   while ( !live_nodes.empty() ) {
     int node = live_nodes.front();
@@ -88,14 +88,14 @@ most_distant_node( const vector< vector<int> > & adj_list, const int A, vector<i
     int dist = dist_from_A[node];
     vector<int> & path = path_from_A[node];
     if ( verbose ) cout << "node = " << node << "; dist = " << dist << "; path has length " << path.size() << "; adj_list = ";
-    
+
     // Check the distance of this node.
     if ( dist > dist_AB ) {
       path_AB = path;
       dist_AB = dist;
       B = node;
     }
-    
+
     // Add this node's neighbors to the queue.
     for ( size_t i = 0; i < adj_list[node].size(); i++ ) {
       int node2 = adj_list[node][i];
@@ -109,14 +109,14 @@ most_distant_node( const vector< vector<int> > & adj_list, const int A, vector<i
     }
     if ( verbose ) cout << endl;
   }
-  
+
   if ( verbose ) {
     cout << "MAXIMUM DISTANCE IS " << dist_AB << " AT NODE " << B << endl;
     cout << "PATH:";
     for ( size_t i = 0; i < path_AB.size(); i++ ) cout << "\t" << path_AB[i];
     cout << endl;
   }
-  
+
   return B;
 }
 
@@ -130,15 +130,15 @@ find_longest_path( const vector< vector<int> > & adj_list )
 {
   vector<int> path(0);
   srand48( time(0) );
-  
+
   // If there are no adjacencies left in this graph, return an empty vector.
   int size = adj_list.size();
   bool has_adj = false;
   for ( int i = 0; i < size; i++ )
     if ( !adj_list[i].empty() ) has_adj = true;
   if ( !has_adj ) return path;
-  
-  
+
+
   // Longest Path Step 1: Pick a random node A and find the node B that is furthest from A.
   // We do this repeatedly with different nodes A (of degree at least 1), just to make sure we have the right answer.
   // This always finds the largest path on one of the non-trivial components of the graph.  Spanning trees have only one non-trivial component, although they
@@ -146,22 +146,22 @@ find_longest_path( const vector< vector<int> > & adj_list )
   bool stochastic = false;
   int A = 0;
   while ( adj_list[A].empty() && A < size ) A++;
-  
+
   if ( stochastic ) {
     int A = lrand48() % size;
     while ( adj_list[A].empty() && A < size ) A = lrand48() % size;
   }
-  
+
   assert( A < size );
-  
+
   int B = most_distant_node( adj_list, A, path );
-  
+
   // Longest Path Step 2: Find the node C that is furthest from B.  The path from B to C is guaranteed to be the longest path in the tree.
   most_distant_node( adj_list, B, path );
-  
+
   // Canonicalize the path order, just to make this function deterministic (in the case of a spanning tree with only one component.)
   if ( path[0] > path[path.size()-1] ) reverse( path.begin(), path.end() );
-  
+
   return path;
 }
 
@@ -203,7 +203,7 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const int contig_size,
   : _species( species )
 {
   assert( contig_size > 0 );
-  
+
   _matrix_init = false;
   _N_contigs = ceil( double(chrom_len) / contig_size );
   _contig_size = contig_size; // this implies !DeNovo()
@@ -215,10 +215,10 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const int contig_size,
   _tree.clear();
   _SAM_files.clear();
   _CP_score_dist = 1e7;
-  
+
   int N_bins = 2 * _N_contigs;
   cout << Time() << ": Creating a new ChromLinkMatrix for a chromosome with " << _N_contigs << " contigs of size " << _contig_size << " (matrix size = " << N_bins << "x" << N_bins << ")" << endl;
-  
+
   InitMatrix();
 }
 
@@ -234,18 +234,18 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const int cluster_size
     _N_contigs( cluster_size )
 {
   assert( cluster_size != 0 );
-  
+
   _matrix_init = false;
   _contig_size = 0; // this implies DeNovo()
   _longest_contig = -1;
   _tree.clear();
   _SAM_files.clear();
   _CP_score_dist = 1e7;
-  
+
   cout << Time() << ": Creating a new ChromLinkMatrix for a cluster with " << _N_contigs << " contigs (matrix size = " << N_bins() << "x" << N_bins() << ")" << endl;
-  
+
   InitMatrix();
-  
+
 }
 
 
@@ -256,9 +256,9 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const vector<string> &
 {
   assert( !SAM_files.empty() );
   assert( !clusters.empty() );
-  
+
   AssertFilesExist( SAM_files );
-  
+
   _matrix_init = false;
   _N_contigs = clusters[cluster_ID].size();
   _contig_size = 0; // this implies DeNovo()
@@ -266,9 +266,9 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const vector<string> &
   _tree.clear();
   _SAM_files.clear(); // this vector will be filled by LoadFromSAMDeNovo
   _CP_score_dist = 1e7;
-  
+
   InitMatrix();
-  
+
   LoadFromSAMDeNovo( SAM_files, RE_sites_file, clusters, cluster_ID );
   return;
 }
@@ -277,54 +277,48 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const vector<string> &
 
 
 // Destructor.
-ChromLinkMatrix::~ChromLinkMatrix()
-{
-  if ( _matrix_init ) FreeMatrix();
+ChromLinkMatrix::~ChromLinkMatrix() {
+  if (_matrix_init) {
+    FreeMatrix();
+  }
 }
 
-
-
-static const unsigned LINE_LEN = 10000000;
-
-
-
-
-
+static const unsigned LINE_LEN = 100000;
 // ReadFile: Read the data from file CLM_file into this ChromLinkMatrix.
 // Overwrite any existing data.
-// The file CLM_file should have been created by a previous call to ChromLinkMatrix::WriteFile() with heatmap=false.
-void
-ChromLinkMatrix::ReadFile( const string & CLM_file )
-{
-  cout << Time() << ": ChromLinkMatrix::ReadFile   <-  " << CLM_file << "\t" << flush;
-  assert( boost::filesystem::is_regular_file( CLM_file ) );
-  
+// The file CLM_file should have been created by a previous call to
+// ChromLinkMatrix::WriteFile() with heatmap=false.
+void ChromLinkMatrix::ReadFile(const string &CLM_file) {
+  string clm_file = CLM_file;
+  cout << ": ChromLinkMatrix::ReadFile   <-  " << clm_file << "\t" << flush;
+  assert( boost::filesystem::is_regular_file(clm_file));
+
   // Set initial values that MUST be overwritten later.
   _contig_size = -1;
   _SAM_files.clear();
   _matrix_init = false;
-  
+
   char line[LINE_LEN];
   vector<string> tokens;
-  
+
   string contig_lens_file = "";
   string RE_sites_file = "";
   bool seen_data = false;
-  
-  ifstream in( CLM_file.c_str(), ios::in );
-  
+
+  ifstream in(clm_file.c_str(), ios::in);
+
   // Read the file line-by-line.
-  
+
   while ( 1 ) {
     in.getline( line, LINE_LEN );
     assert( strlen(line)+1 < LINE_LEN );
     if ( in.fail() ) break;
-    
+
     // Examine the header lines carefully.  These header lines should have been generated in ChromLinkMatrix::WriteFile.
     if ( line[0] == '#' ) {
       boost::split( tokens, line, boost::is_any_of(" ") );
       assert( tokens.size() > 3 );
-      
+
       if ( tokens[1] == "Species" ) // line: "# species = human"
 	_species = tokens[3];
       else if ( tokens[1] == "N_contigs" ) { // line: "# N_contigs = 1"
@@ -348,9 +342,9 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
 	AssertFilesExist( _SAM_files );
       }
     }
-    
+
     else if ( line[0] == 'X' ) continue; // skip the header line of the matrix itself
-    
+
     // If this is not a header line, put data in the matrix.
     // The data may be sparse (i.e., not every X,Y pair appearing) and that's ok.
     else {
@@ -365,40 +359,40 @@ ChromLinkMatrix::ReadFile( const string & CLM_file )
 	_matrix[X][Y].push_back( boost::lexical_cast<int>( tokens[3+i] ) );
     }
   }
-  
+
   in.close();
-  
+
   cout << "\tN contigs = " << _N_contigs << endl;
-  
+
   if ( _N_contigs > 1 ) {
     if ( !seen_data ) cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
     //PRINT2( seen_data, has_links() );
     //assert( seen_data == has_links() );
   }
-  
+
   assert( _contig_size != -1 );
   assert( !_SAM_files.empty() );
   assert( _matrix_init );
-  
-  
+
+
   // If this is a de novo CLM, read contig lengths from the contig_lens_file and contig RE sites from the contig_RE_sites file.
   if ( DeNovo() ) { // this is equivalent to _contig_size == 0
     assert( contig_lens_file != "" && contig_lens_file != "." );
     _contig_lengths = ParseTabDelimFile<int>( contig_lens_file, 0 );
     assert( _N_contigs == (int) _contig_lengths.size() ); // if this fails, the contig_lens file has the wrong number of lines
     FindLongestContig();
-    
+
     LoadRESitesFile( RE_sites_file );
   }
-  
-  
+
+
   // If this isn't a de novo CLM, the contig_lens_file should have been marked as ".".
   else {
     assert( contig_lens_file == "." );
     _longest_contig = -1;
   }
-  
-  
+
+
 }
 
 
@@ -416,15 +410,15 @@ void
 ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
 {
   cout << Time() << ": ChromLinkMatrix::WriteFile(" << ( heatmap ? "heatmap" : "CLM" ) << ") -> " << CLM_file << endl;
-    
-  
+
+
   // If this is a de novo CLM, set filenames for the auxiliary contig lengths and contig RE sites file.
   string contig_lens_file = DeNovo() ? CLM_file + ".lens" : ".";
   string contig_RE_sites_file = DeNovo() ? CLM_file + ".RE_sites" : ".";
-  
+
   bool seen_data = false;
   ofstream out( CLM_file.c_str(), ios::out );
-  
+
   // Print a header to file.  The header is for easier human reading and also contains numbers used by ChromLinkMatrix::ReadFile().
   out << "# ChromLinkMatrix file - see ChromLinkMatrix.h for documentation of this object type" << endl;
   out << "# Species = " << _species << endl;
@@ -438,18 +432,18 @@ ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
   for ( size_t i = 0; i < _SAM_files.size(); i++ )
     out << " " << _SAM_files[i];
   out << endl;
-  
+
   // Print the table to file.
   out << "X\tY\tZ" << ( heatmap ? "" : "\tlink_lengths" ) << endl;
-  
+
   for ( int X = 0; X < 2*_N_contigs; X++ )
     for ( int Y = 0; Y < 2*_N_contigs; Y++ ) {
-      
+
       vector<int> & Z = _matrix[X][Y];
       //PRINT3( X, Y, Z.size() );
       if ( Z.empty() ) continue; // this makes the matrix sparse
       seen_data = true;
-      
+
       // If writing a heatmap, write just the vector size, and only once for each pair of contigs (i.e., don't differentiate by orientation.)
       if ( heatmap ) {
 	if ( X%2 || Y%2 ) continue;
@@ -457,41 +451,41 @@ ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
       }
       // If writing a CLM output file, write the entire vector, and write for all four contig orientations.
       else {
-	
+
 	string s;
 	int Z_size = Z.size();
 	for ( size_t i = 0; i < Z.size(); i++ ) {
 	  s += '\t';
 	  s += boost::lexical_cast<string>( Z[i] );
-	  
+
 	  // Test the length of the string to make sure it's not so long that it will break the input.
 	  if ( s.size() > LINE_LEN - 50 ) { Z_size = i+1; break; }
 	}
 	out << X << '\t' << Y << '\t' << Z_size << s << endl;
       }
     }
-  
+
   out.close();
-  
+
   if ( _N_contigs > 1 ) {
     if ( !seen_data ) cerr << "WARNING: ChromLinkMatrix::ReadFile: CLM file '" << CLM_file << "' has multiple contigs but no link data" << endl;
     //PRINT2( seen_data, has_links() );
     //assert( seen_data == has_links() );
   }
-  
+
   // If this is a de novo CLM, also write the contig lengths and RE sites to auxiliary files.
   if ( DeNovo() ) {
-    
+
     ofstream out2( contig_lens_file.c_str(), ios::out );
     for ( int i = 0; i < _N_contigs; i++ )
       out2 << _contig_lengths[i] << endl;
     out2.close();
-    
+
     ofstream out3( contig_RE_sites_file.c_str(), ios::out );
     for ( int i = 0; i < _N_contigs; i++ )
       out3 << ( _contig_RE_sites[i] - 1 ) << endl; // subtract 1 to make up for the 1 added in LoadRESites()
     out3.close();
-    
+
   }
 }
 
@@ -504,16 +498,16 @@ void
 ChromLinkMatrix::DrawHeatmap( const string & heatmap_file ) const
 {
   WriteFile( "heatmap.txt", true ); // true means to write the file in heatmap format
-  
-  // The R script "heatmap.R" is hardwired to take "heatmap.txt" as input and write to ~/public_html/heatmap.jpg.
+
+  // The R script "heatmap.R" is hardwired to take "heatmap.txt" as input and write to out/heatmap.jpg.
   // For details on how this script works, see the script itself.
-  cout << Time() << ": Plotting a heatmap at ~/public_html/" << heatmap_file << endl;
+  cout << Time() << ": Plotting a heatmap at out/" << heatmap_file << endl;
   system( "heatmap.R" );
-  
+
   // Copy the file heatmap.jpg into the place desired.
   if ( heatmap_file != "" && heatmap_file != "heatmap.jpg" )
-    system( ( "cp ~/public_html/heatmap.jpg ~/public_html/" + heatmap_file ).c_str() );
-  
+    system( ( "cp out/heatmap.jpg out/" + heatmap_file ).c_str() );
+
   cout << Time() << ": Done plotting!" << endl;
 }
 
@@ -528,7 +522,7 @@ ChromLinkMatrix::LoadFromSAMDeNovo( const string & SAM_file, const string & RE_s
   // Make a list of ChromLinkMatrix pointers in which the only non-null pointer is to this ChromLinkMatrix.  This is needed for LoadDeNovoCLMsFromSAM.
   vector<ChromLinkMatrix *> CLMs( clusters.size(), NULL );
   CLMs[cluster_ID] = this;
-  
+
   LoadDeNovoCLMsFromSAM( SAM_file, RE_sites_file, clusters, CLMs );
 }
 
@@ -557,11 +551,11 @@ ChromLinkMatrix::LoadFromSAMNonDeNovo( const string & SAM_file, const int chrom_
   // Look at the SAM file's header to determine the number of chromosomes in the reference genome.
   int N_chroms = NTargetsInSAM( SAM_file );
   assert( chrom_ID >= 0 && chrom_ID < N_chroms );
-  
+
   // Make a list of ChromLinkMatrix pointers in which the only non-null pointer is to this ChromLinkMatrix.  This is needed for LoadNonDeNovoCLMsFromSAM.
   vector<ChromLinkMatrix *> CLMs( N_chroms, NULL );
   CLMs[chrom_ID] = this;
-  
+
   LoadNonDeNovoCLMsFromSAM( SAM_file, CLMs );
 }
 
@@ -589,7 +583,7 @@ ChromLinkMatrix::has_links() const
     for ( int j = i+1; j < _N_contigs; j++ )
       if ( !_matrix[ 2*i ][ 2*j ].empty() )
 	return true;
-  
+
   return false;
 }
 
@@ -601,20 +595,20 @@ vector<bool>
 ChromLinkMatrix::ContigsUsed( const bool flag_adjacent ) const
 {
   if ( _N_contigs == 1 ) return vector<bool>( 1, true ); // handle edge case
-  
+
   vector<bool> used( _N_contigs, true );
-  
-  
+
+
   // Loop over all bins in a row.
   for ( int i = 0; i < _N_contigs; i++ ) {
     bool has_data = false;
-    
+
     for ( int j = 0; j < _N_contigs; j++ )
       if ( !_matrix[ 2*min(i,j) ][ 2*max(i,j) ].empty() ) {
 	has_data = true;
 	break;
       }
-    
+
     // If there's no data in this row, flag it (and maybe its neighbors).
     if ( !has_data ) {
       used[i] = false;
@@ -624,7 +618,7 @@ ChromLinkMatrix::ContigsUsed( const bool flag_adjacent ) const
       }
     }
   }
-  
+
   return used;
 }
 
@@ -638,16 +632,16 @@ double
 ChromLinkMatrix::ContigOrientLogLikelihood( const int c1, const bool rc1, const int c2, const bool rc2 ) const
 {
   double log_like = 0;
-  
+
   // Find the vector of contig distances that represents this pair of contigs with this orientation.
   // For an ASCII illustration of these orientations, see AddLinkToMatrix().
   const vector<int> & dists = _matrix[ 2*c1 + (rc1?1:0) ][ 2*c2 + (rc2?1:0) ];
-  
+
   // Each link of distance x makes a contribution of 1/x to the likelihood; hence -ln(x) to the log-likelihood.
   int N_links = dists.size();
   for ( int j = 0; j < N_links; j++ )
     log_like -= log( double(dists[j]) );
-  
+
   return log_like;
 }
 
@@ -673,18 +667,18 @@ double
 ChromLinkMatrix::OrderingScore( const ContigOrdering & order, const bool oriented, const int range_start, const int range_stop ) const
 {
   assert( order.N_contigs() == _N_contigs ); // sanity check
-  
+
   double score = 0;
-  
-  
+
+
   // Loop over all distinct values of contig1 and contig2, such that contig1 < contig2.
   for ( int i1 = 0; i1+1 < order.N_contigs_used(); i1++ ) {
     int contig1 = order.contig_ID(i1);
     int rc1     = order.contig_rc(i1);
-    
+
     // Keep track of the distance between contig1 and contig2 (which is occupied by other intervening contigs.)
     int contig_dist = 0;
-    
+
     for ( int i2 = i1+1; i2 < order.N_contigs_used(); i2++ ) {
       if ( range_start != -1 && range_stop == -1 )
 	if ( i1 >= range_start || i2 < range_start ) continue;
@@ -692,15 +686,15 @@ ChromLinkMatrix::OrderingScore( const ContigOrdering & order, const bool oriente
 	if ( i1 >= range_stop || i2 < range_start ) continue;
       int contig2 = order.contig_ID(i2);
       int rc2     = order.contig_rc(i2);
-      
+
       // Each oriented pair of contigs points to an element in the ChromLinkMatrix, which is a vector<int> giving the distance between the reads in those
       // two contigs, assuming the contigs are immediately adjacent with the specified orientations.
       // For an ASCII illustration of these distances, see AddLinkToMatrix().
       const vector<int> & dists = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
-      
+
       // If we take orientation into account, we have to do a bunch of computation on the individual links.
       if ( oriented ) {
-	
+
 	// Adjust the distances to account for the space between contig1 and contig2 in this ContigOrdering.
 	// Each link of distance x makes a contribution to the score that is equal to 1/x.
 	for ( size_t i = 0; i < dists.size(); i++ ) {
@@ -708,17 +702,17 @@ ChromLinkMatrix::OrderingScore( const ContigOrdering & order, const bool oriente
 	  score += 1.0 / double( dists[i] + contig_dist );
 	}
       }
-      
+
       contig_dist += ( _contig_size != 0 ? _contig_size : _contig_lengths[contig2] );
       if ( contig_dist > _CP_score_dist ) break;
-      
+
       if ( !oriented ) {
 	// Just count the number of links between the two contigs.
 	score += dists.size() / double( contig_dist );
       }
     }
   }
-  
+
   assert( !isnan(score) );
   return score;
 }
@@ -733,51 +727,51 @@ double
 ChromLinkMatrix::EnrichmentScore( const ContigOrdering & order ) const
 {
   assert( order.N_contigs() == _N_contigs ); // sanity check
-  
+
   if ( order.N_contigs() <= 2 || order.N_contigs_used() <= 1 ) return 0; // handle degenerate case
-  
-  
+
+
   // Find the total number of links and the total (squared) distance in which the links occur.  Use these numbers to calculate a link density.
   // Also calculate the null score, which depends on the set of contigs used in the ContigOrdering, but not on their order or orientation.
   int64_t N_links = 0, total_len = 0, total_len_sq = 0;
   double null_score = 0;
-  
+
   for ( int i1 = 0; i1 < order.N_contigs_used(); i1++ ) {
     int contig1 = order.contig_ID(i1);
-    
+
     total_len += _contig_lengths[contig1];
-    
+
     // Keep track of the distance between contig1 and contig2 (which is occupied by other intervening contigs.)
     int contig_dist = 0;
-    
+
     for ( int i2 = i1+1; i2 < order.N_contigs_used(); i2++ ) {
       int contig2 = order.contig_ID(i2);
-      
+
       // If the distance is too far, skip this contig pair.
       contig_dist += ( _contig_size != 0 ? _contig_size : _contig_lengths[contig2] );
       if ( contig_dist > _CP_score_dist ) break;
-      
+
       // Add to the contig length tallies.
       N_links += _matrix[ 2*contig1 ] [ 2*contig2 ].size();
       int64_t len_sq = (int64_t) _contig_lengths[contig1] * (int64_t) _contig_lengths[contig2];
       total_len_sq += len_sq;
-      
+
       // Add to the null score.  Note that at the moment, the null score is purely a measure of the relative lengths and positions of contigs.
       null_score += len_sq / contig_dist;
       if ( isnan( null_score ) ) PRINT7( i1, i2, contig1, contig2, null_score, len_sq, contig_dist ); // trying to track down a weird bug
     }
   }
-  
+
   // Calculate the average link density per bp of sequence.  Multiply the null score by this to convert it from a measure of length to a density of links.
   double link_density = double( N_links ) / total_len_sq;
   null_score *= link_density;
   assert( null_score != 0 );
   assert( !isnan( null_score ) );
-  
-  
+
+
   // Lastly, find the OrderingScore and divide it by the null score.
   double score = OrderingScore(order);
-  
+
   //PRINT5( score, null_score, N_links, total_len_sq, link_density );
   return score / null_score;
 }
@@ -798,10 +792,10 @@ void
 ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * mapping )
 {
   assert(0); // this function was test code and is now deprecated
-  
+
   cout << Time() << ": PrefilterLinks" << endl;
   cout << "THING\tX\tY\tZ\n";
-  
+
   // Make a map of local contig ID to true position on the chromosome.
   map<int,int> true_starts;
   set<int>::const_iterator it = cluster.begin();
@@ -818,17 +812,17 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
     true_pos[i++] = it->second;
     //PRINT( it->second );
   }
-  
-  
+
+
   // Loop over all contig pairs.
   for ( int contig1 = 0; contig1 < _N_contigs; contig1++ ) {
     for ( int contig2 = contig1+1; contig2 < _N_contigs; contig2++ ) {
       const vector<int> & links = _matrix[ 2*contig1 ][ 2*contig2 ];
       int N_links = links.size();
       if ( N_links == 0 ) continue; // no links, so nothing to do
-      
+
       int len1 = _contig_lengths[contig1], len2 = _contig_lengths[contig2];
-      
+
       // The possible range of link distances between these contigs is [0,len1+len2).  If the links are evenly distributed on the contigs, we expect the
       // distribution of link sizes to be roughly trapezoidal, as follows:
       //
@@ -842,21 +836,21 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
       //
       // We want to measure the extent to which the distribution of link distances deviates from this.
       double expected_link_freq = double( N_links ) / len2;
-      
+
       // Make bins for possible link distances.
       int bin_size = 10000;
       int N_bins = (len1+len2)/bin_size + 1;
-      
+
       // Determine how many links actually fall into each bin.
       vector<int> N_links_in_bin( N_bins, 0 );
       for ( int i = 0; i < N_links; i++ )
 	N_links_in_bin[ links[i] / bin_size ]++;
-      
-	
-      
+
+
+
       double esum = 0;
       double var = 0;
-      
+
       for ( int i = 0; i < N_bins; i++ ) {
 	int bin_start = i*bin_size, bin_stop = (i+1)*bin_size;
 	double expected_N_links_in_bin = expected_link_freq * bin_size;
@@ -873,9 +867,9 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
 	var += diff * diff;
 	esum += expected_N_links_in_bin;
       }
-      
+
       var /= N_links;
-      
+
       //PRINT6( contig1, contig2, N_links, N_bins, esum, var );
       int pos1 = true_pos[contig1];
       int pos2 = true_pos[contig2];
@@ -883,35 +877,35 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
 	cout << "THING\t" << pos1 << "\t" << pos2 << "\t" << var << endl;
 	cout << "THING\t" << pos2 << "\t" << pos1 << "\t" << var << endl;
       }
-      
+
       /*
       int bin_counts[100];
       for ( size_t i = 0; i < 100; i++ ) bin_counts[i] = 0;
-      
+
       // Find the number of links landing in each sub-bin.  We will calculate the variance of this distribution and use it as a statistic of non-randomness.
       for ( int i = 0; i < N_links; i++ )
-	
-      
-      
+
+
+
       // We've gotten all the bins.  Now calculate the variance of the bin contents.
       double avg_N_links = N_links / 100.0;
       double var = 0;
-      
+
       for ( int i = 0; i < 100; i++ ) {
 	//PRINT2( i, bin_counts[i] );
 	double diff = bin_counts[i] - avg_N_links;
 	var += diff * diff;
       }
-      
+
       var /= N_links;
-      
+
       PRINT4( contig1, contig2, N_links, var );
       */
     }
   }
-  
+
   exit(0);
-  
+
 }
 
 
@@ -921,46 +915,46 @@ ChromLinkMatrix::MakeTrunkOrder( const int min_N_REs ) const
 {
   cout << Time() << ": MakeTrunkOrder!" << endl;
   assert ( !_contig_RE_sites.empty() );
-  
+
   // Handle the trivial case, where there are fewer than two contigs or there are no links between the contigs.
   if ( !has_links() ) return ContigOrdering( _N_contigs, false );
-  
+
   // First, find the minimum spanning tree (MST) that spans a graph version of this ChromLinkMatrix.  The minimum spanning tree is a way to connect all the
   // nodes (contigs) such that the total weight of all the connections (measured as 1 / the number of links in support of a connection) is at a minimum.
   _tree = FindSpanningTree( min_N_REs );
-  
-  
+
+
   // SmoothThornsInTree: Remove from the tree as many "thorns" (i.e., single-vertex spurs from the main trunk) as possible.
   SmoothThornsInTree(_tree);
-  
+
   // Optional output: Make a dotplot of the tree.
   if (0) {
     string file = "dotplot.tree.txt";
-    cout << Time() << ": Drawing a dotplot of this spanning tree at ~/public_html/" << file << endl;
+    cout << Time() << ": Drawing a dotplot of this spanning tree at out/" << file << endl;
     ofstream out( file.c_str(), ios::out );
-    
+
     for ( int i = 0; i < _N_contigs; i++ )
       for (size_t j = 0; j != _tree[i].size(); ++j)
 	if ( (int)_tree[i][j] > i )
 	  out << i << "\t" << _tree[i][j] << "\n";
     out.close();
-    
-    // Run the QuickDotplot script to generate a dot plot image, which gets placed at ~/public_html/<file>.jpg.
+
+    // Run the QuickDotplot script to generate a dot plot image, which gets placed at out/<file>.jpg.
     string cmd = "QuickDotplot " + file;
     std::system( cmd.c_str() );
   }
-  
-  
+
+
   // Optional output: Make a graph image for this spanning tree.
   // NOT RECOMMENDED for graphs over 500 vertices due to runtime problems and unreadability of output.
   if (0) PlotTree( _tree, "tree.png" );
-  
+
   // The MST is a tree, not a linear ordering (or ContigOrdering).  Convert it to a ContigOrdering by finding the longest path.
   ContigOrdering trunk = TreeTrunk( _tree, true );
   OrientContigs( trunk );
-  
+
   //trunk.DrawDotplot( "order_dotplot.1.trunk.txt" );
-  
+
   return trunk;
 }
 
@@ -971,39 +965,39 @@ ContigOrdering
 ChromLinkMatrix::MakeFullOrder( const int min_N_REs, const bool use_CP_score ) const
 {
   cout << Time() << ": MakeFullOrder!" << endl;
-  
+
   // Handle the trivial case, where there are fewer than two contigs or there are no links between the contigs.
   if ( !has_links() ) return ContigOrdering( _N_contigs, false );
-  
-  
+
+
   assert( !_tree.empty() ); // if this fails, you need to run MakeTrunkOrder() first
-  
-  
+
+
   // Reinsert the pruned contigs into the ordering.
   ContigOrdering ordering = ReinsertShreds( _tree, min_N_REs, use_CP_score );
-  
-  
+
+
   // Determine the proper orientation of contigs in this ContigOrdering.
   OrientContigs( ordering );
   ordering.Print();
-  
-  
-  
+
+
+
   // Find the score for the "true" ordering.  (This is worthless except in simulated assemblies in which the contigs are in the proper order.)
   //double true_score = OrderingScore( ContigOrdering( _N_contigs, true ) );
   cout << setprecision(8);
-  
+
   // Report on the size of this ContigOrdering.  Also report on its "enrichment", which describes the degree to which the Hi-C links between
   // the placed contigs are in close contigs - i.e., the amount of signal along the main diagonal of the heatmap.
   cout << "Full ordering:\t";
   ReportOrderingSize(ordering);
   cout << "..... ENRICHMENT SCORE = " << EnrichmentScore(ordering) << endl;
   //ordering.DrawDotplot("order_dotplot.2.shreds+oriented.txt");
-  
+
   ContigOrdering true_ordering = ordering;
   true_ordering.Sort();
   cout << "TRUTH ENRICHMENT SCORE = " << EnrichmentScore( true_ordering ) << endl;
-  
+
   // Try out all possible inversions.  Use ordering scores (non-normalized) instead of enrichment scores, to save CPU time.
   /*
   double base_score = OrderingScore(ordering);
@@ -1019,8 +1013,8 @@ ChromLinkMatrix::MakeFullOrder( const int min_N_REs, const bool use_CP_score ) c
 	cout << "BETTER:\ti = " << i << "\tj = " << j << "\tscore = " << score << endl;
     }
   */
-  
-  
+
+
   return ordering;
 }
 
@@ -1042,7 +1036,7 @@ void
 ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistribution & link_size_distribution ) const
 {
   cout << Time() << ": SpaceContigs" << endl;
-  
+
   // Sanity checks.
   for ( size_t i = 0; i < _SAM_files.size(); i++ )
     cout << "in CLM: " << _SAM_files[i] << endl;
@@ -1052,32 +1046,32 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
   assert( order.N_contigs() == _N_contigs );
   assert( order.has_Q_scores() ); // can't space contigs if they're not already oriented
   if ( order.N_contigs_used() < 2 ) return; // no spacing is necessary unless there are multiple contigs in the ordering
-  
+
   order.ClearGaps();
-  
-  
+
+
   // Make a mapping of contig position in ContigOrdering -> position of first contig in that contig's scaffold-in-progress.
   // Initially each contig is a scaffold-in-progress unto itself, so this is just an identity mapping.
   vector<int> scaffold_start( order.N_contigs_used() );
   for ( int i = 0; i < order.N_contigs_used(); i++ )
     scaffold_start[i] = i;
-  
+
   // Make a mapping of contig position in ContigOrdering -> size of scaffold-in-progress starting at that contig (or 0 if contig doesn't start a scaffold.)
   vector<int> scaffold_size( order.N_contigs_used(), 1 );
-  
-  
+
+
   // Make a reverse mapping of contig length to position in ContigOrdering, so that we can immediately find the position of the longest contig.
   //multimap< int, int, greater<int> > length_map;
   //for ( int i = 0; i < order.N_contigs_used(); i++ )
   //length_map.insert( make_pair( _contig_lengths[ order.contig_ID(i) ], i ) );
-  
-  
+
+
   // Calculate the LDE (Link Density Enrichment) of each contig.  This is the (observed/expected) density of intra-contig Hi-C links on that contig and is used
   // to normalize inter-contig link densities.
   vector<double> enrichments;
   // TEMP: Write link density enrichments to file.
   ofstream out( "enrichments.txt", ios::out );
-  
+
   for ( int i = 0; i < _N_contigs; i++ ) {
     double enrichment = link_size_distribution.FindEnrichmentOnContig( _contig_lengths[i], _matrix[ 2*i ][ 2*i ] );
     //double norm = (double) _contig_lengths[i] / (3500 * (_contig_RE_sites[i]+1) );
@@ -1085,20 +1079,20 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
     out << enrichment << endl;
   }
   out.close();
-  
+
   int N_gaps_found = 0;
-  
+
   // 1. Loop Steps 2-4 repeatedly until all contigs are merged into a scaffold.
   while ( N_gaps_found+1 < order.N_contigs_used() ) {
-    
-    
+
+
     // 2. Find the longest pair of adjacent contigs in the ContigOrdering.  (A pair's "length" here is defined as the length of the shorter contig.)
     int LP_pos1 = -1, LP_pos2 = -1, LP_length = 0; // LP = longest pair
     for ( int i = 0; i+1 < order.N_contigs_used(); i++ ) {
-      
+
       // This contig may part of a scaffold-in-progress.  If so, we only examine it if it's the first contig in its scaffold - otherwise it's redundant.
       if ( i != scaffold_start[i] ) continue;
-      
+
       // If this contig is the start of the final scaffold-in-progress, then no further linking needs to be made beyond it.
       int i2 = i + scaffold_size[i]; // the start of the next scaffold
       if    ( i2 == order.N_contigs_used() ) continue;
@@ -1106,20 +1100,20 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
       assert( scaffold_size[i]  > 0 );
       assert( scaffold_size[i2] > 0 );
       //PRINT5( i, i2, scaffold_size[i], scaffold_size[i2], order.N_contigs_used() );
-      
+
       // Find the length of this scaffold-in-progress, and the subsequent one (which will become linked to this one by a gap), by adding their contig lengths.
       // Note that gaps don't count as part of a merged length.
       int length1 = 0, length2 = 0;
       for ( int j = 0; j < scaffold_size[i]; j++ )
 	length1 += _contig_lengths[ order.contig_ID(i+j) ];
-      
+
       for ( int j = 0; j < scaffold_size[i2]; j++ )
 	length2 += _contig_lengths[ order.contig_ID(i2+j) ];
-      
+
       // Find the length of the shorter of the two contigs/scaffolds.  Keep track of which pair has the longest length.
       int length = min( length1, length2 );
       //PRINT5( i, i2, length1, length2, length );
-      
+
       if ( LP_length < length ) {
 	LP_length = length;
 	LP_pos1 = i;
@@ -1127,17 +1121,17 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
       }
     }
     //PRINT5( LP_pos1, LP_pos2, order.contig_ID(LP_pos1), order.contig_ID(LP_pos2), LP_length );
-    
-    
+
+
     // 3. Determine the gap size between these two contigs.  Do this by considering the set of link distances between them (note that their orientations are
     //    determined by OrientContigs) and determining what number to add to these link distances to make them most concordant with the expectations of the
     //    LinkSizeDistribution.  Call function: FindGapSize().
-    
+
     // Find the vector of link lengths associated with this adjacency.  This vector describes the distance that the links would have if the contigs were
     // immediately adjacent.  For an ASCII illustration of these distances, see AddLinkToMatrix().
     int pos1 = LP_pos2 - 1;
     int pos2 = LP_pos2;
-    
+
     int contig1 = order.contig_ID(pos1);
     int rc1     = order.contig_rc(pos1);
     int contig2 = order.contig_ID(pos2);
@@ -1146,31 +1140,31 @@ ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistributio
     //PRINT6( pos1, pos2, contig1, contig2, rc1, rc2 );
     const vector<int> & dists = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
     //assert( !dists.empty() );
-    
+
     const int & L1 = _contig_lengths[contig1];
     const int & L2 = _contig_lengths[contig2];
-    
+
     // Find the local LDE (link density enrichment).  It's a weighted product of the LDEs of each contig.
     double local_LDE = pow( enrichments[contig1], double(2*L1)/(L1+L2) ) * pow( enrichments[contig2], double(2*L2)/(L1*L2) );
-    
+
     // Assuming these contigs are separated at a distance D, the actual size of all the Hi-C links is D higher than the reported number.
     // Determine the value of D that makes this set of links most concordant with the expectations of the LinkSizeDistribution.
     int D = FindGapSize( order, LP_pos2-1, link_size_distribution, enrichments );
     D = link_size_distribution.FindDistanceBetweenLinks( L1, L2, local_LDE, dists );
     //assert( D != INT_MAX );
-    
-    
+
+
     // 4. Using the derived gap size, merge these contigs into a scaffold-in-progress.  They are now measured as a single contig for the purposes of length.
     PRINT2( LP_pos2-1, D );
     order.SetGap( LP_pos2-1, D );
     N_gaps_found++;
-    
+
     // Update the scaffold_start and scaffold_size vectors.
     for ( int i = LP_pos2; i < order.N_contigs_used(); i++ ) {
       if ( scaffold_start[i] != LP_pos2 ) break;
       scaffold_start[i] = LP_pos1;
     }
-    
+
     scaffold_size[LP_pos1] += scaffold_size[LP_pos2];
     scaffold_size[LP_pos2] = 0;
   }
@@ -1200,25 +1194,25 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
     }
     return best_tree;
   }
-  
-  
+
+
   using namespace boost;
   typedef adjacency_list < vecS, vecS, undirectedS, property<vertex_distance_t, int>, property < edge_weight_t, double > > Graph;
   typedef pair<int, int> E;
-  
+
   bool use_RE = !_contig_RE_sites.empty();
   const vector<int> & lens = use_RE ? _contig_RE_sites : _contig_lengths;
-  
+
   static const int MAX_EDGE_WEIGHT_PENALTY = 10; // HEUR: setting this higher will make the search for a long path more aggressive
-  
-  
+
+
   // Blank out all small contigs to force them to be left out of the ordering.
   // Reduce the min contig length as necessary so that the cluster has at least 3 long contigs
   // If this isn't done, there will be too few real edges in the graph and prim_minimum_spanning_tree will get confused.
   int N_long_contigs = 0;
   for ( int i = 0; i < _N_contigs; i++ )
     if ( lens[i] >= min_N_REs ) N_long_contigs++;
-  
+
   int min_len_reduced = min_N_REs;
   assert( _N_contigs >= 3 );
   while ( N_long_contigs < 3 && min_len_reduced > 0 ) {
@@ -1228,10 +1222,10 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
       if ( lens[i] >= min_len_reduced ) N_long_contigs++;
   }
   PRINT2( min_len_reduced, N_long_contigs );
-  
-  
+
+
   vector< vector<int> > best_tree; // this will contain the output
-  
+
   // Set up the edges of the graph.
   int N_edges = _N_contigs * (_N_contigs-1) / 2;
   E * edges = new E[N_edges];
@@ -1240,46 +1234,46 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
     for ( int j = i+1; j < _N_contigs; j++ )
       edges[max_edge_ID++] = make_pair(i,j);
   assert( max_edge_ID == N_edges );
-  
+
   // Allocate memory for the edge weigths.
   double * weights = new double[N_edges];
-  
+
   vector<int> trunk; // this will be repeatedly updated
   int edge_weight_penalty = 1;
   size_t trunk_size = 0;
-  
+
   // In each iteration of the loop, we do the following 3 things:
   // 1. Build a graph.  If there was a previous iteration, use the longest path from that iteration to inform the graph building for this iteration.
   // 2. Run Prim's algorithm to find the MST on this graph.
   // 3. Find the "trunk", the longest path in this MST.
   for ( size_t iteration = 0; iteration < 100; iteration++ ) {
-    
+
     // Set up the edge weights to be infinity (i.e., unusable) by default.  The prim_minimum_spanning_tree algorithm can't handle non-connected graphs.  Hence,
     // if two vertices in the graph should have no edge between them, they'll have an edge with weight infinity.
     for ( int i = 0; i < N_edges; i++ )
       weights[i] = INFINITY;
-    
+
     max_edge_ID = 0;
     vector<bool> isolated( _N_contigs, true );
-    
+
     // 1. Build a graph.  If there was a previous iteration, use the longest path from that iteration to inform the graph building for this iteration.
     // Define the vertices, edges, and edge weights.  Each contig becomes a vertex, and the Hi-C links between contigs are represented as edges between them.
-    
+
     // Loop over all pairs of contigs (vertices).
     for ( int i = 0; i < _N_contigs; i++ ) {
       vector<int>::const_iterator i_it = find( trunk.begin(), trunk.end(), i );
-      
+
       for ( int j = i+1; j < _N_contigs; j++ ) {
 	max_edge_ID++;
-	
+
 	if ( lens[i] < min_len_reduced || lens[j] < min_len_reduced ) continue; // leave out short contigs
 	//PRINT7( iteration, i, j, link_weight, lens[i], lens[j], min_len_reduced );
-	
+
 	double link_weight = LinkDensity(i,j);
 	//PRINT3( i, j, link_weight );
 	if ( link_weight == 0 ) continue; // no links between these two contigs
 	double edge_weight = 1.0 / link_weight; // better-linked contigs should have a *smaller* edge weight in the graph
-	
+
 	// Use the already-observed longest path to guide further development of the tree.  The idea is to use the longest path as a scaffold, and fit into it
 	// the contigs that were initially left out of it.  So, for the purposes of extending the longest path, prevent non-adjacent contigs in the longest
 	// path from moving directly to each other, and penalize adjacent ones.
@@ -1288,64 +1282,64 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
 	  if ( i_it + 1 != j_it && i_it - 1 != j_it ) continue; // these two contigs aren't adjacent in the longest path
 	  else                                        edge_weight *= edge_weight_penalty;
 	}
-	
+
 	// Keep track of which vertices are really isolated so we can remove them from the graph later.
 	isolated[i] = false;
 	isolated[j] = false;
-	
+
 	//cout << "FindSpanningTree iteration #" << iteration << ": Adding edge #" << max_edge_ID << " between " << i << " and " << j << " with weight " << edge_weight << endl;
 	weights[max_edge_ID-1] = edge_weight; // subtract 1 because max_edge_weight has already been incremented in this loop
       }
-      
+
     }
     assert( max_edge_ID == N_edges );
-    
+
     // If all edges are isolated, there is effectively no graph - i.e., no sufficiently long contigs have any links to other sufficiently long contigs.
     // In this case, let's just forget about trying to make an ordering and just return an empty one.
     if ( count( isolated.begin(), isolated.end(), false ) == 0 ) {
       best_tree.resize( _N_contigs, vector<int>() );
       return best_tree;
     }
-    
-    
+
+
     if ( _N_contigs > 10000 ) cout << "WARNING: ChromLinkMatrix contains a large number of contigs (" << _N_contigs << ").  About to create a Graph object, which will take a lot of memory.  May run out of memory and throw a bad_alloc error." << endl;
-    
+
     // Build the Graph object.
     Graph g( edges, edges + max_edge_ID, weights, _N_contigs );
     vector < graph_traits<Graph>::vertex_descriptor > MST_adjs( _N_contigs );
-    
+
     // 2. Run Prim's algorithm to find the MST on this graph.
     cout << Time() << ": prim_minimum_spanning_tree (iteration #" << iteration << ", previous trunk_size = " << trunk_size << ")" << endl;
     prim_minimum_spanning_tree(g, &MST_adjs[0]);
     //cout << Time() << ": prim_minimum_spanning_tree done!" << endl;
-    
+
     for ( int i = 0; i < _N_contigs; i++ )
       if ( lens[i] < min_len_reduced || lens[ MST_adjs[i] ] < min_len_reduced )
 	MST_adjs[i] = i;
-    
+
     // Convert the tree from the output format of prim_minimum_spanning_tree into adjacency-list format.
     vector< vector<int> > MST( _N_contigs, vector<int>( 0 ) );
     for ( int i = 0; i < _N_contigs; i++ ) {
       int j = MST_adjs[i];
-      
+
       // Don't make connections for isolated contigs.
       if ( i == j || isolated[i] || isolated[j] ) continue;
-      
+
       MST[i].push_back(j);
       MST[j].push_back(i);
     }
-    
-    
-    
+
+
+
     // 3. Find the "trunk", the longest path in this tree.
     trunk = find_longest_path( MST );
-    
+
     // If this tree's path length is an improvement over the last iteration, great!  Save the result.
     if ( trunk.size() > trunk_size ) {
       trunk_size = trunk.size();
       best_tree = MST;
     }
-    
+
     // Otherwise, get more aggressive by increasing the edge weight penalty.  If it's at max, stop iterating.
     else {
       edge_weight_penalty++;
@@ -1353,29 +1347,29 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
       continue;
     }
     //PRINT( trunk_size );
-    
-    
+
+
     // Optional output: Make a dot file and then an image of this complete graph.
     // NOT RECOMMENDED for graphs over 30 vertices, and unlikely to be useful for graphs above 10.
     if (0) {
       ofstream out( "graph.dot", ios::out );
       boost::write_graphviz( out, g, make_label_writer( get(vertex_index,g) ), make_label_writer( get(edge_weight,g) ) );
       out.close();
-      std::system ( "dot -Tpng graph.dot > ~/public_html/graph.png" );
-      cout << "Drew an image of this graph at ~/public_html/graph.png" << endl;
+      std::system ( "dot -Tpng graph.dot > out/graph.png" );
+      cout << "Drew an image of this graph at out/graph.png" << endl;
     }
-    
+
   }
-  
-  
-  
+
+
+
   // Cleanup.
   delete[] edges;
   delete[] weights;
-  
+
   cout << Time() << ": FindSpanningTree: Trunk length = " << trunk_size << endl;
   assert( !best_tree.empty() );
-  
+
   return best_tree;
 }
 
@@ -1403,16 +1397,16 @@ ChromLinkMatrix::SmoothThornsInTree( vector< vector<int> > & tree ) const
 {
   cout << Time() << ": SmoothThornsInTree...\t";
   assert( (int) tree.size() == _N_contigs );
-  
+
   int N_smoothed = 0;
   const double aggression = 3.0; // HEUR: parameter; 1.0 is most aggressive
-  
+
   // First, look for thorns.  Loop over all nodes A that might be thorns.
   // NOTE: Because we modify the tree in place within each iteration, the overall result could be affected by the contig ordering.
-  
+
   for ( int A = 0; A < _N_contigs; A++ ) {
     if ( tree[A].size() != 1 ) continue;
-    
+
     // Find the nodes B,C,D.  Verify that the structure in this area is appropriate for a thorn.
     int B = tree[A][0];
     if ( tree[B].size() != 3 ) continue;
@@ -1422,19 +1416,19 @@ ChromLinkMatrix::SmoothThornsInTree( vector< vector<int> > & tree ) const
       ( C == -1 ? C : D ) = tree[B][i];
     }
     if ( tree[C].size() == 1 || tree[D].size() == 1 ) continue;
-    
-    
+
+
     // Consider the net change that would happen from smoothing this thorn in either of the two possible ways (designated "AC" and "AD".)
     double N_links_AC = LinkDensity(A,C) - LinkDensity(B,C);
     double N_links_AD = LinkDensity(A,D) - LinkDensity(B,D);
-    
+
     // Pick which change, if either, to apply.  0 = neither; 1 = AC; 2 = AD
     int choice = 0;
-    
+
     // Most of the time, the change will be negative (since the graph was created with the thorn).  If a change is non-negative, go with it.
     if ( N_links_AC >= 0 || N_links_AD >= 0 )
       choice = ( N_links_AC > N_links_AD ? 1 : 2 );
-    
+
     // If both changes would have a net negative effect, take one of them if its negative effect is much less than the other's.
     // If the fold difference in their effects is less than <aggression>, leave the thorn as is.
     else {
@@ -1442,14 +1436,14 @@ ChromLinkMatrix::SmoothThornsInTree( vector< vector<int> > & tree ) const
       if      ( change_ratio < 1/aggression ) choice = 1;
       else if ( change_ratio >   aggression ) choice = 2;
     }
-    
+
     //cout << "THORNY SITUATION:\t(C,B,D) = (" << C << "," << B << "," << D << ")\tA = " << A << "\tN_links_AC = " << N_links_AC << "\tN_links_AD = " << N_links_AD << "\tCHANGE RATIO = " << (N_links_AC/N_links_AD) << "\tCHOICE = " << choice << endl;
-    
-    
+
+
     // Apply the change!
     if ( choice != 0 ) {
       N_smoothed++;
-      
+
       int CorD = choice == 1 ? C : D;
       tree[B]   .erase( find( tree[B]   .begin(), tree[B]   .end(), CorD ) );
       tree[CorD].erase( find( tree[CorD].begin(), tree[CorD].end(), B ) );
@@ -1457,8 +1451,8 @@ ChromLinkMatrix::SmoothThornsInTree( vector< vector<int> > & tree ) const
       tree[CorD].push_back(A);
     }
   }
-  
-  
+
+
   cout << "N thorns smoothed: " << N_smoothed << endl;
 }
 
@@ -1478,12 +1472,12 @@ ChromLinkMatrix::TreeTrunk( const vector< vector<int> > & tree, const bool verbo
   vector<int> longest_path = find_longest_path( tree );
   if ( _N_contigs == 1 ) longest_path.push_back(0); // handle the trivial case
   ContigOrdering trunk( _N_contigs, longest_path );
-  
+
   if ( verbose ) {
     cout << "Trunk:\t";
     ReportOrderingSize( trunk );
   }
-  
+
   return trunk;
 }
 
@@ -1506,42 +1500,42 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
 {
   bool verbose = false;
   assert ( !_contig_RE_sites.empty() );
-  
+
   cout << Time() << ": ReinsertShreds with use_CP_score = " << boolalpha << use_CP_score << ", CP_score_dist = " << _CP_score_dist << endl;
-  
+
   assert( _N_contigs == (int) tree.size() );
-  
+
   // Handle a degenerate case that sometimes produces odd results.
   if ( _N_contigs == 1 ) return ContigOrdering( 1, true );
-  
-  
+
+
   vector<int> longest_path = find_longest_path( tree ); // this is redundant but oh well
   ContigOrdering order( _N_contigs, longest_path );
-  
-  
+
+
   // 3. Repeat this pruning and shred the tree into a set of linear paths, by repeatedly finding the longest path and then pruning that path.
   vector< vector<int> > shreds;
   int n_nodes_left = _N_contigs;
   vector<bool> nodes_left( _N_contigs, true );
-  
+
   while ( 1 ) {
-    
+
     // Excise the longest path from the graph, along with any links to other nodes.
     for ( size_t i = 0; i < longest_path.size(); ++i ) {
       int node = longest_path[i];
-      
+
       assert( nodes_left[node] );
       nodes_left[node] = false;
       n_nodes_left--;
-      
+
       for ( size_t j = 0; j < tree[node].size(); ++j ) {
 	vector<int> & j_adjs = tree[ tree[node][j] ];
 	j_adjs.erase( remove( j_adjs.begin(), j_adjs.end(), node ), j_adjs.end() );
       }
       tree[node].clear();
     }
-    
-    
+
+
     // Find one of the longest remaining paths in the reduced graph.
     // Technically the longest_path function is guaranteed to find one of the longest paths (in case of a tie) in one of the components of the graph.
     // If longest_path returns an empty path, there are no non-trivial paths left, and we're done.
@@ -1553,16 +1547,16 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
     //  cout << '\t' << longest_path[i];
     //cout << endl;
   }
-  
-  
-  
+
+
+
   // Examine the singleton shreds.  Every contig with no data should be in a singleton shred, but there may also be other singleton shreds.
   vector<bool> contigs_used = ContigsUsed(false);
   for ( int i = 0; i < _N_contigs; i++ ) {
     if ( !contigs_used[i] ) assert( nodes_left[i] );
     if ( nodes_left[i] && contigs_used[i] ) shreds.push_back( vector<int>( 1, i ) );
   }
-  
+
   cout << "Singleton shreds (" << n_nodes_left << "):";
   for ( size_t i = 0; i < nodes_left.size(); i++ )
     if ( nodes_left[i] ) {
@@ -1570,19 +1564,19 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
       else cout << "\t(" << i << ")";
     }
   cout << endl;
-  
-  
+
+
   // 4. Reinsert the linear "shreds" into the ContigOrdering, each time simply finding the optimal point at which to insert them.
   // Note that we are reinserting them in decreasing order of their size.
   cout << Time() << ": Reinserting " << shreds.size() << " shreds" << endl;
-  
+
   for ( size_t i = 0; i < shreds.size(); i++ ) {
     vector<int> shred = shreds[i];
     int shred_start = shred[0];
     int shred_end   = shred.back();
     if ( verbose ) { cout << Time() << ": Adding shred #" << i << ":"; for ( size_t j=0; j < shred.size(); j++ ) cout << '\t' << shred[j]; cout << endl; }
-    
-    
+
+
     int shred_len = 0;
     for ( size_t j = 0; j < shred.size(); j++ )
       shred_len += ( _contig_RE_sites.empty() ? _contig_lengths[ shred[j] ] : _contig_RE_sites[ shred[j] ] );
@@ -1594,22 +1588,22 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
       if ( verbose ) cout << "FAIL!\n";
       continue;
     }
-    
-    
+
+
     // Consider all possible positions and orientations in which to insert this shred.
     // Find the position with the most data (immediate links) in support of it.
     double best_N_links = 0;
     double best_score = 0;
     int best_j = -1;
     bool best_rc = false;
-    
+
     for ( int j = 0; j <= order.N_contigs_used(); j++ ) {
-      
+
       for ( int rc = 0; rc < 2; rc++ ) {
 	if ( rc && shred_start == shred_end ) continue; // no need to reverse singletons
 	if ( verbose ) cout << "Adding at position " << j << " with " << ( rc ? "RC" : "FW" ) << " orientation" << endl;
-	
-	
+
+
 	if ( use_CP_score ) {
 	  ContigOrdering order_plus = order;
 	  order_plus.AddContigs( shred, j );
@@ -1622,41 +1616,41 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
 	    best_rc = bool(rc);
 	  }
 	}
-	
+
 	else {
-	  
+
 	  // Count the NET number of Hi-C links in the adjacencies created by inserting this shred here.
 	  // Note the edge cases: Inserting the shred at the very beginning or ending only creates one adjacency, but doesn't destroy any adjacencies.
 	  double N_links = 0;
 	  int cID_prev  = j-1 < 0                       ? -1 : order.contig_ID(j-1);
 	  int cID_next  = j   >= order.N_contigs_used() ? -1 : order.contig_ID(j);
 	  if (rc) { int swap = cID_prev; cID_prev  = cID_next; cID_next  = swap; }
-	  
+
 	  if ( cID_prev  != -1 )                    N_links += LinkDensity( cID_prev, shred_start );
 	  if ( cID_next  != -1 )                    N_links += LinkDensity( cID_next, shred_end );
 	  if ( cID_prev  != -1 && cID_next  != -1 ) N_links -= LinkDensity( cID_prev, cID_next );
-	  
-	  
+
+
 	  if ( N_links > best_N_links ) {
 	    best_N_links = N_links;
 	    best_j = j;
 	    best_rc = bool(rc);
 	  }
-	  
+
 	  if ( verbose ) cout << "Total (normalized) number of net links supporting this mofo: " << N_links << endl;
 	}
       }
     }
-    
-    
+
+
     if ( verbose ) cout << "Best stuff: N_links = " << ( use_CP_score ? best_score : best_N_links ) << " from j=" << best_j << ", rc=" << int(best_rc) << endl;
-    
+
     if ( best_rc ) reverse( shred.begin(), shred.end() );
     order.AddContigs( shred, best_j );
   }
-  
-  
-  
+
+
+
   return order;
 }
 
@@ -1668,16 +1662,16 @@ void
 ChromLinkMatrix::OrientContigs( ContigOrdering & order ) const
 {
   cout << Time() << ": OrientContigs" << endl;
-  
+
   // Build a WDAG (Weighed Directed Acyclic Graph) representing all possible ways to orient contigs in this ContigOrdering
   WDAG wdag = order.OrientationWDAG( this );
-  
+
   // Compute the highest-weight path on this WDAG.
   wdag.FindBestPath();
   //wdag.WriteToFile("wdag.txt");
   vector<int> best_node_IDs = wdag.BestNodeIDs();
   assert( (int) best_node_IDs.size() == order.N_contigs_used() + 2 ); // path includes start,end nodes
-  
+
   // Use the node IDs of the highest-weight path to determine which contigs should be flipped.
   // Due to the node ID numbering, an even node ID indicates that a contig should be flipped.
   for ( int i = 1; i+1 < (int) best_node_IDs.size(); i++ ) {
@@ -1685,15 +1679,15 @@ ChromLinkMatrix::OrientContigs( ContigOrdering & order ) const
     assert( node_ID == 2*i-1 || node_ID == 2*i );
     if ( node_ID == 2*i ) order.Invert(i-1);
   }
-  
-  
+
+
   // Calculate quality scores for each contig's orientation.  The quality score is defined as the relative likelihood that the contig belongs in its chosen
   // orientation rather than the opposite, given its neighbors' orientations and the links it shares with them.
   for ( int i = 0; i < order.N_contigs_used(); i++ ) {
-    
+
     int  ID = order.contig_ID(i);
     bool rc = order.contig_rc(i);
-    
+
     // Calculate the log-likelihood of the data, given the orientation as we see it, and the log-likelihood of the data, if this contig were flipped.
     // We must be careful to handle edge cases.
     double LL = 0, LL_alt = 0;
@@ -1705,19 +1699,19 @@ ChromLinkMatrix::OrientContigs( ContigOrdering & order ) const
       LL     += ContigOrientLogLikelihood( ID,  rc, order.contig_ID(i+1), order.contig_rc(i+1) );
       LL_alt += ContigOrientLogLikelihood( ID, !rc, order.contig_ID(i+1), order.contig_rc(i+1) );
     }
-    
+
     // The difference between log-likelihoods describes how much statistical confidence is behind our call of this contig's orientation.
     double diff = LL - LL_alt;
     assert( diff >= 0 ); // if this fails, the WDAG hasn't done its job properly - there's a bug somewhere
-    
+
     //double ratio = LL_alt / LL;
     //PRINT5( i, LL, LL_alt, diff, ratio );
-    
+
     // Load the quality score into the ContigOrdering.
     order.AddOrientQ( i, diff );
-    
+
   }
-  
+
 }
 
 
@@ -1731,9 +1725,9 @@ ChromLinkMatrix::InitMatrix()
 {
   assert( !_matrix_init );
   assert( _N_contigs > 0 );
-  
+
   int N_bins = 2 * _N_contigs; // each contig gets 2 bins: one for each of its possible orientations
-  
+
   // Initialize the matrix of data.  If the matrices are big, the machine may run out of memory, so catch that error.
   try {
     _matrix = new vector<int> * [N_bins];
@@ -1747,15 +1741,15 @@ ChromLinkMatrix::InitMatrix()
     cerr << "ERROR: Sorry, there's not enough memory to allocate for this ChromLinkMatrix!  Try running on a machine with more RAM.\nbad_alloc error message: " << ba.what() << endl;
     exit(1);
   }
-  
-  
+
+
   _matrix_init = true;
 }
 
 
 
 
- 
+
 
 // De-allocate memory for the matrix of data.
 void
@@ -1763,7 +1757,7 @@ ChromLinkMatrix::FreeMatrix()
 {
   assert( _matrix_init );
   _matrix_init = false;
-  
+
   for ( int i = 0; i < 2 * _N_contigs; i++ )
     delete[] _matrix[i];
   delete[] _matrix;
@@ -1778,22 +1772,22 @@ ChromLinkMatrix::LoadRESitesFile( const string & RE_sites_file )
 {
   cout << Time() << ": Loading contig RE lengths for use in normalization <-\t" << RE_sites_file << endl;
   assert ( DeNovo() );
-  
+
   if ( RE_sites_file == "." ) {
     cerr << "WARNING: Tried to load an RE_sites_file with the name `.'.  Is this taken from a CLM file with no RE_sites_file listed?  Can't normalize to RE sites." << endl;
     return;
   }
-  
+
   // Get token 1 (zero-indexed) from each line of the lengths file.
   _contig_RE_sites = ParseTabDelimFile<int>( RE_sites_file, 0 );
-  
+
   // If this assert fails, the input RE_sites_file is inconsistent with the original dataset (wrong number of contigs).
   assert( (int) _contig_RE_sites.size() == _N_contigs );
-  
+
   // Add 1 to all length to prevent dividing by 0 (some short assembly contigs have no restriction sites)
   for ( int i = 0; i < _N_contigs; i++ )
     _contig_RE_sites[i]++;
-  
+
   // Find the most REs in one contig.  Note that this occurs after adding 1 to lengths.
   _most_contig_REs = *( max_element( _contig_RE_sites.begin(), _contig_RE_sites.end() ) );
 }
@@ -1811,8 +1805,8 @@ ChromLinkMatrix::AddLinkToMatrix( const int contig1, const int contig2, const in
   // Set a minimum offset.  This prevents distances from being equal to 0, which is good because that leads to division-by-0 errors in OrderingScore().
   // To be pedantically accurate, we would want to set OFFSET to twice the read length, but the read length currently isn't tracked.
   static const int OFFSET = 100;
-  
-  
+
+
   /* In this ASCII illustration, read1_dist1 = 8, read1_dist2 = 2, read2_dist1 = 1, read2_dist2 = 9.
    *
    * fw, fw:          R----R               fw, rc:          R------------R
@@ -1831,8 +1825,8 @@ ChromLinkMatrix::AddLinkToMatrix( const int contig1, const int contig2, const in
   int dist_fw_rc = read1_dist2 + read2_dist2 + OFFSET;
   int dist_rc_fw = read1_dist1 + read2_dist1 + OFFSET;
   int dist_rc_rc = read1_dist1 + read2_dist2 + OFFSET;
-  
-  
+
+
   // Record all four distances in the 2-D matrix object for this ChromLinkMatrix.
   // The conversion from contig ID to bin ID is: bin ID = 2 * contig ID + (1 if rc)
   // Note that the matrix is filled in a symmetric fashion, and should always remain symmetric.
@@ -1844,7 +1838,7 @@ ChromLinkMatrix::AddLinkToMatrix( const int contig1, const int contig2, const in
   _matrix[2*contig2  ][2*contig1+1].push_back( dist_fw_rc );
   _matrix[2*contig2+1][2*contig1  ].push_back( dist_rc_fw );
   _matrix[2*contig2  ][2*contig1  ].push_back( dist_rc_rc );
-  
+
 }
 
 
@@ -1857,17 +1851,17 @@ ChromLinkMatrix::CalculateRepeatFactors()
   assert(0); // TEMP: not used at the moment, buggy in fragScaff cases, screw it
   cout << Time() << ": CalculateRepeatFactors for normalization" << endl;
   assert( DeNovo() );
-  
+
   _repeat_factors.clear();
   _repeat_factors.resize( _N_contigs );
-    
+
   // Find the number of Hi-C links on each contig.  This is as simple as adding rows/columns in the matrix.  Also calculate the total sum.
   int64_t N_links_total = 0;
   vector<int64_t> N_links( _N_contigs, 0 );
-  
+
   for ( int i = 0; i < _N_contigs; i++ )
     assert( _contig_RE_sites[i] > 0 ); // not sure why this would fail
-  
+
   for ( int i = 0; i < _N_contigs; i++ )
     for ( int j = 0; j < _N_contigs; j++ )
       if ( !_matrix[2*i][2*j].empty() ) {
@@ -1879,14 +1873,14 @@ ChromLinkMatrix::CalculateRepeatFactors()
 	N_links[i]    += N_links_norm;
 	N_links[j]    += N_links_norm;
       }
-  
+
   // Calculate the 'average' number of links.
   double N_links_avg = 2.0 * N_links_total / _N_contigs;
-  
+
   for ( int i = 0; i < _N_contigs; i++ )
     _repeat_factors[i] = N_links[i] / N_links_avg;
-  
-  
+
+
   // Write to file so that Reporter::EvalGapSizes can access these.
   cout << Time() << ": Writing to RFs.txt" << endl;
   ofstream out( "RFs.txt", ios::out );
@@ -1903,11 +1897,11 @@ ChromLinkMatrix::LinkDensity( const int contig1, const int contig2 ) const
 {
   double N_links = _matrix[ 2*contig1 ][ 2*contig2 ].size();
   if ( !DeNovo() ) return N_links;
-  
+
   //N_links /= ( _repeat_factors[contig1] * _repeat_factors[contig2] );
   //return N_links; // TEMP: should already be effectively normalized by contig length/RE sites thru repeat_factor
-  
-  // Normalize by contig length, 
+
+  // Normalize by contig length,
   const bool use_REs = !_contig_RE_sites.empty();
   if ( use_REs )
     return N_links * _most_contig_REs / _contig_RE_sites[contig1] * _most_contig_REs / _contig_RE_sites[contig2];
@@ -1920,19 +1914,19 @@ ChromLinkMatrix::LinkDensity( const int contig1, const int contig2 ) const
 
 
 
-// PlotTree: Use grpahviz to print a spanning tree to a graph image at ~/public_html/<filename>.
+// PlotTree: Use grpahviz to print a spanning tree to a graph image at out/<filename>.
 // Note that graphviz is very slow for large graphs, and the output images themselves are sometimes so large as to cause memory problems.
 // Hence this is NOT RECOMMENDED for graphs with over 500 vertices.
 void
 ChromLinkMatrix::PlotTree( const vector< vector<int> > & tree, const string & filename ) const
 {
   assert( (int) tree.size() == _N_contigs );
-  cout << Time() << ": PlotTree: Drawing an image of this spanning tree at ~/public_html/" << filename << endl;
-  
-  
+  cout << Time() << ": PlotTree: Drawing an image of this spanning tree at out/" << filename << endl;
+
+
   if ( _N_contigs >= 500 ) cerr << "WARNING: Called ChromLinkMatrix::PlotTree on a large tree of size " << _N_contigs << "; this may take a while, and the output file " << filename << " will take a long time to open" << endl;
   if ( filename.substr( filename.size() - 4, 4 ) != ".png" ) cerr << "WARNING: Called ChromLinkMatrix::PlotTree to make a file called " << filename << "; filename should end in `.png'" << endl;
-       
+
   // Make a dot file and then an image of the spanning tree.
   ofstream out( ( filename + ".dot" ).c_str(), ios::out );
   out << "graph G {\n";
@@ -1943,8 +1937,8 @@ ChromLinkMatrix::PlotTree( const vector< vector<int> > & tree, const string & fi
 	out << i << "--" << tree[i][j] << ";\n";
   out << "}\n";
   out.close();
-  
-  string cmd = "dot -Tpng " + filename + ".dot > ~/public_html/" + filename;
+
+  string cmd = "dot -Tpng " + filename + ".dot > out/" + filename;
   system( cmd.c_str() );
 }
 
@@ -1960,11 +1954,11 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
   assert( order.N_contigs() == _N_contigs );
   assert( _N_contigs == (int) enrichments.size() );
   assert( order.gap_size(pos) == -1 ); // this gap size shouldn't already be estimated!
-  
+
   const int MAX_DIST = 1e7; // HEUR: the maximum range at which to consider links; a gap will never be found beyond this size, nor will the links between contigs at a distance greater than this be considered
   const int D_step = 1000; // HEUR: this affects algorithm runtime
-  
-  
+
+
   // We're going to merge contig #pos and contig #pos+1, but each of these contigs may belong to a scaffold-in-progress with multiple contigs separated by
   // gaps whose sizes have already been estimated (hopefully accurately).  Hence we have more information than just the links between these two contigs; we
   // can examine the links between all contigs in the scaffolds-in-progress!
@@ -1975,7 +1969,7 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
   int s1_size = pos - s1_start + 1;
   int s2_size = s2_stop - pos;
   //PRINT7( pos, pos+1, order.contig_ID(pos), s1_start, s2_stop, s1_size, s2_size );
-  
+
   // Now determine, for each pair of contigs within the scaffold-in-progress, the "extra distance" between the contigs that is implied by the other contigs
   // and gaps within the scaffolds-in-progress.
   // For each contig, we calculate the extra distance associated with that contig's length (and its adjacent gap's size); then we record this extra distance
@@ -1989,7 +1983,7 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
 	if ( extra_dists[j][k] + extra_dist < 0 ) extra_dists[j][k] = INT_MAX; // prevent integer overflow
 	else extra_dists[j][k] += extra_dist;
   }
-  
+
   for ( int i = 1; i < s2_size; i++ ) {
     int extra_dist = _contig_lengths[pos+i+1] + order.gap_size(pos+i);
     //PRINT6( i, pos+i, order.contig_ID(pos+i+1), _contig_lengths[pos+i+1], order.gap_size(pos+i), extra_dist );
@@ -1998,24 +1992,24 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
 	if ( extra_dists[j][k] + extra_dist < 0 ) extra_dists[j][k] = INT_MAX; // prevent integer overflow
 	else extra_dists[j][k] += extra_dist;
   }
-  
+
   /*
   for ( int i = 0; i < s1_size; i++ )
     for ( int j = 0; j < s2_size; j++ )
       PRINT3( i, j, extra_dists[i][j] );
   */
-  
+
   vector< vector<double> > worsts( s1_size, vector<double>( s2_size, 0 ) );
-  
-  
+
+
   // The maximum value of D is defined by the maximum observed intra-contig link lengths.
   // This guarantees that no link will be considered with a range greater than _MAX_LINK_DIST, which keeps the LinkBin() function safe.
   //int MAX_D = LinkSizeDistribution::_MAX_LINK_DIST;
-  
+
   int best_D = -1;
   double best_log_likelihood = -INT_MAX;
-  
-  
+
+
   // Find the maximum number of links that we'll ever have to deal with between two contigs.
   int max_N_links = 0;
   for ( int i = s1_start; i <= pos; i++ )
@@ -2024,87 +2018,87 @@ ChromLinkMatrix::FindGapSize( const ContigOrdering & order, const int pos, const
       if ( N_links > max_N_links ) max_N_links = N_links;
     }
   PRINT( max_N_links );
-  
-  
+
+
   // As a pre-calculation step, find the logarithms of factorials.
   // This could go in a separate function to save runtime, but I tested it and the savings are pretty minimal.
   vector<double> log_factorial( max_N_links + 1, 0 );
   for ( int j = 2; j <= max_N_links; j++ )
     log_factorial[j] = log_factorial[j-1] + log(j);
-  
-  
+
+
   // TEMP: Try an exhaustive search first.  It's slow but will find a good answer.
   // Once this works, we'll implement the more complicated but faster binary-search method in LinkSizeDistribution::FindDistanceBetweenLinks().
   for ( int D = 0; D < MAX_DIST; D += D_step ) {
-    
-    
+
+
     // We are contemplating a gap size of D between contig #pos and contig #pos+1.
     // We must calculate the total log-likelihood of this gap size based on all available information - i.e., the various contigs in the scaffolds-in-progress
     // being merged.  Hence we must find the log-likelihoods of all pairwise link distributions between contigs in the first and second scaffold-in-progress.
     double log_likelihood = 0;
-    
+
     for ( int i = 0; i < s1_size; i++ )
       for ( int j = 0; j < s2_size; j++ ) {
-	
+
 	// Skip cases where contigs are far apart; these could be confounded by genuine long-range interactions.
 	// However they must still count against this possible D-value in the log likelihood score.
 	if ( D + extra_dists[i][j] > MAX_DIST ) {
 	  log_likelihood += worsts[i][j];
 	  continue;
 	}
-	
+
 	int pos1 = pos - i;
 	int pos2 = pos + 1 + j;
 	int contig1 = order.contig_ID(pos1);
 	int rc1     = order.contig_rc(pos1);
 	int contig2 = order.contig_ID(pos2);
 	int rc2     = order.contig_rc(pos2);
-	
+
 	const int & L1 = _contig_lengths[contig1];
 	const int & L2 = _contig_lengths[contig2];
-	
+
 	// Find the links between these two contigs.  Adjust them as necessary to take them account the extra distance between the contigs on their scaffolds.
 	vector<int> links = _matrix[ 2*contig1+rc1 ] [ 2*contig2+rc2 ];
 	for ( size_t k = 0; k < links.size(); k++ )
 	  if ( links[k] + extra_dists[i][j] < 0 ) links[k] = INT_MAX; // prevent integer overflow
 	  else links[k] += extra_dists[i][j];
-	
-	
+
+
 	// Find the local LDE (link density enrichment).  It's a weighted product of the LDEs of each contig.
 	double local_LDE = pow( enrichments[contig1], double(2*L1)/(L1+L2) ) * pow( enrichments[contig2], double(2*L2)/(L1*L2) );
-	
+
 	// Finally, find the log-likelihood contribution from this pair of contigs.
 	double this_ll = lsd.log_likelihood_D( D, L1, L2, local_LDE, links, log_factorial );
 	//PRINT4( D, i, j, this_ll );
 	if ( this_ll < worsts[i][j] ) worsts[i][j] = this_ll;
 	log_likelihood += this_ll;
-	
+
       }
-    
+
     PRINT2( D, log_likelihood );
-    
-    
+
+
     // Record the value of D that gives the best log-likelihood.
     if ( log_likelihood > best_log_likelihood ) {
       best_log_likelihood = log_likelihood;
       best_D = D;
     }
-    
+
   }
-  
+
   PRINT2( best_D, best_log_likelihood );
   return best_D;
 }
 
 
- 
+
 
 // ReportOrderingSize: Report about the number and length of contigs in this ContigOrdering, compared to the total set of contigs in this CLM.
 void
 ChromLinkMatrix::ReportOrderingSize( const ContigOrdering & order ) const
 {
   int64_t order_length = 0, total_contig_length;
-  
+
   if ( DeNovo() ) {
     total_contig_length = std::accumulate( _contig_lengths.begin(), _contig_lengths.end(), int64_t(0) );
     for ( int i = 0; i < order.N_contigs_used(); i++ )
@@ -2114,10 +2108,10 @@ ChromLinkMatrix::ReportOrderingSize( const ContigOrdering & order ) const
     total_contig_length = _contig_size * order.N_contigs();
     order_length        = _contig_size * order.N_contigs_used();
   }
-  
+
   double pct_used   = 100.0 * order.N_contigs_used() / _N_contigs;
   double pct_length = 100.0 * order_length / total_contig_length;
-  
+
   cout << "Order contains " << order.N_contigs_used() << " of " << _N_contigs << " contigs (" << pct_used << "%), with a total length of " << order_length << " of " << total_contig_length << " (" << pct_length << "%)." << endl;
 }
 
@@ -2139,21 +2133,21 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
 {
   assert( CLMs.size() == clusters.size() );
   int N_clusters = clusters.size();
-  
+
   bool verbose = true;
-  
-  
+
+
   // Find the lengths of all of the de novo contigs.  This tells us how many de novo contigs there are in the total dataset.
   vector<int> contig_lengths_orig  = TargetLengths( SAM_file );
   vector<int> contig_RE_sites_orig = ParseTabDelimFile<int>( RE_sites_file, 1 );
   int N_contigs_total = contig_lengths_orig.size();
-  
+
   // For each ChromLinkMatrix that we're actually creating, make a lookup table of the lengths and number of RE sites in the contigs in this cluster.
   vector<int> used;
   for ( int i = 0; i < N_clusters; i++ ) {
     if ( CLMs[i] == NULL ) continue;
     used.push_back(i);
-    
+
     CLMs[i]->_contig_lengths .clear();
     CLMs[i]->_contig_RE_sites.clear();
     for ( set<int>::const_iterator it = clusters[i].begin(); it != clusters[i].end(); ++it ) {
@@ -2164,13 +2158,13 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     CLMs[i]->FindLongestContig();
     CLMs[i]->_SAM_files.push_back( SAM_file ); // keep track of which SAM files were used to generate this matrix
   }
-  
+
   cout << Time() << ": Filling "
        << ( used.size() == 1 ? "cluster " + boost::lexical_cast<string>( used[0] ) : boost::lexical_cast<string>( used.size() ) + " clusters" )
        << " with Hi-C data from SAM file " << SAM_file
        << ( verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
-  
-  
+
+
   // Convert the clusters vector into two lookup tables, which map contig IDs to cluster IDs, and also onto "local" contig indices for the cluster.
   // For example, if there are 8 contigs in two clusters: {0,2,5,6} and {1,3,7}, then the cluster_IDs table will look like this: [ 0, 1, 0, 1, -1, 0, 0, 1 ].
   // The local_cIDs lookup table will look like this for cluster #0: [0, -1, 1, -1, -1, 2, 3, -1] and like this for cluster #1: [-1, 0, -1, 1, -1, -1, -1, 2].
@@ -2183,8 +2177,8 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
       local_cIDs [*it] = ID[i]++;
     }
   }
-  
-  
+
+
   /*
   for ( int i = 0; i < N_contigs_total; i++ )
     PRINT3( i, cluster_IDs[i], local_cIDs[i] );
@@ -2193,27 +2187,27 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
   for ( int i = 0; i < N_clusters; i++ )
     PRINT( CLMs[i] );
   */
-  
-  
-  
+
+
+
   int N_pairs_used = 0;
-  
+
   // Set up a SAMStepper object to read in the alignments.
   SAMStepper stepper(SAM_file);
   stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the assembly.
-  
+
   // Loop over all pairs of alignments in the SAM file.
   // Note that the next_pair() function assumes that all reads in a SAM file are paired, and the two reads in a pair occur in consecutive order.
   for ( pair< bam1_t *, bam1_t *> aligns = stepper.next_pair(); aligns.first != NULL; aligns = stepper.next_pair() ) {
-    
+
     if ( verbose && stepper.N_aligns_read() % 1000000 == 0 ) cout << "." << flush;
-    
+
     const bam1_core_t & c1 = aligns.first->core;
     const bam1_core_t & c2 = aligns.second->core;
-    
+
     // Ignore reads with mapping quality 0.  (In the GSM862723 dataset this is roughly 4% of reads.)
     if ( c1.qual == 0 || c2.qual == 0 ) continue;
-    
+
     // Sanity checks to make sure the read pairs appear as they should in the SAM file.
     // If one of these asserts fails, there is an internal inconsistency in the SAM file.  Maybe the file is truncated or it has an incorrect header?
     //cout << stepper.as_SAM_line(aligns.first) << endl << stepper.as_SAM_line(aligns.second) << endl << endl;
@@ -2223,7 +2217,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     assert( c2.pos == c1.mpos );
     assert( c1.tid < N_contigs_total );
     assert( c2.tid < N_contigs_total );
-    
+
     // Find what contigs these reads map to, and which clusters they belong to.
     // We only care about this link if both reads align, to contigs in the same cluster, and that cluster is one of the non-NULL ones that we're building.
     int cluster  = cluster_IDs[c1.tid];
@@ -2231,7 +2225,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     if ( cluster  == -1 ) continue;
     if ( cluster  != cluster2 ) continue;
     if ( CLMs[cluster] == NULL ) continue;
-    
+
     // If the two reads align to the exact same contig, the link isn't informative, so skip it.
     if ( c1.tid == c2.tid ) { // TEMP: allow these links so LinkSizeDistribution can do its stuff
       int dist = abs( c2.pos - c1.pos );
@@ -2239,7 +2233,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
       CLMs[cluster]->_matrix[x][x].push_back( dist );
       continue;
     }
-    
+
     // For each read, find the distance to either end of its contig.
     int read1_dist1 = c1.pos;
     int read2_dist1 = c2.pos;
@@ -2247,17 +2241,17 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     int read2_dist2 = contig_lengths_orig[c2.tid] - c2.pos;
     assert( read1_dist2 >= 0 );
     assert( read2_dist2 >= 0 );
-    
+
     // Add the link to the matrix object.
     //cout << "Adding link to cluster #" << cluster << endl;
     CLMs[cluster]->AddLinkToMatrix( local_cIDs[c1.tid], local_cIDs[c2.tid], read1_dist1, read1_dist2, read2_dist1, read2_dist2 );
-    
+
     N_pairs_used++;
   }
-  
+
   if ( verbose ) cout << endl;
-  
-  
+
+
   //for ( int i = 0; i < N_clusters; i++ )
   //CLMs[i]->CalculateRepeatFactors();
 }
@@ -2274,13 +2268,13 @@ void
 LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLMs )
 {
   const bool verbose = true; // verbosely read in the file
-  
+
   cout << Time() << ": Reading Hi-C data from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
   assert( boost::filesystem::is_regular_file( SAM_file ) );
-  
+
   int N_chroms = NTargetsInSAM( SAM_file );
   assert( N_chroms == (int) CLMs.size() ); // if this fails, the CLMs vector doesn't have a number of elements equal to the number of chromosomes
-  
+
   // Gather up stats on each ChromLinkMatrix object for local use.
   bool has_data = false;
   vector<int> N_contigs   ( N_chroms, -1 );
@@ -2290,80 +2284,80 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
       N_contigs   [chrID] = CLMs[chrID]->_N_contigs;
       contig_sizes[chrID] = CLMs[chrID]->_contig_size;
       CLMs[chrID]->_SAM_files.push_back( SAM_file ); // keep track of which SAM files were used to generate this matrix
-      
+
       has_data = true;
     }
-  
-  
+
+
   if (!has_data) {
     cout << "WARNING: Called LoadNonDeNovoCLMsFromSAM with no non-NULL LinkMatrix objects.  Nothing will happen.  Skipping." << endl;
     return;
   }
-  
-  
-  
-  
+
+
+
+
   int N_pairs_used = 0;
-  
+
   // Set up a SAMStepper object to read in the alignments.
   SAMStepper stepper(SAM_file);
   stepper.FilterAlignedPairs(); // Only look at read pairs where both reads aligned to the reference.
-  
+
   // Loop over all pairs of alignments in the SAM file.
   // Note that the next_pair() function assumes that all reads in a SAM file are paired, and the two reads in a pair occur in consecutive order.
   for ( pair< bam1_t *, bam1_t *> aligns = stepper.next_pair(); aligns.first != NULL; aligns = stepper.next_pair() ) {
-    
+
     if ( verbose && stepper.N_aligns_read() % 1000000 == 0 ) cout << "." << flush;
-    
+
     const bam1_core_t & c1 = aligns.first->core;
     const bam1_core_t & c2 = aligns.second->core;
-    
+
     // Sanity checks to make sure the read pairs appear as they should in the SAM file.
     assert( c1.tid == c2.mtid );
     assert( c2.tid == c1.mtid );
     assert( c1.pos == c2.mpos );
     assert( c2.pos == c1.mpos );
-    
+
     // Ignore the oddly large number of cases where both reads map to the same location.  (Maybe these are cases in which really only one read mapped?  Dunno.)
     if ( c1.pos == c2.pos ) continue;
     // Only select one half of each read pair.  This breaks symmetry and therefore has a small stochastic effect in the odd situations of unmatched read pairs.
     if ( c1.pos >  c2.pos ) continue;
-    
+
     // Ignore reads with mapping quality 0.  (In the GSM862723 dataset this is roughly 4% of reads.)
     if ( c1.qual == 0 || c2.qual == 0 ) continue;
-    
+
     if ( c1.tid != c2.tid ) continue; // skip interchromosomal links
     if ( c1.tid >= N_chroms ) continue; // skip links on non-canonical chromosomes
     if ( !CLMs[c1.tid] ) continue; // skip links on chromosomes for which we have no ChromLinkMatrix object
-    
+
     // Find the contig IDs for these reads.  This determines in what bins the distance between them will be stored.
     int contig_size = contig_sizes[c1.tid];
     int contig1 = c1.pos / contig_size;
     int contig2 = c2.pos / contig_size;
-    
+
     // Ignore cases in which both reads map to the same contig, because these are uninformative for scaffolding.
     if ( contig1 == contig2 ) continue;
-    
+
     assert( contig1 < N_contigs[c1.tid] );
     assert( contig2 < N_contigs[c1.tid] );
-    
+
     // For each read, find the distance to either end of its contig.
     int read1_dist1 = c1.pos - contig1 * contig_size;
     int read2_dist1 = c2.pos - contig2 * contig_size;
     int read1_dist2 = (contig1+1) * contig_size - c1.pos;
     int read2_dist2 = (contig2+1) * contig_size - c2.pos;
-    
+
     // Add the link to the matrix object of the appropriate ChromLinkMatrix.
     CLMs[c1.tid]->AddLinkToMatrix( contig1, contig2, read1_dist1, read1_dist2, read2_dist1, read2_dist2 );
-    
+
     N_pairs_used++;
-    
+
   }
-  
+
   if ( verbose ) cout << endl;
-  
+
   cout << Time() << ": Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << "; N pairs used: " << N_pairs_used << endl;
-  
+
   //for ( int i = 0; i < N_chroms; i++ )
   //CLMs[i]->CalculateRepeatFactors();
 }
@@ -2389,4 +2383,3 @@ LoadNonDeNovoCLMsFromSAM( const vector<string> & SAM_files, vector<ChromLinkMatr
   for ( size_t i = 0; i < SAM_files.size(); i++ )
     LoadNonDeNovoCLMsFromSAM( SAM_files[i], CLMs );
 }
-

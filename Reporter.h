@@ -86,9 +86,9 @@ struct ReporterData
   vector<int> cluster_chrom; // for each cluster, the chromosome containing the plurality (by length) of its contigs
   vector<int>     cluster_N_good,   cluster_N_bad,   cluster_N_unaligned;   // for each cluster, the number of contigs (in|not in) the plurality chromosome
   vector<int64_t> cluster_len_good, cluster_len_bad, cluster_len_unaligned; // for each cluster, the length of contigs (in|not in) the plurality chromosome
-  
+
   boost::dynamic_bitset<> in_cluster; // flags indicating whether each contig is in a cluster
-  
+
   // OrderingFlags for trunks and full orderings.
   OrderingFlags trunk_flags, order_flags;
 };
@@ -99,75 +99,75 @@ struct ReporterData
 class Reporter
 {
  public:
-  
+
   /* CONSTRUCTOR: Just load the data structures. */
-  
+
   Reporter( const RunParams & run_params,
 	    const ClusterVec & clusters,
 	    const vector<ContigOrdering> & trunks = vector<ContigOrdering>(0, ContigOrdering(0) ),
 	    const vector<ContigOrdering> & orders = vector<ContigOrdering>(0, ContigOrdering(0) ) );
-  
+
   ~Reporter();
-  
+
   /* EVAL FUNCTIONS: (Mostly) reference-based evaluation.  These put numbers into the ReporterData object.
    * The ReportChart() functions then use these numbers to print pretty output files.
    */
-  
+
   void Eval() const; // main top-level function; calls other Eval() functions
   void EvalContigUsage() const; // non-reference-based
   void EvalClustering() const;
   void EvalOrderAccuracy( int cluster_ID, bool full_order ) const; // if full_order, then eval _orders[cluster_ID]; otherwise eval _trunks[cluster_ID]
   void EvalGapSizes( int cluster_ID, bool full_order ) const;
-  
+
   // ReportChart: Print out all the ReporterData info in a pretty chart.
   // There are two versions, depending on whether or not there's a reference available.  The version WithReference should be called after all Eval() functions.
   void ReportChart() const { if ( _true_mapping ) ReportChartWithReference(); else ReportChartNoReference(); }
   void ReportChartWithReference() const;
   void ReportChartNoReference() const;
-  
-  /* PLOT FUNCTIONS: These functions produce files at ~/public_html/<file_head>.jpg. */
-  
+
+  /* PLOT FUNCTIONS: These functions produce files at out/<file_head>.jpg. */
+
   // HistogramOrderingErrors: Make a histogram showing the odds of a contig being mis-ordered, as a function of the contig's length.
   void HistogramOrderingErrors( const bool full_order, const string & file_head ) const;
   // DotplotOrderAccuracy: Make a QuickDotplot of the ordering, highlighting contigs that are mis-ordered.  Uses the output of EvalOrderAccuracy.
   void DotplotOrderAccuracy( const int ordering_ID, const bool full_order, const bool plot_interchrom_contigs, const string & file_head ) const;
-  
-  
-  
+
+
+
  private:
-  
+
   // RequireReference: Throw a verbose error if _true_mapping == NULL.  This should always be called before anything that uses _true_mapping.
   void RequireReference() const;
-  
+
   // Helper functions for ReportChart().
   void ReportChartOrderingPercentages( ostream & out ) const;
   void ReportChartOrderingErrors( const bool full_order, ostream & out ) const;
-  
+
   int N_non_singleton_clusters() const;
-  
+
   // contig_length_if: Return the length of all contigs with their bit marked as 'true' in the input bitset.
   int64_t contig_length_if( const boost::dynamic_bitset<> & bits ) const;
-  
-  
+
+
   /* DATA STRUCTURES.  These are all loaded in by the constructor */
-  
+
   // Parameters for this run (loaded in from the INI file.)
   const RunParams _run_params;
-  
+
   // TrueMapping describing contig alignments to referece.  For reference-free assemblies, this is NULL, and many evaluation options/functions are unavailable.
   const TrueMapping * _true_mapping;
-  
+
   const int _N_contigs;
   const int _N_chroms; // number of chromosomes in reference; will be -1 for a reference-free assembly
   const int _N_clusters, _N_orderings; // the number of orderings may be less than the number of clusters, if orders have not been calculated for all clusters
-  
+
   const vector<int> _contig_lengths;
   const int64_t _total_contig_length;
-  
+
   const ClusterVec _clusters;
   const vector<ContigOrdering> _trunks, _orders; // these are empty if !_has_ordering
-  
-  
+
+
   // The ReporterData object contains raw data points that are calculated by Eval...() functions.  The numbers are printed out in ReportChart().
   mutable struct ReporterData * _data;
 };

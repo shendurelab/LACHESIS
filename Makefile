@@ -38,15 +38,15 @@ LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 .cc.o:  .cc
 	$(CC) -c $< $(CFLAGS) $(INCLUDES)
 
-all:   check-env libs $(EXES)
+all:   libs $(EXES)
 
-libs: check-env
+libs:
 	$(MAKE) -C include
 
-Lachesis: check-env $(OBJS) Lachesis.o
+Lachesis: $(OBJS) Lachesis.o
 	$(CC) $(CFLAGS) $(OBJS) Lachesis.o -o Lachesis $(LFLAGS)
 
-LTest: check-env $(OBJS) LTest.o
+LTest: $(OBJS) LTest.o
 	$(CC) $(CFLAGS) $(OBJS) LTest.o -o LTest $(LFLAGS)
 
 clean:
@@ -65,5 +65,3 @@ endif
 ifndef LACHESIS_BOOST_DIR
     $(error Environment variable $$LACHESIS_BOOST_DIR is undefined - please set to a directory containing the root of the Boost package)
 endif
-
-                                                                               

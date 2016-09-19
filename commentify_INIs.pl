@@ -195,7 +195,7 @@ $lines[18]
 # Boolean (0/1).  Draw a 2-D heatmap of the entire Hi-C link dataset before clustering.
 $lines[19]
 # Boolean (0/1).  Draw a 2-D dotplot of the clustering result, compared to truth.  This is time-consuming and eats up file I/O.  Ignored if USE_REFERENCE = 0.
-# The dotplots go to ~/public_html/dotplot.SKY.*.jpg
+# The dotplots go to out/dotplot.SKY.*.jpg
 $lines[20]
 
 
