@@ -810,7 +810,7 @@ ContigOrdering::DrawDotplot( const string & file ) const
 void
 ContigOrdering::DrawDotplotVsTruth( const set<int> & cluster, const TrueMapping & true_mapping, const string & file ) const
 {
-  cout << Time() << ": DrawDotplotVsTruth" << endl;
+  cout << "DrawDotplotVsTruth" << endl;
 
   // First, figure out the true order and orientation of the contigs in this ordering.
   // Note that we don't bother with contigs that are in this cluster but not in this ordering.

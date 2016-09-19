@@ -135,7 +135,7 @@ GenomeLinkMatrix::GenomeLinkMatrix( const vector<string> & SAM_files, const int 
   _species = "human"; // these SAM files must be human
 
 
-  cout << Time() << ": Creating a new GenomeLinkMatrix with bin_size = " << bin_size << " and SAM_files =";
+  cout << "Creating a new GenomeLinkMatrix with bin_size = " << bin_size << " and SAM_files =";
   for ( size_t i = 0; i < SAM_files.size(); i++ )
     cout << "  " << SAM_files[i];
   cout << endl;
@@ -147,7 +147,7 @@ GenomeLinkMatrix::GenomeLinkMatrix( const vector<string> & SAM_files, const int 
   _N_bins = std::accumulate( bins_per_chrom.begin(), bins_per_chrom.end(), 0 );
 
 
-  cout << Time() << ": Number of bins in entire genome = " << _N_bins << endl;
+  cout << "Number of bins in entire genome = " << _N_bins << endl;
 
   // Set the original order to identity (i.e., no rearrangement until ReorderContigsByRef() gets called.)
   _contig_orig_order.clear();
@@ -183,7 +183,7 @@ GenomeLinkMatrix::GenomeLinkMatrix( const string & species, const vector<string>
   _RE_sites_file = RE_sites_file;
 
 
-  cout << Time() << ": Creating a new GenomeLinkMatrix for an assembly in progress, with SAM_files =";
+  cout << "Creating a new GenomeLinkMatrix for an assembly in progress, with SAM_files =";
   for ( size_t i = 0; i < SAM_files.size(); i++ )
     cout << "  " << SAM_files[i];
   cout << endl;
@@ -212,7 +212,7 @@ GenomeLinkMatrix::GenomeLinkMatrix( const string & species, const vector<string>
 
   _contig_skip = vector<bool>(_N_bins,false);
 
-  cout << Time() << ": Number of contigs = " << _N_bins << endl;
+  cout << "Number of contigs = " << _N_bins << endl;
 
   // Create an empty matrix for these bins.
   InitMatrix();
@@ -239,7 +239,7 @@ static const unsigned LINE_LEN = 50000;
 void
 GenomeLinkMatrix::ReadFile( const string & GLM_file )
 {
-  cout << Time() << ": GenomeLinkMatrix::ReadFile   <-  " << GLM_file << endl;
+  cout << "GenomeLinkMatrix::ReadFile   <-  " << GLM_file << endl;
   assert( boost::filesystem::is_regular_file( GLM_file ) );
 
 
@@ -271,7 +271,7 @@ GenomeLinkMatrix::ReadFile( const string & GLM_file )
 
       else if ( tokens[1] == "N_bins" ) { // line: "# N_bins = 1"
 	_N_bins = boost::lexical_cast<int>( tokens[3] );
-	cout << Time() << ": N_bins = " << _N_bins << endl;
+	cout << "N_bins = " << _N_bins << endl;
 	InitMatrix();
       }
 
@@ -296,7 +296,7 @@ GenomeLinkMatrix::ReadFile( const string & GLM_file )
     // If this is not a header line, put data in the matrix.
     // The data may be sparse, and that's ok - the matrix will just contain 0s.  However, there may not be data on the diagonal.
     else {
-      if ( first ) { first = false; cout << Time() << ": Loading matrix data..." << endl; }
+      if ( first ) { first = false; cout << "Loading matrix data..." << endl; }
 
       boost::split( tokens, line, boost::is_any_of("\t") );
       int X = boost::lexical_cast<int>( tokens[0] );
@@ -341,7 +341,7 @@ GenomeLinkMatrix::ReadFile( const string & GLM_file )
 void
 GenomeLinkMatrix::WriteFile( const string & GLM_file ) const
 {
-  cout << Time() << ": GenomeLinkMatrix::WriteFile  ->  " << GLM_file << endl;
+  cout << "GenomeLinkMatrix::WriteFile  ->  " << GLM_file << endl;
 
   ofstream out( GLM_file.c_str(), ios::out );
 
@@ -439,7 +439,7 @@ GenomeLinkMatrix::LoadFromSAMNonDeNovo( const vector<string> & SAM_files )
 void
 GenomeLinkMatrix::NormalizeToDeNovoContigLengths( const bool use_RE_sites )
 {
-  cout << Time() << ": NormalizeToDeNovoContigLengths" << ( use_RE_sites ? " (using RE sites)" : " (using lengths in bp)" ) << endl;
+  cout << "NormalizeToDeNovoContigLengths" << ( use_RE_sites ? " (using RE sites)" : " (using lengths in bp)" ) << endl;
 
   assert( DeNovo() ); // don't use on binned-human-chromosome data
 
@@ -480,7 +480,7 @@ GenomeLinkMatrix::NormalizeToDeNovoContigLengths( const bool use_RE_sites )
 void
 GenomeLinkMatrix::ReorderContigsByRef( TrueMapping & true_mapping )
 {
-  cout << Time() << ": ReorderContigsByRef" << endl;
+  cout << "ReorderContigsByRef" << endl;
 
   // Get the full ordering of the contigs on reference.
   vector<int> contig_order = true_mapping.QueriesToGenomeOrder();
@@ -524,7 +524,7 @@ GenomeLinkMatrix::ReorderContigsByRef( TrueMapping & true_mapping )
 void
 GenomeLinkMatrix::SkipShortContigs( const int & min_len )
 {
-  cout << Time() << ": SkipShortContigs with min_len = " << min_len << endl;
+  cout << "SkipShortContigs with min_len = " << min_len << endl;
 
   int N_short = 0;
   int64_t short_len = 0;
@@ -539,7 +539,7 @@ GenomeLinkMatrix::SkipShortContigs( const int & min_len )
   double avg_len = N_short == 0 ? 0 : double(short_len) / N_short;
 
   // The number of contigs reported as small includes contigs that may have already been marked for skipping, e.g., by SkipRepeats().
-  cout << Time() << ": Marked " << N_short << " contigs (avg length " << avg_len << ") as too short to inform clustering." << endl;
+  cout << "Marked " << N_short << " contigs (avg length " << avg_len << ") as too short to inform clustering." << endl;
 }
 
 
@@ -547,7 +547,7 @@ GenomeLinkMatrix::SkipShortContigs( const int & min_len )
 void
 GenomeLinkMatrix::SkipContigsWithFewREs( const int & min_N_REs )
 {
-  cout << Time() << ": SkipContigsWithFewREs with min_N_REs = " << min_N_REs << endl;
+  cout << "SkipContigsWithFewREs with min_N_REs = " << min_N_REs << endl;
   assert( !_contig_RE_sites.empty() ); // this function can only be used if RE site lengths have been loaded in
 
   int N_short = 0;
@@ -566,7 +566,7 @@ GenomeLinkMatrix::SkipContigsWithFewREs( const int & min_N_REs )
   double avg_N_REs = N_short == 0 ? 0 : double(short_N_REs) / N_short;
 
   // The number of contigs reported as small includes contigs that may have already been marked for skipping, e.g., by SkipRepeats().
-  cout << Time() << ": Marked " << N_short << " contigs (avg len " << avg_len << ", avg number of RE sites " << avg_N_REs << ") as having too few RE sites to inform clustering (CLUSTER_MIN_RE_SITES = " << min_N_REs << ")." << endl;
+  cout << "Marked " << N_short << " contigs (avg len " << avg_len << ", avg number of RE sites " << avg_N_REs << ") as having too few RE sites to inform clustering (CLUSTER_MIN_RE_SITES = " << min_N_REs << ")." << endl;
 }
 
 
@@ -577,7 +577,7 @@ GenomeLinkMatrix::SkipContigsWithFewREs( const int & min_N_REs )
 void
 GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool flip )
 {
-  cout << Time() << ": SkipRepeats with repeat_multiplicity = " << repeat_multiplicity << ", flip = " << noboolalpha << flip << endl;
+  cout << "SkipRepeats with repeat_multiplicity = " << repeat_multiplicity << ", flip = " << noboolalpha << flip << endl;
   bool verbose = false;
 
   // Find the number of Hi-C links on each contig.  This is as simple as adding rows/columns in the matrix.  Also calculate the total sum.
@@ -630,7 +630,7 @@ GenomeLinkMatrix::SkipRepeats( const double & repeat_multiplicity, const bool fl
   double avg_len = N_repetitive == 0 ? 0 : double(repetitive_len) / N_repetitive;
 
   // The number of contigs reported as repetitive includes contigs that may have already been marked for skipping, e.g., by SkipShortContigs().
-  cout << Time() << ": Marked " << N_repetitive << " contigs (avg length " << avg_len << ") as too repetitive to inform clustering (CLUSTER_MAX_LINK_DENSITY = " << repeat_multiplicity << ")." << endl;
+  cout << "Marked " << N_repetitive << " contigs (avg length " << avg_len << ") as too repetitive to inform clustering (CLUSTER_MAX_LINK_DENSITY = " << repeat_multiplicity << ")." << endl;
 }
 
 
@@ -652,7 +652,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CE
   }
   assert ( N_non_skipped > 0 );
 
-  cout << Time() << ": AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << NONINFORMATIVE_RATIO << ")" << endl;
+  cout << "AHClustering!  (N informative contigs = " << N_non_skipped << ", N_CLUSTERS_MIN=" << N_CLUSTERS_MIN << ", MIN_AVG_LINKAGE=" << MIN_AVG_LINKAGE << ", NONINFORMATIVE_RATIO=" << NONINFORMATIVE_RATIO << ")" << endl;
 
   // Check that the CEN_contigs vector makes sense, if it's non-empty.
   // All values must be in the range of contig IDs, and there can't be more values than clusters.
@@ -702,7 +702,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CE
   // Calculate all possible "merge scores" for all pairs of clusters.  Make a list sorted by distance.
   // The initial "merge score" values for the initial (one-bin) clusters is simply the amount of link data between each pair of bins.
   // Also make a matrix to keep track of the merge scores for each pair of clusters.  This is the same data as merge_score_map, but in a different form.
-  cout << Time() << ": Creating a 'merge score map'..." << endl;
+  cout << "Creating a 'merge score map'..." << endl;
   multimap< double, pair<int64_t,int>, greater<double> > merge_score_map;
   for ( int i = 0; i < _N_bins; i++ )
     if ( !_contig_skip[i] )
@@ -790,7 +790,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CE
     N_merges++;
     N_merges_since_prune++;
     //int N_merges_remaining = _N_bins - N_merges - N_contigs_skipped;
-    //cout << Time() << ": MERGE #" << N_merges << ": Best linkage has value = " << best_linkage << "\tbetween clusters " << PrintSet( _clusters[best_i] ) << " and " << PrintSet( _clusters[best_j] ) << endl;
+    //cout << "MERGE #" << N_merges << ": Best linkage has value = " << best_linkage << "\tbetween clusters " << PrintSet( _clusters[best_i] ) << " and " << PrintSet( _clusters[best_j] ) << endl;
 
 
 
@@ -894,7 +894,7 @@ GenomeLinkMatrix::AHClustering( const int N_CLUSTERS_MIN, const vector<int> & CE
 
     }
 
-    cout << Time() << ": Merge #" << N_merges << ": Clusters\t#" << best_i << "," << best_j << "\t-> " << new_cluster_ID << "\tLinkage = " << best_linkage << endl;
+    cout << "Merge #" << N_merges << ": Clusters\t#" << best_i << "," << best_j << "\t-> " << new_cluster_ID << "\tLinkage = " << best_linkage << endl;
 
   }
 
@@ -917,7 +917,7 @@ void
 GenomeLinkMatrix::ExcludeLowQualityContigs( const TrueMapping & true_mapping )
 {
   assert( !_clusters.empty() );
-  cout << Time() << ": ExcludeLowQualityContigs (this is kind of cheating and it must be the LAST modification step on the clusters)" << endl;
+  cout << "ExcludeLowQualityContigs (this is kind of cheating and it must be the LAST modification step on the clusters)" << endl;
 
   // Create a new ClusterVec consisting only of contigs that pass the quality threshold.
   ClusterVec new_clusters( _clusters.size(), _clusters.N_contigs() );
@@ -943,7 +943,7 @@ GenomeLinkMatrix::ExcludeLowQualityContigs( const TrueMapping & true_mapping )
 void
 GenomeLinkMatrix::MoveContigsInClusters( const double annealing_factor )
 {
-  cout << Time() << ": MoveContigsInClusters with annealing_factor = " << annealing_factor << endl;
+  cout << "MoveContigsInClusters with annealing_factor = " << annealing_factor << endl;
   assert( annealing_factor >= 1 );
 
   // Pre-processing: Make a lookup table of contig ID to cluster ID, and a table of the total contig length of each cluster.
@@ -1147,7 +1147,7 @@ GenomeLinkMatrix::ValidateClusters( const TrueMapping * true_mapping, const bool
 
   vector<int> bin_to_clusterID = _clusters.cluster_IDs();
 
-  cout << Time() << ": Done clustering!" << endl;
+  cout << "Done clustering!" << endl;
 
   multimap< double, int, greater<double> > cluster_linkages;
 
@@ -1295,7 +1295,7 @@ GenomeLinkMatrix::DrawClusterDotplot( const TrueMapping & true_mapping ) const
   {
     string outfile = "dotplot.jpg";
     if ( _species == "human" ) outfile = "dotplot.SKY.jpg";
-    cout << Time() << ": DrawClusterDotplot -> out/" << outfile << endl;
+    cout << "DrawClusterDotplot -> out/" << outfile << endl;
   }
 
 
@@ -1370,14 +1370,14 @@ GenomeLinkMatrix::DrawHeatmap( const string & heatmap_file ) const
 
   // The R script "heatmap.R" is hardwired to take "heatmap.txt" as input and write to out/heatmap.jpg.
   // For details on how this script works, see the script itself.
-  cout << Time() << ": Plotting a heatmap at out/" << heatmap_file << endl;
+  cout << "Plotting a heatmap at out/" << heatmap_file << endl;
   system( "heatmap.R" );
 
   // Copy the file heatmap.jpg into the place desired.
   if ( heatmap_file != "" && heatmap_file != "heatmap.jpg" )
     system( ( "cp out/heatmap.jpg out/" + heatmap_file ).c_str() );
 
-  cout << Time() << ": Done plotting!" << endl;
+  cout << "Done plotting!" << endl;
 }
 
 
@@ -1407,7 +1407,7 @@ GenomeLinkMatrix::InitMatrix()
 void
 GenomeLinkMatrix::LoadRESitesFile( const string & RE_sites_file )
 {
-  cout << Time() << ": Loading contig RE lengths for use in normalization <-\t" << RE_sites_file << endl;
+  cout << "Loading contig RE lengths for use in normalization <-\t" << RE_sites_file << endl;
   assert ( DeNovo() );
 
   if ( RE_sites_file == "." ) {
@@ -1447,7 +1447,7 @@ GenomeLinkMatrix::LoadFromSAM( const string & SAM_file, const vector<int> & bins
 
   bool verbose = true;
 
-  cout << Time() << ": Reading Hi-C data (" << _species << ") from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
+  cout << "Reading Hi-C data (" << _species << ") from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
   assert( boost::filesystem::is_regular_file( SAM_file ) );
   _SAM_files.push_back( SAM_file );
 
@@ -1533,11 +1533,11 @@ GenomeLinkMatrix::LoadFromSAM( const string & SAM_file, const vector<int> & bins
 
 
   if ( verbose ) cout << endl;
-  cout << Time() << ": N aligns read from " << SAM_file << ": " << stepper.N_aligns_read() << endl;
+  cout << "N aligns read from " << SAM_file << ": " << stepper.N_aligns_read() << endl;
 
 
   // Convert all the data from this SAM file to compressed_matrix format, and add it in.
-  cout << Time() << ": Compressing mapped_matrix data..." << endl;
+  cout << "Compressing mapped_matrix data..." << endl;
   boost::numeric::ublas::compressed_matrix<int64_t> compressed_matrix = mapped_matrix;
   _matrix = _matrix + compressed_matrix;
 }
@@ -1581,7 +1581,7 @@ GenomeLinkMatrix::BinsPerChromInHumanGenome() const
 void
 GenomeLinkMatrix::SetClusters( const vector<int> & bin_to_clusterID, const double NONINFORMATIVE_RATIO )
 {
-  cout << Time() << ": SetClusters" << endl;
+  cout << "SetClusters" << endl;
   assert( (int) bin_to_clusterID.size() == _N_bins );
   assert( NONINFORMATIVE_RATIO == 0 || NONINFORMATIVE_RATIO > 1 ); // negative values and values in the range (0,1] make no sense for this parameter
 

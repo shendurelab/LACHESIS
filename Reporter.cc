@@ -148,7 +148,7 @@ Reporter::Reporter( const RunParams & run_params,
     _orders( orders ),
     _data( new ReporterData() )
 {
-  cout << Time() << ": Launching a Reporter for a result with N_contigs = " << _N_contigs << ", N_chroms = " << _N_chroms << ", N_clusters = " << _N_clusters << ", N orderings = " << _N_orderings << ", total assembly length = " << _total_contig_length << endl;
+  cout << "Launching a Reporter for a result with N_contigs = " << _N_contigs << ", N_chroms = " << _N_chroms << ", N_clusters = " << _N_clusters << ", N orderings = " << _N_orderings << ", total assembly length = " << _total_contig_length << endl;
 
   /* SANITY CHECKS
    *
@@ -277,7 +277,7 @@ Reporter::Eval() const
 void
 Reporter::EvalClustering() const
 {
-  cout << Time() << ": EvalClustering" << endl;
+  cout << "EvalClustering" << endl;
 
   // Mark contigs that are in the cluster.
   _data->in_cluster.resize( _N_contigs );
@@ -645,7 +645,7 @@ Reporter::ReportChartWithReference() const
 
   // Open the ReportChart output file.
   string report_chart_file = _run_params._out_dir + "/REPORT.txt";
-  cout << Time() << ": Writing a ReportChart to " << report_chart_file << endl;
+  cout << "Writing a ReportChart to " << report_chart_file << endl;
   ofstream out( report_chart_file.c_str() );
 
 
@@ -655,7 +655,7 @@ Reporter::ReportChartWithReference() const
 
 
   // Print basic info about this assembly.
-  out << Time() << ": ReportChart!" << endl << endl;
+  out << "ReportChart!" << endl << endl;
   out << "Info about input assembly:" << endl;
   if ( _run_params._sim_bin_size > 0 ) out << "REFERENCE GENOME CHOPPED UP INTO " << _run_params._sim_bin_size << "-BP BINS" << endl;
   else                                 out << "DE NOVO ASSEMBLY, reference genome available for validation" << endl;
@@ -795,10 +795,6 @@ Reporter::ReportChartWithReference() const
   out.close();
 }
 
-
-
-
-
 // ReportChartNoReference: Print out all the ReporterData info in a pretty chart.  This is the version for a reference-free assembly.
 void
 Reporter::ReportChartNoReference() const
@@ -807,7 +803,7 @@ Reporter::ReportChartNoReference() const
 
   // Open the ReportChart output file.
   string report_chart_file = _run_params._out_dir + "/REPORT.txt";
-  cout << Time() << ": Writing a ReportChart to " << report_chart_file << endl;
+  cout << "Writing a ReportChart to " << report_chart_file << endl;
   ofstream out( report_chart_file.c_str() );
 
 
@@ -817,7 +813,7 @@ Reporter::ReportChartNoReference() const
 
 
   // Print basic info about this assembly.
-  out << Time() << ": ReportChart!" << endl << endl;
+  out << "ReportChart!" << endl << endl;
   out << "Info about input assembly:" << endl;
   out << "DE NOVO ASSEMBLY, with no reference genome (less validation available)" << endl;
   out << "Species: " << _run_params._species << endl;
@@ -921,8 +917,7 @@ Reporter::HistogramOrderingErrors( const bool full_order, const string & file_he
   assert( (int) lens.size() == _N_contigs );
 
 
-  cout << Time() << ": HistogramOrderingErrors with file_head = " << file_head << endl;
-
+  cout << ": HistogramOrderingErrors with file_head = " << file_head << endl;
 
   const OrderingFlags & flags = full_order ? _data->order_flags : _data->trunk_flags;
 
@@ -986,7 +981,7 @@ Reporter::DotplotOrderAccuracy( const int ordering_ID, const bool full_order, co
 
   assert( ordering_ID >= 0 && ordering_ID < _N_orderings );
 
-  cout << Time() << ": DotplotOrderAccuracy with ordering_ID = " << ordering_ID << ", full_order = " << int(full_order) << "; file_head = " << file_head << endl;
+  cout << "DotplotOrderAccuracy with ordering_ID = " << ordering_ID << ", full_order = " << int(full_order) << "; file_head = " << file_head << endl;
 
   // Pick the ordering to analyze.
   const ContigOrdering & scaffold = full_order ? _orders[ordering_ID] : _trunks[ordering_ID];
@@ -1193,7 +1188,7 @@ Reporter::contig_length_if( const boost::dynamic_bitset<> & bits ) const
 void
 MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const bool USE_RES )
 {
-  cout << Time() << ": MakeWholeAssemblyHeatmap!" << endl;
+  cout << "MakeWholeAssemblyHeatmap!" << endl;
 
 
   // 1. Load the ClusterVec and the ContigOrderings to determine how these contigs have been clustered and ordered by Lachesis.
@@ -1281,7 +1276,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const 
   out2.close();
 
   int N_contigs_used = new_ID;
-  cout << Time() << ": Total number of contigs that are sufficiently long (among the top " << PLOT_N << ") and are clustered and ordered, and will therefore go into the histogram = " << N_contigs_used << " (length = " << total_len << ")" << endl;
+  cout << "Total number of contigs that are sufficiently long (among the top " << PLOT_N << ") and are clustered and ordered, and will therefore go into the histogram = " << N_contigs_used << " (length = " << total_len << ")" << endl;
 
 
   // 3. Load a GenomeLinkMatrix to get the quantity of Hi-C links between all pairs of contigs.
@@ -1293,7 +1288,7 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const 
 
 
   // 4. Make a heatmap of the GLM's data, with the contigs reordered as in Step 2.
-  cout << Time() << ": Writing a heatmap to heatmap.txt" << endl;
+  cout << "Writing a heatmap to heatmap.txt" << endl;
   ofstream out( "heatmap.txt" );
   out << "X\tY\tZ\n";
 
@@ -1316,8 +1311,8 @@ MakeWholeAssemblyHeatmap( const RunParams & run_params, const int PLOT_N, const 
 
   out.close();
 
-  cout << Time() << ": Making out/heatmap.MWAH.jpg... this may take a while" << endl;
+  cout << "Making out/heatmap.MWAH.jpg... this may take a while" << endl;
   system( "heatmap.MWAH.R" );
 
-  cout << Time() << ": Done with that heatmap!" << endl;
+  cout << "Done with that heatmap!" << endl;
 }

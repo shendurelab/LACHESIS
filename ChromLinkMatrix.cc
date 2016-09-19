@@ -217,7 +217,7 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const int contig_size,
   _CP_score_dist = 1e7;
 
   int N_bins = 2 * _N_contigs;
-  cout << Time() << ": Creating a new ChromLinkMatrix for a chromosome with " << _N_contigs << " contigs of size " << _contig_size << " (matrix size = " << N_bins << "x" << N_bins << ")" << endl;
+  cout << "Creating a new ChromLinkMatrix for a chromosome with " << _N_contigs << " contigs of size " << _contig_size << " (matrix size = " << N_bins << "x" << N_bins << ")" << endl;
 
   InitMatrix();
 }
@@ -242,7 +242,7 @@ ChromLinkMatrix::ChromLinkMatrix( const string & species, const int cluster_size
   _SAM_files.clear();
   _CP_score_dist = 1e7;
 
-  cout << Time() << ": Creating a new ChromLinkMatrix for a cluster with " << _N_contigs << " contigs (matrix size = " << N_bins() << "x" << N_bins() << ")" << endl;
+  cout << "Creating a new ChromLinkMatrix for a cluster with " << _N_contigs << " contigs (matrix size = " << N_bins() << "x" << N_bins() << ")" << endl;
 
   InitMatrix();
 
@@ -409,7 +409,7 @@ void ChromLinkMatrix::ReadFile(const string &CLM_file) {
 void
 ChromLinkMatrix::WriteFile( const string & CLM_file, const bool heatmap ) const
 {
-  cout << Time() << ": ChromLinkMatrix::WriteFile(" << ( heatmap ? "heatmap" : "CLM" ) << ") -> " << CLM_file << endl;
+  cout << "ChromLinkMatrix::WriteFile(" << ( heatmap ? "heatmap" : "CLM" ) << ") -> " << CLM_file << endl;
 
 
   // If this is a de novo CLM, set filenames for the auxiliary contig lengths and contig RE sites file.
@@ -501,14 +501,14 @@ ChromLinkMatrix::DrawHeatmap( const string & heatmap_file ) const
 
   // The R script "heatmap.R" is hardwired to take "heatmap.txt" as input and write to out/heatmap.jpg.
   // For details on how this script works, see the script itself.
-  cout << Time() << ": Plotting a heatmap at out/" << heatmap_file << endl;
+  cout << "Plotting a heatmap at out/" << heatmap_file << endl;
   system( "heatmap.R" );
 
   // Copy the file heatmap.jpg into the place desired.
   if ( heatmap_file != "" && heatmap_file != "heatmap.jpg" )
     system( ( "cp out/heatmap.jpg out/" + heatmap_file ).c_str() );
 
-  cout << Time() << ": Done plotting!" << endl;
+  cout << "Done plotting!" << endl;
 }
 
 
@@ -793,7 +793,7 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
 {
   assert(0); // this function was test code and is now deprecated
 
-  cout << Time() << ": PrefilterLinks" << endl;
+  cout << "PrefilterLinks" << endl;
   cout << "THING\tX\tY\tZ\n";
 
   // Make a map of local contig ID to true position on the chromosome.
@@ -913,7 +913,7 @@ ChromLinkMatrix::PrefilterLinks( const set<int> & cluster, const TrueMapping * m
 ContigOrdering
 ChromLinkMatrix::MakeTrunkOrder( const int min_N_REs ) const
 {
-  cout << Time() << ": MakeTrunkOrder!" << endl;
+  cout << "MakeTrunkOrder!" << endl;
   assert ( !_contig_RE_sites.empty() );
 
   // Handle the trivial case, where there are fewer than two contigs or there are no links between the contigs.
@@ -930,7 +930,7 @@ ChromLinkMatrix::MakeTrunkOrder( const int min_N_REs ) const
   // Optional output: Make a dotplot of the tree.
   if (0) {
     string file = "dotplot.tree.txt";
-    cout << Time() << ": Drawing a dotplot of this spanning tree at out/" << file << endl;
+    cout << "Drawing a dotplot of this spanning tree at out/" << file << endl;
     ofstream out( file.c_str(), ios::out );
 
     for ( int i = 0; i < _N_contigs; i++ )
@@ -964,7 +964,7 @@ ChromLinkMatrix::MakeTrunkOrder( const int min_N_REs ) const
 ContigOrdering
 ChromLinkMatrix::MakeFullOrder( const int min_N_REs, const bool use_CP_score ) const
 {
-  cout << Time() << ": MakeFullOrder!" << endl;
+  cout << "MakeFullOrder!" << endl;
 
   // Handle the trivial case, where there are fewer than two contigs or there are no links between the contigs.
   if ( !has_links() ) return ContigOrdering( _N_contigs, false );
@@ -1035,7 +1035,7 @@ ChromLinkMatrix::MakeFullOrder( const int min_N_REs, const bool use_CP_score ) c
 void
 ChromLinkMatrix::SpaceContigs( ContigOrdering & order, const LinkSizeDistribution & link_size_distribution ) const
 {
-  cout << Time() << ": SpaceContigs" << endl;
+  cout << "SpaceContigs" << endl;
 
   // Sanity checks.
   for ( size_t i = 0; i < _SAM_files.size(); i++ )
@@ -1309,9 +1309,9 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
     vector < graph_traits<Graph>::vertex_descriptor > MST_adjs( _N_contigs );
 
     // 2. Run Prim's algorithm to find the MST on this graph.
-    cout << Time() << ": prim_minimum_spanning_tree (iteration #" << iteration << ", previous trunk_size = " << trunk_size << ")" << endl;
+    cout << "prim_minimum_spanning_tree (iteration #" << iteration << ", previous trunk_size = " << trunk_size << ")" << endl;
     prim_minimum_spanning_tree(g, &MST_adjs[0]);
-    //cout << Time() << ": prim_minimum_spanning_tree done!" << endl;
+    //cout << "prim_minimum_spanning_tree done!" << endl;
 
     for ( int i = 0; i < _N_contigs; i++ )
       if ( lens[i] < min_len_reduced || lens[ MST_adjs[i] ] < min_len_reduced )
@@ -1367,7 +1367,7 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
   delete[] edges;
   delete[] weights;
 
-  cout << Time() << ": FindSpanningTree: Trunk length = " << trunk_size << endl;
+  cout << "FindSpanningTree: Trunk length = " << trunk_size << endl;
   assert( !best_tree.empty() );
 
   return best_tree;
@@ -1395,7 +1395,7 @@ ChromLinkMatrix::FindSpanningTree( const int min_N_REs ) const
 void
 ChromLinkMatrix::SmoothThornsInTree( vector< vector<int> > & tree ) const
 {
-  cout << Time() << ": SmoothThornsInTree...\t";
+  cout << "SmoothThornsInTree...\t";
   assert( (int) tree.size() == _N_contigs );
 
   int N_smoothed = 0;
@@ -1501,7 +1501,7 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
   bool verbose = false;
   assert ( !_contig_RE_sites.empty() );
 
-  cout << Time() << ": ReinsertShreds with use_CP_score = " << boolalpha << use_CP_score << ", CP_score_dist = " << _CP_score_dist << endl;
+  cout << "ReinsertShreds with use_CP_score = " << boolalpha << use_CP_score << ", CP_score_dist = " << _CP_score_dist << endl;
 
   assert( _N_contigs == (int) tree.size() );
 
@@ -1568,13 +1568,13 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
 
   // 4. Reinsert the linear "shreds" into the ContigOrdering, each time simply finding the optimal point at which to insert them.
   // Note that we are reinserting them in decreasing order of their size.
-  cout << Time() << ": Reinserting " << shreds.size() << " shreds" << endl;
+  cout << "Reinserting " << shreds.size() << " shreds" << endl;
 
   for ( size_t i = 0; i < shreds.size(); i++ ) {
     vector<int> shred = shreds[i];
     int shred_start = shred[0];
     int shred_end   = shred.back();
-    if ( verbose ) { cout << Time() << ": Adding shred #" << i << ":"; for ( size_t j=0; j < shred.size(); j++ ) cout << '\t' << shred[j]; cout << endl; }
+    if ( verbose ) { cout << "Adding shred #" << i << ":"; for ( size_t j=0; j < shred.size(); j++ ) cout << '\t' << shred[j]; cout << endl; }
 
 
     int shred_len = 0;
@@ -1661,7 +1661,7 @@ ChromLinkMatrix::ReinsertShreds( vector< vector<int> > & tree, const int min_N_R
 void
 ChromLinkMatrix::OrientContigs( ContigOrdering & order ) const
 {
-  cout << Time() << ": OrientContigs" << endl;
+  cout << "OrientContigs" << endl;
 
   // Build a WDAG (Weighed Directed Acyclic Graph) representing all possible ways to orient contigs in this ContigOrdering
   WDAG wdag = order.OrientationWDAG( this );
@@ -1770,7 +1770,7 @@ ChromLinkMatrix::FreeMatrix()
 void
 ChromLinkMatrix::LoadRESitesFile( const string & RE_sites_file )
 {
-  cout << Time() << ": Loading contig RE lengths for use in normalization <-\t" << RE_sites_file << endl;
+  cout << "Loading contig RE lengths for use in normalization <-\t" << RE_sites_file << endl;
   assert ( DeNovo() );
 
   if ( RE_sites_file == "." ) {
@@ -1849,7 +1849,7 @@ void
 ChromLinkMatrix::CalculateRepeatFactors()
 {
   assert(0); // TEMP: not used at the moment, buggy in fragScaff cases, screw it
-  cout << Time() << ": CalculateRepeatFactors for normalization" << endl;
+  cout << "CalculateRepeatFactors for normalization" << endl;
   assert( DeNovo() );
 
   _repeat_factors.clear();
@@ -1882,7 +1882,7 @@ ChromLinkMatrix::CalculateRepeatFactors()
 
 
   // Write to file so that Reporter::EvalGapSizes can access these.
-  cout << Time() << ": Writing to RFs.txt" << endl;
+  cout << "Writing to RFs.txt" << endl;
   ofstream out( "RFs.txt", ios::out );
   for ( int i = 0; i < _N_contigs; i++ )
     out << _repeat_factors[i] << endl;
@@ -1921,7 +1921,7 @@ void
 ChromLinkMatrix::PlotTree( const vector< vector<int> > & tree, const string & filename ) const
 {
   assert( (int) tree.size() == _N_contigs );
-  cout << Time() << ": PlotTree: Drawing an image of this spanning tree at out/" << filename << endl;
+  cout << "PlotTree: Drawing an image of this spanning tree at out/" << filename << endl;
 
 
   if ( _N_contigs >= 500 ) cerr << "WARNING: Called ChromLinkMatrix::PlotTree on a large tree of size " << _N_contigs << "; this may take a while, and the output file " << filename << " will take a long time to open" << endl;
@@ -2159,7 +2159,7 @@ LoadDeNovoCLMsFromSAM( const string & SAM_file, const string & RE_sites_file, co
     CLMs[i]->_SAM_files.push_back( SAM_file ); // keep track of which SAM files were used to generate this matrix
   }
 
-  cout << Time() << ": Filling "
+  cout << "Filling "
        << ( used.size() == 1 ? "cluster " + boost::lexical_cast<string>( used[0] ) : boost::lexical_cast<string>( used.size() ) + " clusters" )
        << " with Hi-C data from SAM file " << SAM_file
        << ( verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
@@ -2269,7 +2269,7 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
 {
   const bool verbose = true; // verbosely read in the file
 
-  cout << Time() << ": Reading Hi-C data from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
+  cout << "Reading Hi-C data from SAM file " << SAM_file << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
   assert( boost::filesystem::is_regular_file( SAM_file ) );
 
   int N_chroms = NTargetsInSAM( SAM_file );
@@ -2356,7 +2356,7 @@ LoadNonDeNovoCLMsFromSAM( const string & SAM_file, vector<ChromLinkMatrix *> CLM
 
   if ( verbose ) cout << endl;
 
-  cout << Time() << ": Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << "; N pairs used: " << N_pairs_used << endl;
+  cout << "Done with " << SAM_file << "!  N aligns/pairs read: " << stepper.N_aligns_read() << "/" << stepper.N_pairs_read() << "; N pairs used: " << N_pairs_used << endl;
 
   //for ( int i = 0; i < N_chroms; i++ )
   //CLMs[i]->CalculateRepeatFactors();

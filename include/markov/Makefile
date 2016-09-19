@@ -12,6 +12,7 @@ LIB  = libJmarkov.a
 # compiler commands
 
 CC      = g++
+##CC = clang
 RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
@@ -21,7 +22,7 @@ INCLUDES = -I$(LACHESIS_BOOST_DIR) #-I$(HOME)/include
 
 # compiler flags
 
-CFLAGS  = -Wall -ansi -pedantic -g -O3
+CFLAGS  = -Wall -ansi -pedantic -g -O3 -std=c++11
 #CFLAGS += -pg
 
 # linking flags

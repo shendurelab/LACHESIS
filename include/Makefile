@@ -12,16 +12,15 @@ LIBS = libJtime.a libJgtools.a libJmarkov.a
 # then add $(INCLUDES) to the .cc.o dependencies and $(INC_LIBS) to the
 # executable dependencies.
 
-
-
 # compiler commands
 CC      = g++
+##CC = clang
 RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
 # compiler flags
-CFLAGS  = -Wall -ansi -pedantic -g -O3
+CFLAGS  = -Wall -ansi -pedantic -g -O3 -std=c++11
 INCLUDES = -I$(LACHESIS_SAMTOOLS_DIR) -I$(LACHESIS_BOOST_DIR)
 
 # linking flags.  The LACHESIS_BOOST_DIR environment variable must be set

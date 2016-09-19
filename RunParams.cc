@@ -108,7 +108,7 @@ RunParams::VerifySAMFileHeaders() const
 void
 RunParams::ParseIniFile( const string & ini_file )
 {
-  cout << Time() << ": RunParams is parsing INI file at " << ini_file << endl;
+  cout << "RunParams is parsing INI file at " << ini_file << endl;
   if ( !boost::filesystem::is_regular_file( ini_file ) ) {
     cerr << "ERROR: Can't find file " << ini_file << endl;
     exit(1);

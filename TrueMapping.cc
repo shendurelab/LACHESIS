@@ -61,7 +61,7 @@ TrueMapping::TrueMapping( const string & species, const vector<string> & query_n
     _query_names( query_names ),
     _target_names( target_names )
 {
-  cout << Time() << ": Creating a TrueMapping" << endl;
+  cout << "Creating a TrueMapping" << endl;
   
   // These parameters are taken from the lengths of the names vectors.
   assert( NQueries() > 0 );
@@ -96,7 +96,7 @@ TrueMapping::TrueMapping( const string & species, const vector<string> & query_n
   // Count the number of unaligned sequences.
   int N_unaligned = count( _target.begin(), _target.end(), -1 );
   
-  cout << Time() << ": TrueMapping contains " << NQueries() << " query sequences aligned to " << NTargets() << " target sequences (incl. " << N_unaligned << " unaligned)" << endl;
+  cout << "TrueMapping contains " << NQueries() << " query sequences aligned to " << NTargets() << " target sequences (incl. " << N_unaligned << " unaligned)" << endl;
 }
 
 
@@ -223,7 +223,7 @@ TrueMapping::TargetID( const string & target_name ) const
 void
 TrueMapping::Print( const bool genome_order ) const
 {
-  cout << Time() << ": TrueMapping::Print" << endl;
+  cout << "TrueMapping::Print" << endl;
   
   // Determine the order in which to print the query sequences.
   vector<int> order( NQueries(), -1 );
@@ -252,7 +252,7 @@ TrueMapping::Print( const bool genome_order ) const
 void
 TrueMapping::PrintSeqLengthOnTargets( const string & dummy_SAM_file, ostream & out ) const
 {
-  cout << Time() << ": TrueMapping::PrintSeqLengthOnTargets" << endl;
+  cout << "TrueMapping::PrintSeqLengthOnTargets" << endl;
   
   // Get query sequence lengths.
   vector<int> query_lengths = TargetLengths( dummy_SAM_file );
@@ -606,7 +606,7 @@ TrueMapping::ReadBlastAlignsFromFileSet( const string & species, const string & 
     }
     
     // Do the parsing!
-    cout << Time() << ": Parsing BLAST files to find contig alignments to reference; will cache results at " << TrueMapping_file << endl;
+    cout << "Parsing BLAST files to find contig alignments to reference; will cache results at " << TrueMapping_file << endl;
     ParseBlastAlignmentFiles( BLAST_files, query_lengths, _target_names, TrueMapping_file );
   }
   

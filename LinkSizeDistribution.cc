@@ -107,7 +107,7 @@ uint_16log2_frac( const double x ) {
 LinkSizeDistribution::LinkSizeDistribution( const vector<string> & SAM_files )
   : _SAM_files( SAM_files )
 {
-  cout << Time() << ": LinkSizeDistribution!" << endl;
+  cout << "LinkSizeDistribution!" << endl;
 
   bool verbose = true;
 
@@ -189,7 +189,7 @@ LinkSizeDistribution::LinkSizeDistribution( const vector<string> & SAM_files )
   // Loop over the input SAM files.
   for ( size_t i = 0; i < SAM_files.size(); i++ ) {
 
-    cout << Time() << ": Reading Hi-C data from SAM file " << SAM_files[i] << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
+    cout << "Reading Hi-C data from SAM file " << SAM_files[i] << (verbose ? "\t(dot = 1M alignments)" : "" ) << endl;
 
 
     // Set up a SAMStepper object to read in the alignments.
@@ -241,7 +241,7 @@ LinkSizeDistribution::LinkSizeDistribution( const vector<string> & SAM_files )
   }
 
   // Report the results of the pass filtering.
-  cout << Time() << ": Done reading SAM files!  Pass filters:" << endl;
+  cout << "Done reading SAM files!  Pass filters:" << endl;
   cout << "\ttotal number of read pairs:\t" << passes[0] << endl;
   cout << "\tboth reads have MQ > 0: \t" << passes[1] << endl;
   cout << "\tlink is intra-contig/scaffold:\t" << passes[2] << endl;
@@ -315,7 +315,7 @@ LinkSizeDistribution::ReadFile( const string & infile )
   _max_intra_contig_link_dist = -1;
 
   // Parse the whole input file into tokens.
-  cout << Time() << ": Reading LinkSizeDistribution file " << infile << endl;
+  cout << "Reading LinkSizeDistribution file " << infile << endl;
 
   vector< vector<string> > file_as_tokens;
   TokenizeFile( infile, file_as_tokens );
@@ -375,7 +375,7 @@ LinkSizeDistribution::ReadFile( const string & infile )
 void
 LinkSizeDistribution::WriteFile( const string & outfile ) const
 {
-  cout << Time() << ": Writing a LinkSizeDistribution to file " << outfile << endl;
+  cout << "Writing a LinkSizeDistribution to file " << outfile << endl;
 
   ofstream out( outfile.c_str(), ios::out );
 
@@ -412,7 +412,7 @@ LinkSizeDistribution::WriteFile( const string & outfile ) const
 void
 LinkSizeDistribution::DrawDotplot( const bool rescale ) const
 {
-  cout << Time() << ": Drawing a dotplot of a LinkSizeDistribution" << endl;
+  cout << "Drawing a dotplot of a LinkSizeDistribution" << endl;
 
   // Make a temp file that will contain this distribution.  This file will be deleted, but QuickDotplot will make its file at out/<temp_file>.jpg.
   string temp_file = "LinkSizeDistribution";
@@ -602,7 +602,7 @@ LinkSizeDistribution::FindDistanceBetweenLinks( const int L1_0, const int L2_0, 
 
 
 
-  cout << Time() << ": Result of binary search: D = " << best_D << "\twith log-likelihood LL = " << best_log_likelihood << endl;
+  cout << "Result of binary search: D = " << best_D << "\twith log-likelihood LL = " << best_log_likelihood << endl;
 
 
   if (1) { // TEMP: try an exhaustive search instead
