@@ -6,10 +6,9 @@
 OBJS = N50.o ChromInterval.o HumanGenome.o CopyNumberProfile.o FileParsers.o SAMStepper.o
 LIB  = libJgtools.a
 
-
-
 # compiler commands
 CC      = g++
+##CC = clang
 RM      = /bin/rm -rf
 AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
@@ -18,7 +17,7 @@ BACKUPS = *~ \\\#*\\\#
 INCLUDES = -I$(LACHESIS_BOOST_DIR) -I$(LACHESIS_SAMTOOLS_DIR)
 
 # compiler flags
-CFLAGS  = -Wall -ansi -pedantic -g -O3
+CFLAGS  = -Wall -ansi -pedantic -g -O3 -std=c++11
 
 # dependencies
 

@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+use warnings;
 use strict;
 
 # QuickDotplot
@@ -13,9 +14,6 @@ use strict;
 # Josh Burton
 # January 2013
 
-
-
-
 # Subroutine declarations.
 # The definitions are at the end of the file.
 sub print_syntax_and_exit();
@@ -23,50 +21,28 @@ sub test_input_file($ );
 sub find_dot_size($ );
 sub write_R_script($ );
 
-
-
 # If no arguments were supplied, print syntax and exit.
 my $n_args = scalar @ARGV;
 &print_syntax_and_exit() if ( $n_args != 1 );
-
-
 
 # Figure out the input and output filename.
 my $input_file = $ARGV[0];
 &test_input_file($input_file);
 my $output_jpg = "$input_file.jpg";
 $output_jpg =~ s/.+\///g;
-$output_jpg = "~/public_html/$output_jpg"; # move the output filename to ~/public_html
-
+$output_jpg = "out/$output_jpg"; # move the output filename to out/
 
 # Figure out the optimal dot size for visual cleanliness.
 my $dot_size = &find_dot_size( $input_file );
 
-
 # Write an R script.  The exact format of the script is specified in &write_R_script and depends on many variables.
-my $script_file = "$ENV{'HOME'}/bin/QuickDotplot.R";
+my $script_file = "QuickDotplot.R";
 write_R_script($script_file);
 
 # Now that the R script has been written, let's run it in R.
 print "QuickDotplot: Writing a JPG to $output_jpg\n";
 system( "R -f $script_file --slave" );
 #system( "rm $script_file" );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #######################
 #                     #

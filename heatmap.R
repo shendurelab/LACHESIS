@@ -1,19 +1,19 @@
-#!/net/gs/vol3/software/modules-sw/R/2.15.1/Linux/RHEL6/x86_64/bin/Rscript
+#!/usr/bin/env Rscript
 
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// This software and its documentation are copyright (c) 2014-2015 by Joshua //
-// N. Burton and the University of Washington.  All rights are reserved.     //
-//                                                                           //
-// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
-// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
-// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
-// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
-// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+#///////////////////////////////////////////////////////////////////////////////
+#//                                                                           //
+#// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+#// N. Burton and the University of Washington.  All rights are reserved.     //
+#//                                                                           //
+#// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+#// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+#// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+#// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+#// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+#// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+#// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+#//                                                                           //
+#///////////////////////////////////////////////////////////////////////////////
 
 
 # Make a colored heatmap plot from heatmap.txt.
@@ -47,5 +47,5 @@ p <- p + xlab("") # clear x- and y-axis labels
 p <- p + ylab("")
 p <- p + scale_fill_gradientn( colours = palette(100), name="log10(N links)" ) # choose colors from the palette
 
-jpeg.file <- "~/public_html/heatmap.jpg"
+jpeg.file <- "out/heatmap.jpg"
 ggsave( filename=jpeg.file, plot=p, width=7, height=6 )

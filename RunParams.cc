@@ -70,16 +70,16 @@ RunParams::ConvertOrFail( const string & value ) const
   try {
     return boost::lexical_cast<T> (value);
   }
-  
+
   catch ( boost::bad_lexical_cast& ) {
-    
+
     // This function should only be called with T = int, double, or bool.
     string type_name;
     if      ( typeid(T) == typeid(int)    ) type_name = "int";
     else if ( typeid(T) == typeid(double) ) type_name = "double";
     else if ( typeid(T) == typeid(bool)   ) type_name = "bool";
     else ReportParseFailure ( "RunParams::ConvertOrFail called with unrecognized typeid?!?  This is a programming error, not a runtime error." );
-    
+
     ReportParseFailure( "Value '" + value + "' should be of type '" + type_name + "' but isn't." );
     exit(1); // control never reaches here
   }
@@ -92,13 +92,13 @@ void
 RunParams::VerifySAMFileHeaders() const
 {
   int N_targets;
-  
+
   // Require the SAM file headers to agree on the number of targets they have.
   for ( size_t i = 0; i < _SAM_files.size(); i++ ) {
     if ( i == 0 ) N_targets = NTargetsInSAM( _SAM_files[i] );
     else assert( N_targets == NTargetsInSAM( _SAM_files[i] ) );
   }
-} 
+}
 
 
 
@@ -108,17 +108,17 @@ RunParams::VerifySAMFileHeaders() const
 void
 RunParams::ParseIniFile( const string & ini_file )
 {
-  cout << Time() << ": RunParams is parsing INI file at " << ini_file << endl;
+  cout << "RunParams is parsing INI file at " << ini_file << endl;
   if ( !boost::filesystem::is_regular_file( ini_file ) ) {
     cerr << "ERROR: Can't find file " << ini_file << endl;
     exit(1);
   }
-  
+
   const bool verbose = false;
-  
-  
+
+
   /* QUALITY CONTROL VARIABLES.  The following set of variables are designed to make sure the INI file is properly formatted as we read it in. */
-  
+
   // This is the order in which RunParams expects to see the parameters.  It's also the order in which the parameters appear in the default INI files.
   // It's important to enforce the order because some parameters depend on earlier ones (e.g., SAM_DIR must be loaded so we know where to look for SAM_FILES.)
   // If you want to permanently add or remove any parameters, make sure to update N_keys as well as keys_order_array.
@@ -132,7 +132,7 @@ RunParams::ParseIniFile( const string & ini_file )
 				      "ORDER_MIN_N_RES_IN_TRUNK", "ORDER_MIN_N_RES_IN_SHREDS", "ORDER_DRAW_DOTPLOTS",
 				      "REPORT_EXCLUDED_GROUPS", "REPORT_QUALITY_FILTER", "REPORT_DRAW_HEATMAP" };
   const vector<string> keys_order( keys_order_array, keys_order_array + N_keys );
-  
+
   // For certain keys, we can have any (nonzero) number of values appear after the key.  Mark these keys.  For all other keys, exactly one value is required.
   map<string, bool> variable_N_values;
   for ( int i = 0; i < N_keys; i++ ) {
@@ -140,58 +140,58 @@ RunParams::ParseIniFile( const string & ini_file )
     if ( key == "SAM_FILES" || key == "CLUSTER_CONTIGS_WITH_CENS" || key == "REPORT_EXCLUDED_GROUPS" ) variable_N_values[key] = true;
     else variable_N_values[key] = false;
   }
-  
-  
-  
-  
+
+
+
+
   vector<string> tokens;
   int current_key_ID = 0;
-  
+
   _ini_file = ini_file;
   ifstream in( _ini_file.c_str(), ios::in );
   _line_N = 0;
-  
+
   // Read the file line-by-line.
   while ( 1 ) {
     in.getline( _line, _LINE_LEN );
     assert( strlen(_line)+1 < _LINE_LEN );
     if ( in.fail() ) break;
     _line_N++;
-    
-    
+
+
     // Remove trailing (but not leading) whitespace from the line.
     size_t stop = string(_line).find_last_not_of( " \t" );
     if ( stop == string::npos ) continue; // no non-whitespace in this line, so skip it
     _line[stop+1] = '\0';
-    
+
     // Skip commented lines.  Note that a line is only considered commented if it starts with a '#' symbol.  Mid-line comments in the ini file aren't allowed.
     if ( _line[0] == '#' ) continue;
-    
+
     // Split each line into tokens, using whitespace (i.e., each set of one or more consecutive spaces/tabs) as delimiters.
     boost::split( tokens, _line, boost::is_any_of(" \t"), boost::token_compress_on );
-    
+
     // Require each line to be of the form "key = value" (with room for more than one value.)
     if ( tokens.size() < 3 ) ReportParseFailure( "There must be at least three whitespace-delimited tokens (`e.g., key = value`)." );
     if ( tokens[1] != "=" )  ReportParseFailure( "The second whitespace-delimited token must be an equals sign (=)." );
-    
+
     string key = tokens[0];
     string value = tokens[2]; // this may be the first of multiple values
-    
+
     // Require the key to be one of the keys that RunParams expects to see.
     if ( variable_N_values.find( key ) == variable_N_values.end() )
       ReportParseFailure( "Key '" + key + "' isn't recognized as an informative piece of information for Lachesis." );
-    
+
     // If this key expects only one value (most do), check that only one value is given.
     if ( !variable_N_values.at(key) && tokens.size() != 3 )
       ReportParseFailure( "Key '" + key + "' should be followed by only one value, but multiple values are given." );
-    
+
     // Require the key to be the next key in the ordered list.
     if ( key != keys_order[current_key_ID] )
       ReportParseFailure( "Key '" + key + "' appears too early in the INI file; we expect to see the key '" + keys_order[current_key_ID] + "' instead.\nMake sure not to change the order in which the keys appear in the INI file." );
     current_key_ID++;
-    
-    
-    
+
+
+
     // Finally, set the local variable that corresponds to this key.
     // For values that are numbers, check to make sure the value is actually a number.
     // For values that describe input files or directories, check to make sure the input file/directory actually exists.
@@ -291,12 +291,12 @@ RunParams::ParseIniFile( const string & ini_file )
     }
     else if ( key == "REPORT_QUALITY_FILTER" ) _report_quality_filter = ConvertOrFail<int>( value );
     else if ( key == "REPORT_DRAW_HEATMAP" )   _report_draw_heatmap   = ConvertOrFail<bool>( value );
-    
-    
+
+
     // Record this line.
     _params.push_back( _line );
-    
-    
+
+
     // Verbose output (optional).
     if ( !verbose ) continue;
     cout << "LINE #" << _line_N << endl;
@@ -306,8 +306,8 @@ RunParams::ParseIniFile( const string & ini_file )
       cout << '\t' << tokens[i];
     cout << endl << endl;
   }
-  
-    
+
+
   assert( current_key_ID == N_keys );
 }
 
@@ -336,7 +336,7 @@ RunParams::LoadDraftContigNames() const
   // Note that this reads the file <_draft_assembly_fasta>.names, and will create the file if necessary.
   if ( _draft_contig_names.empty() ) _draft_contig_names = GetFastaNames( _draft_assembly_fasta );
   return &_draft_contig_names;
-} 
+}
 
 
 
@@ -346,17 +346,17 @@ string
 RunParams::DraftContigRESitesFilename() const
 {
   string RE_sites_file = _draft_assembly_fasta + ".counts_" + _RE_site_seq + ".txt";
-  
+
   // If this function hasn't already been run, the file may not exist, in which case the script CountMotifsInFasta.pl needs to be run.
   if ( !boost::filesystem::is_regular_file( RE_sites_file ) ) {
     string cmd = "CountMotifsInFasta.pl " + _draft_assembly_fasta + " " + _RE_site_seq;
     system( cmd.c_str() );
     assert( boost::filesystem::is_regular_file( RE_sites_file ) ); // if this fails, the CountMotifsInFasta.pl script didn't run correctly
   }
-  
+
   return RE_sites_file;
 }
-  
+
 
 
 // Load a TrueMapping using the files in this RunParams object.
@@ -365,24 +365,24 @@ TrueMapping *
 RunParams::LoadTrueMapping() const
 {
   if ( !_use_ref ) return NULL;
-  
+
   assert( !_SAM_files.empty() );
-  
+
   // Call these functions to fill the cache variables _ref_contig_names and _draft_contig_names, respectively.
   LoadRefGenomeContigNames();
   LoadDraftContigNames();
-  
+
   // Create a TrueMapping object, which records where the contigs are truly located on the reference.
   // If the draft assembly consists of simulated bins from the reference assembly, use a special constructor that deduces the true location of each bin.
   // Otherwise, pass the BLAST file head into the constructor so it can use those alignments.
-  
+
   TrueMapping * mapping =
     _sim_bin_size != 0 ?
     new TrueMapping( _species, _sim_bin_size, _draft_contig_names, _ref_contig_names )
     :
     new TrueMapping( _species, _draft_contig_names, _ref_contig_names, _BLAST_file_head, _out_dir, _SAM_files[0] );
-  
-  
+
+
   // Remove heterochromatic regions from the fly reference.
   if ( _species == "fly" ) {
     mapping->RemoveTarget( "2LHet" );
@@ -393,12 +393,12 @@ RunParams::LoadTrueMapping() const
     mapping->RemoveTarget( "YHet" );
     mapping->RemoveTarget( "U" );
     mapping->RemoveTarget( "Uextra" );
-    
+
     // Also merge chromosomes 2 and 3.
     mapping->MergeTargets( "2L", "2R", "2" );
     mapping->MergeTargets( "3L", "3R", "3" );
   }
-  
+
   return mapping;
 }
 

@@ -70,32 +70,32 @@ class LinkSizeDistribution
  public:
   LinkSizeDistribution( const vector<string> & SAM_files );
   LinkSizeDistribution( const string & infile ) { ReadFile( infile ); }
-  
-  
+
+
   // ReadFile, WriteFile: Read and write LinkSizeDistribution objects in a simple file format.
   // Once a LinkSizeDistribution is loaded, it's much faster to read and write these files than to parse the SAM files again.
   void ReadFile ( const string & infile );
   void WriteFile( const string & outfile ) const;
-  
-  // DrawDotplot: Use QuickDotplot to make a dotplot of this LinkSizeDistribution at ~/public_html/LinkSizeDistribution.jpg.
+
+  // DrawDotplot: Use QuickDotplot to make a dotplot of this LinkSizeDistribution at out/LinkSizeDistribution.jpg.
   void DrawDotplot( const bool rescale = false ) const;
-  
+
   // FindEnrichmentOnContig: Input a contig's length L and its set of intra-contig links.  Determine the local enrichment of links on (and, presumably, in the
   // vicinity of) this contig.  This is used in normalization of the gap sizes on either side of this contig.
   double FindEnrichmentOnContig( const int L, const vector<int> & links ) const;
-  
+
   // FindDistanceBetweenLinks: Input the lengths of two contigs, a set of Hi-C link distances that describe the position of links between the two contigs,
   // and LDE (link density enrichment), which indicates the relative intra-contig link density on these two contigs.
   // Determine the distance D to add to each of these link distances to make the total set of distances best match this LinkSizeDistribution.
   int FindDistanceBetweenLinks( const int L1_0, const int L2_0, const double LDE, const vector<int> & links ) const;
-  
+
   vector<string> SAM_files() const { return _SAM_files; }
-  
-  
+
+
   double log_likelihood_D( const int D, const int L1, const int L2, const double LDE, const vector<int> & links, const vector<double> & log_factorial ) const;
-  
+
   /* LINK SIZE RANGES */
-  
+
   // MIN_LINK_DIST: The minimum distance for Hi-C links that we care about here.  This can't be much smaller than the density of restriction sites, or the
   // assumption of constant link density will break down.  Besides, it doesn't have to be very small, since we're going to be using this dataset to look at
   // inter-contig Hi-C links, which by definition are very rarely small.
@@ -105,36 +105,36 @@ class LinkSizeDistribution
   // (Link densities above _max_intra_contig_link will be extrapolated anyway.)
   // Must be a power-of-2 multiple of _MIN_LINK_DIST.  We choose 2^16 * _MIN_LINK_DIST = 2^28 = 268,435,456.  This results in _N_bins = 16 * 16 = 256.
   static const int _MAX_LINK_DIST = 1 << 28;
-  
-  
+
+
  private:
-  
-  
+
+
   /* PRIVATE FUNCTIONS: used locally */
   int BinSize( const int bin_ID ) const; // size in bp of a bin
   int LinkBin( const int dist ) const; // convert a link distance to a bin ID
-  
+
   void FindExpectedIntraContigLinks( const int L, vector<double> & result, const bool verbose = false ) const;
   void FindExpectedInterContigLinks( const int D, const int L1, const int L2, const double LDE, vector<double> & result, const bool verbose = false ) const;
-  
-  
-  
+
+
+
   /* PRIVATE VARIABLES */
-  
+
   // max_intra_contig_link_dist: The largest intra-contig link length.  Beyond this length the numbers are just extrapolated as 1/x.
   int _max_intra_contig_link_dist;
-  
+
   /* THE BINS OF LINK SIZES
    * The bins are in the range [ _MIN_LINK_DIST, MAX_LINK_DIST ).  Their sizes are geometric, so a given bin goes from [X,Y) with Y = X * _SIXTEENTH_ROOT_OF_2.
    */
-  
+
   int _N_bins;
   vector<int> _bin_starts; // The boundaries of each bin.  This vector has length _N_bins+1 so that the highest bin can have an upper bound.
   vector<double> _link_density; // The bins of link density.  The expected number of links between two regions at a given distance (normaized by _BIN_NORM).
-  
-  
+
+
   vector<string> _SAM_files; // the SAM files used to create this distribution
-  
+
 };
 
 
