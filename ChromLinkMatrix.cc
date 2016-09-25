@@ -769,6 +769,7 @@ ChromLinkMatrix::EnrichmentScore( const ContigOrdering & order ) const
   }
   
   // Calculate the average link density per bp of sequence.  Multiply the null score by this to convert it from a measure of length to a density of links.
+  if ( total_len_sq == 0 ) return 0; // handle case where all pairs are skipped.
   double link_density = double( N_links ) / total_len_sq;
   null_score *= link_density;
   assert( null_score != 0 );
