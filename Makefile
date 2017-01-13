@@ -31,6 +31,12 @@ LFLAGS = $(INC_LIBS) $(BOOST_LIBS) $(SAMTOOLS_LIBS) -lz -lpthread
 .cc.o:  .cc
 	$(CC) -c $< $(CFLAGS) $(INCLUDES)
 
+
+## This target may be used in order to invoke clang's tidy tool.
+## It prints out a very nice report showing how one is or is not following the clang C++ style guide
+## Use it with something like 'make ContigOrdering.tidy' and read the new file created by clang.
+## Since I don't really know C++ at all, it provided a nice way for me to learn bits and pieces of the
+## syntax which are not familar from C.
 %.tidy: %.cc
 	clang-tidy $< -checks=* -header-filter='.*' -- -Iinclude 2>$<.tidy 1>&2
 
@@ -53,10 +59,11 @@ clobber: clean
 	(MAKE) clobber -C include # recurse to the include directory
 
 # Environment variable check.
-check-env:
-ifndef LACHESIS_SAMTOOLS_DIR
-    $(error Environment variable $$LACHESIS_SAMTOOLS_DIR is undefined - please set to a directory containing the samtools package)
-endif
-ifndef LACHESIS_BOOST_DIR
-    $(error Environment variable $$LACHESIS_BOOST_DIR is undefined - please set to a directory containing the root of the Boost package)
-endif
+## I can set my own environment, thank you very much.
+##check-env:
+##ifndef LACHESIS_SAMTOOLS_DIR
+##    $(error Environment variable $$LACHESIS_SAMTOOLS_DIR is undefined - please set to a directory containing the samtools package)
+##endif
+##ifndef LACHESIS_BOOST_DIR
+##    $(error Environment variable $$LACHESIS_BOOST_DIR is undefined - please set to a directory containing the root of the Boost package)
+##endif
