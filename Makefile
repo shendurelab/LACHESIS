@@ -16,7 +16,6 @@ BACKUPS = *~ \\\#*\\\#
 CFLAGS = -Wall -g -O3 -std=c++11
 CFLAGS += -ansi
 CFLAGS += -pedantic
-#CFLAGS += -pg
 
 # Includes
 INCLUDE_DIR=include

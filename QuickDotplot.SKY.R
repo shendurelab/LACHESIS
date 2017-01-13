@@ -15,19 +15,13 @@
 #//                                                                           //
 #///////////////////////////////////////////////////////////////////////////////
 
-
-
 # QuickDotplot.R
-
-
 library( ggplot2, quietly=TRUE ) # ggplot
 library( scales, quietly=TRUE) # labels=comma
 
 arglist <- commandArgs(trailingOnly=TRUE)
 data.file <- arglist[[1]]
 jpheg.file <- 'out/dotplot.renumbered.jpg'
-
-
 
 # theme_black: Copied from http://stackoverflow.com/questions/13999103/control-color-of-legend-elements-that-are-not-colour-guides-in-ggplot
 theme_black <- function (base_size = 16, base_family = ""){
@@ -49,16 +43,11 @@ theme_black <- function (base_size = 16, base_family = ""){
              )
     }
 
-
-
-
-
 # Read the data file.
 data <- read.table( data.file, header=FALSE )
 
 # Re-order the chromosomes.  This factoring should work for chromosomes whether or not they're prepended with 'chr', though it hasn't been test for with 'chr'.
 #data$V3 <- factor( data$V3, levels = c( "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","X","Y","chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13","chr14","chr15","chr16","chr17","chr18","chr19","chrX","chrY" ) )
-
 
 # Load the data into a ggplot object.
 p <- ggplot( data, aes( x=V1, y=V2 ) )
@@ -73,8 +62,6 @@ p <- p + geom_point( size = 2.5, aes( col=data[,3] ) )
 # These RGB values were taken from a close-up of an actual SKY image, sampled in MS Paint like a boss: http://www.ncbi.nlm.nih.gov/sky/ccap_helper.cgi?tsc=2
 # Chr9 has been changed from white to black because I'm using a white background.
 p <- p + scale_colour_manual( values=rev( c('#FFE800','#900101','#8F8090','#8DE3F6','#8A6911','#9C4D94','#F0A0B0','#F66824','#000000','#049618','#0495D1','#EE04EF','#F70914','#9386EE','#7FE7A0','#F8A80C','#0028F8','#C01C68','#48F41B','#B064EF') ), name = "Chromosome" )
-
-
 
 # Increase font size on axis tick labels.
 p <- p + theme( axis.text.x  = element_text(size=16) )

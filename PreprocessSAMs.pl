@@ -1,21 +1,22 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+use warnings;
+use diagnostics;
 use strict;
 
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// This software and its documentation are copyright (c) 2014-2015 by Joshua //
-// N. Burton and the University of Washington.  All rights are reserved.     //
-//                                                                           //
-// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
-// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
-// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
-// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
-// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
-
+##///////////////////////////////////////////////////////////////////////////////
+##//                                                                           //
+##// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+##// N. Burton and the University of Washington.  All rights are reserved.     //
+##//                                                                           //
+##// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+##// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+##// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+##// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+##// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+##// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+##// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+##//                                                                           //
+##///////////////////////////////////////////////////////////////////////////////
 
 # PreprocessSAMs.pl
 #
@@ -47,26 +48,24 @@ use strict;
 # Josh Burton
 # July 2013
 
-
-
 ################################
 #                              #
 #   USER-DEFINED PARAMETERS    #
 #                              #
 ################################
 
-
 my $dry_run = 0; # if true, just print the commands to be run - don't actually run them
 my $RE_site = 'AAGCTT'; # the restriction enzyme site at which the DNA was cut for the Hi-C experiment
 
 # Paths to the necessary scripts and software packages.
-my $make_bed_around_RE_site_pl = '/net/shendure/vol10/jnburton/src/Lachesis/make_bed_around_RE_site.pl';
-my $bedtools = '/net/shendure/vol10/jnburton/extern/BEDTools-Version-2.15.0/bin/bedtools';
-my $samtools = '/net/gs/vol3/software/modules-sw/samtools/0.1.18/Linux/RHEL6/x86_64/bin/samtools';
+##my $make_bed_around_RE_site_pl = '/net/shendure/vol10/jnburton/src/Lachesis/make_bed_around_RE_site.pl';
+my $make_bed_around_RE_site_pl = qx"which make_bed_around_RE_site.pl";
+##my $bedtools = '/net/shendure/vol10/jnburton/extern/BEDTools-Version-2.15.0/bin/bedtools';
+my $bedtools = qx"which bedtools";
+##my $samtools = '/net/gs/vol3/software/modules-sw/samtools/0.1.18/Linux/RHEL6/x86_64/bin/samtools';
+my $samtools = qx"which samtools";
 #my $mem = "16G";
 #my $picard_head = "java -d64 -Xmx$mem -jar /net/shendure/vol10/jnburton/extern/picard-tools-1.50/";
-
-
 
 ################################
 #                              #
@@ -78,19 +77,15 @@ my $samtools = '/net/gs/vol3/software/modules-sw/samtools/0.1.18/Linux/RHEL6/x86
 # First argument: the command to run.
 # Second argument (optional): the file to redirect stdout to.
 sub run_cmd(@) {
-    
     my ($cmd,$redirect) = @_;
-    
     print localtime() . ": PreprocessSAMs.pl: $cmd\n";
-    
     return if $dry_run;
-    
-    if ($redirect) { system ( "$cmd > $redirect" ) }
-    else           { system ( $cmd ); }
+    if ($redirect) {
+        system("$cmd > $redirect")
+    } else {
+        system ( $cmd );
+    }
 }
-
-
-
 
 ################################
 #                              #
@@ -98,13 +93,11 @@ sub run_cmd(@) {
 #                              #
 ################################
 
-
 # Get the command-line arguments, or check syntax.
 if ( @ARGV != 2 ) {
     print STDERR "\nPreprocessSAMs.pl: A script to prepare SAM or BAM files for use with Lachesis.\n\nSyntax: $0 <sam-or-bam-filename> <draft-assembly-fasta>\n\n";
     exit;
 }
-
 
 # Get the input filenames, and check that they actually exist.
 my ( $SAM, $fasta) = @ARGV;
@@ -117,31 +110,27 @@ unless ( -e $fasta) {
     exit;
 }
 
-
 # Find the input file's "head" and extension.
 my ($head,$extension) = $SAM =~ /^(.*)\.(.*)$/;
 
-
 # Examine the extension to determine whether this is a SAM or a BAM file.  If it's a SAM, convert it to BAM.  If it doesn't seem to be either, throw an error.
-if    ( uc($extension) eq 'SAM' ) { run_cmd( "$samtools view -bS $SAM -o $head.bam" ); }
-elsif ( uc($extension) eq 'BAM' ) {}
-else {
+if (uc($extension) eq 'SAM') {
+    run_cmd( "$samtools view -bS $SAM -o $head.bam" );
+} elsif (uc($extension) eq 'BAM') {
+    ## Do nothing?
+} else {
     print STDERR "$0: Can't determine file type for input file `$SAM`.\nFilename should end in '.SAM' or '.BAM' (not case-sensitive.)\n";
     exit;
 }
 
-
 print "$0 @ARGV\n\n";
-
-
 
 # COMMAND                                OUTPUT FILENAME                               WHAT THE COMMAND DOES
 # make_bed_around_RE_site.pl             <fasta>.near_<RE>.<range>.bed                 Prepare the bed file for bedtools intersect (next command)
 #
 # Make the BED file for the restriction sites on the draft assembly.  This only needs to be done once.
 my $BED_RE_file = "$fasta.near_$RE_site.500.bed";
-run_cmd( "$make_bed_around_RE_site_pl $fasta $RE_site 500" ) unless -e $BED_RE_file;
-
+run_cmd("$make_bed_around_RE_site_pl $fasta $RE_site 500") unless -e $BED_RE_file;
 
 # Do the pre-processing on this file.
 #
@@ -156,9 +145,9 @@ run_cmd( "$make_bed_around_RE_site_pl $fasta $RE_site 500" ) unless -e $BED_RE_f
 my $opts = "VALIDATION_STRINGENCY=SILENT";
 my $nodups = ""; # or ".nodups", if removing PCR duplicates
 
-run_cmd( "$bedtools intersect -abam $head.bam -b $BED_RE_file > $head.REduced.bam" );
+run_cmd("$bedtools intersect -abam $head.bam -b $BED_RE_file > $head.REduced.bam");
 #run_cmd( "${picard_head}SortSam.jar $opts I=$head.REduced.bam O=$head.REduced.sort_coord.bam SO=coordinate" );
 #run_cmd( "${picard_head}MarkDuplicates.jar $opts I=$head.REduced.sort_coord.bam O=$head.REduced.sort_coord.nodups.bam M=$head.REduced.sort_coord.dup_metrics AS=true REMOVE_DUPLICATES=true" );
 #run_cmd( "${picard_head}SortSam.jar $opts I=$head.REduced.sort_coord.nodups.bam O=$head.REduced.nodups.bam SO=queryname" );
-run_cmd( "$samtools view -F12 $head.REduced$nodups.bam -b -o $head.REduced$nodups.paired_only.bam" );
-run_cmd( "$samtools flagstat $head.REduced$nodups.paired_only.bam > $head.REduced$nodups.paired_only.flagstat" );
+run_cmd("$samtools view -F12 $head.REduced$nodups.bam -b -o $head.REduced$nodups.paired_only.bam");
+run_cmd("$samtools flagstat $head.REduced$nodups.paired_only.bam > $head.REduced$nodups.paired_only.flagstat");

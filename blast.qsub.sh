@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 for CHUNK in {1..190}; do
     qsub blast.sh $CHUNK
 done
