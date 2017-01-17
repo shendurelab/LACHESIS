@@ -1,26 +1,25 @@
-#!/usr/bin/env perl
-use warnings;
-use diagnostics;
+#!/usr/bin/perl -w
 use strict;
 
-##///////////////////////////////////////////////////////////////////////////////
-##//                                                                           //
-##// This software and its documentation are copyright (c) 2014-2015 by Joshua //
-##// N. Burton and the University of Washington.  All rights are reserved.     //
-##//                                                                           //
-##// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
-##// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
-##// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
-##// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
-##// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
-##// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
-##// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
-##//                                                                           //
-##///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+// N. Burton and the University of Washington.  All rights are reserved.     //
+//                                                                           //
+// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
 
 # commentify_INI.pl
 #
-# A simple script to add comments (and blank lines) to an INI file to make it readable.  The comments are hard-wired to accurately describe the contents of
+# A simple script to add comments (and blank lines) to an INI file to make it readable.  The comments are hard-wired to accurately describe the contents of 
 # an INI file if it has all of the right fields in the right order.  The counterpart of this script is decommentify_INIs.pl, which does the reverse.
 #
 # This is a convenience script that allows me to easily maintain consistent commenting across a set of INI files.  I will make all of my modifications to the
@@ -29,6 +28,7 @@ use strict;
 # Josh Burton
 # August 2013
 
+
 # Check for input arguments.
 if ( @ARGV != 1 ) {
     print STDERR "\nSyntax: $0 <INI-file>   (writes to stdout)\n\n";
@@ -36,6 +36,7 @@ if ( @ARGV != 1 ) {
 }
 
 my $expected_N_lines = 27;
+
 
 # Open the filename provided, and get the lines out of it.
 die "Can't find input file `$ARGV[0]`: $!\n" unless -e $ARGV[0];
@@ -48,6 +49,7 @@ close IN;
 map { die "ERROR: The following line in $ARGV[0] doesn't seem to describe a key-value pair:\n$_" unless /^\w+\s+\=\s/ } @lines;
 
 die "ERROR: Wrong number of lines in $ARGV[0].  It should be $expected_N_lines, but saw ", scalar @lines, " instead.\n" unless scalar @lines == $expected_N_lines;
+
 
 # Now, print the entire commented file.
 
@@ -77,20 +79,25 @@ print <<FILE_END;
 #
 ###############################################################################################################################################################
 
+
+
 # Species.  If assembling a species for which there is already a reference, use "human" or "mouse" or "fly"; these names are hard-wired into the code.
 # If assembling any other species (including e.g., other Drosophila species), DO NOT use these strings.
 $lines[0]
+
 
 # Directory which will contain the output.  When Lachesis is run, it will create this directory, along with subdirectories main_results/ and cached_data/.
 # If DO_REPORTING = 1 below, the file REPORT.txt, which is the main output reporting file, will be created in here.
 $lines[1]
 
+
+
 #################################################
 #
 #   PARAMETERS FOR THE INPUT ASSEMBLY
 #
-# Draft assembly fasta file.
 
+# Draft assembly fasta file.
 $lines[2]
 
 # Directory containing the input SAM/BAM files that describe Hi-C read alignments to the draft assembly.
@@ -106,6 +113,11 @@ $lines[4]
 # For each contig in the draft assembly, the number of RE sites on the contig will be counted, and the Hi-C link density will be normalized by this number.
 $lines[5]
 
+
+
+
+
+
 #################################################
 #
 #   PARAMETERS FOR THE REFERENCE GENOME
@@ -115,8 +127,8 @@ $lines[5]
 #   orienting results to the results implied by the alignments to reference.
 #   If USE_REFERENCE = 0, none of these parameters are examined or used.
 #
-# Use a reference genome?  Options: 0 (false), 1 (true).
 
+# Use a reference genome?  Options: 0 (false), 1 (true).
 $lines[6]
 
 # If the draft assembly is just the reference genome chopped into simulated bins (e.g., Table 2 in the original Lachesis publication) put the bin size here.
@@ -131,6 +143,10 @@ $lines[8]
 # Lachesis will create a file at <OUTPUT_DIR>/cached_data/TrueMapping.assembly.txt.  Once this file exists, you no longer need the BLAST files.
 # Alternatively, if SIM_BIN_SIZE > 0 (above), BLAST_FILE_HEAD is ignored because no alignments to reference are needed.
 $lines[9]
+
+
+
+
 
 #################################################
 #
@@ -153,6 +169,10 @@ $lines[13]
 # If these cache files already exist, and if OVERWRITE_CLMS = 0, the links are loaded from cache, saving time.
 # Set to 1 if you change anything about the clustering, so that the change will propagate to the ordering.  Otherwise Lachesis will throw an error.
 $lines[14]
+
+
+
+
 
 #################################################
 #
@@ -178,12 +198,15 @@ $lines[19]
 # The dotplots go to out/dotplot.SKY.*.jpg
 $lines[20]
 
+
 # Minimum number of RE sites in contigs allowed into the initial trunk.
 $lines[21]
 # Minimum number of RE sites in shreds considered for reinsertion.
 $lines[22]
 # Boolean (0/1).  If 1, draw a 2-D dotplot for each cluster, showing the ordering results compared to truth.  Ignored if USE_REFERENCE = 0.
 $lines[23]
+
+
 
 #################################################
 #

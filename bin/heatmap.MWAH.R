@@ -1,24 +1,25 @@
 #!/usr/bin/env Rscript
+#///////////////////////////////////////////////////////////////////////////////
+#//                                                                           //
+#// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+#// N. Burton and the University of Washington.  All rights are reserved.     //
+#//                                                                           //
+#// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+#// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+#// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+#// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+#// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+#// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+#// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+#//                                                                           //
+#///////////////////////////////////////////////////////////////////////////////
 
-##///////////////////////////////////////////////////////////////////////////////
-##//                                                                           //
-##// This software and its documentation are copyright (c) 2014-2015 by Joshua //
-##// N. Burton and the University of Washington.  All rights are reserved.     //
-##//                                                                           //
-##// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
-##// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
-##// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
-##// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
-##// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
-##// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
-##// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
-##//                                                                           //
-##///////////////////////////////////////////////////////////////////////////////
 
 # Make a colored hex plot from heatmap.txt.
 #
 # Josh Burton
 # December 2012
+
 
 library(ggplot2,quietly=TRUE) # ggplot
 library(RColorBrewer) # colorRampPalette
@@ -27,6 +28,7 @@ library(grid) # unit
 heatmap.file <- 'heatmap.txt'
 jpeg.file <- "out/HiC_heatmap.jpg"
 shuffle <- 0 # if 1, randomly permute the heatmap to show the 'pre-Lachesis' dataset.
+
 
 ########## Get a ColorBrewer palette.
 
@@ -44,9 +46,13 @@ pal <- c( pal[1:8], "#950B13", "#860811", "#76040F", pal[9], "#500000", "#400000
 
 # BEST: Yellow-to-orange-to-red palette.  Try bias = 1,2,3 for progressively darkened versions.
 pal <- colorRampPalette( c( brewer.pal( 9, 'YlOrRd' ), 'black'), bias=2 )(9)
+
 ##########
 
+
 palette <- colorRampPalette( pal )
+
+
 # Read the file.
 heatmap <- read.table( heatmap.file, header=TRUE )
 
@@ -66,10 +72,12 @@ if ( min( heatmap$Z ) >= 0 ) {
     p <- ggplot( heatmap, aes( x=X, y=Y, fill=Z ) )
 }
 
+
 if ( shuffle == 1 ) {
     # Load shuffled data.  Note that the shuffle order is 1-indexed so we'll need to twiddle the data to use it properly.
     p <- ggplot( heatmap, aes( x=shuffle.order[X+1]-1, y=shuffle.order[Y+1]-1, fill=log10(Z+1) ) )
 }
+
 
 # Set the theme for this plot.
 p <- p + theme_bw()
@@ -85,6 +93,7 @@ p <- p + ylab("")
 #cell.boundary <- rep(cell.size,N)
 #p <- p + geom_tile( aes( width=cell.boundary, height=cell.boundary ) )
 
+
 # Add vertical lines to delineate chromosomes.
 if ( shuffle == 0 ) {
     #p <- p + geom_vline( xintercept = chrom.borders, col='black', linetype='dashed', size=.5 )
@@ -92,6 +101,7 @@ if ( shuffle == 0 ) {
     p <- p + geom_vline( xintercept = chrom.borders, col='black', linetype='dashed', size=1 )
     p <- p + geom_hline( yintercept = chrom.borders, col='black', linetype='dashed', size=1 )
 }
+
 
 # Tweak the theme for better readability on a slide (November 2013 Research Report).
 p <- p + theme( axis.text.x = element_text( size=0 ), axis.text.y = element_text( size=0 ) ) # hide axis labels

@@ -1,20 +1,21 @@
 #!/usr/bin/env Rscript
+# The above "shebang" allows this file to be self-executing
+#///////////////////////////////////////////////////////////////////////////////
+#//                                                                           //
+#// This software and its documentation are copyright (c) 2014-2015 by Joshua //
+#// N. Burton and the University of Washington.  All rights are reserved.     //
+#//                                                                           //
+#// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
+#// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
+#// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
+#// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
+#// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
+#// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
+#// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
+#//                                                                           //
+#///////////////////////////////////////////////////////////////////////////////
 
-## The above "shebang" allows this file to be self-executing
-##///////////////////////////////////////////////////////////////////////////////
-##//                                                                           //
-##// This software and its documentation are copyright (c) 2014-2015 by Joshua //
-##// N. Burton and the University of Washington.  All rights are reserved.     //
-##//                                                                           //
-##// THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  //
-##// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                //
-##// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  //
-##// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      //
-##// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT //
-##// OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  //
-##// THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                //
-##//                                                                           //
-##///////////////////////////////////////////////////////////////////////////////
+
 
 # QuickDotplot.POA.R
 #
@@ -26,12 +27,18 @@
 # < directory=/net/gs/vol2/home/jnburton/vol10/src/HiC >
 # QuickDotplot reporter
 
+
 library( ggplot2, quietly=TRUE ) # ggplot
+
 dotplot.file <- 'QuickDotplot.POA.txt'
 jpeg.file <- 'out/POA.jpg'
 
+
+
+
 # Read the dotplot file.
 dotplot <- read.table( dotplot.file, header=FALSE )
+
 
 # Re-order the error types so that the color mapping is consistent between dotplots.
 # The error names are defined in Reporter::PlotOrderAccuracy().
@@ -39,6 +46,8 @@ err_colors <- c( "awesome", "err_orient", "err_order", "err_order_orient", "err_
 dotplot$colors <- factor( dotplot[,3], levels = err_colors )
 
 dot.size <- ceiling( 50 / sqrt( dim(dotplot)[1] ) )
+
+
 
 # Load the data into a ggplot object.
 p <- ggplot( dotplot, aes( x=V1, y=V2 ) )
