@@ -195,7 +195,7 @@ typedef struct {
   @field  data       all variable-length data, concatenated; structure: qname-cigar-seq-qual-aux
 
   @discussion Notes:
- 
+
    1. qname is zero tailing and core.l_qname includes the tailing '\0'.
    2. l_qseq is calculated from the total length of an alignment block
       on reading or from CIGAR.
@@ -692,7 +692,7 @@ extern "C" {
 	 * Miscellaneous *
 	 *****************/
 
-	/*!  
+	/*!
 	  @abstract Calculate the rightmost coordinate of an alignment on the
 	  reference genome.
 

@@ -70,9 +70,9 @@ struct BlastAlignmentVec; // defined in the .cc
 class TrueMapping
 {
  public:
-  
+
   /* CONSTRUCTORS */
-  
+
   // Default constructor.  This is only invoked when another object that contains a TrueMapping object (e.g., Reporter) is instantiated.
   TrueMapping() {}
   // Load in a set of BLAST alignments for a de novo GLM.  Also load in query and target names.  The dummy_SAM_file is for getting contig lengths.
@@ -82,7 +82,7 @@ class TrueMapping
   TrueMapping( const string & species, const int BIN_SIZE, const vector<string> & query_names, const vector<string> & target_names );
   // Create a TrueMapping for a non-de novo GLM.
   TrueMapping( const string & species, const int & bin_size, const vector<string> & chrom_names, const map<string,int> & chrom_lengths );
-  
+
   /* QUERY FUNCTIONS */
   string species() const { return _species; }
   int NQueries() const { return _query_names.size(); }
@@ -104,9 +104,9 @@ class TrueMapping
   void Print( const bool genome_order ) const;
   // PrintSeqLengthOnTargets: Print a chart report about the total length of query sequence aligned to each target sequence.
   void PrintSeqLengthOnTargets( const string & dummy_SAM_file, ostream & out = cout ) const;
-  
+
   /* Query mapping functions */
-  
+
   // Mapping of contig ID to chromosome ID in the fasta order
   vector<int> QueriesToChromIDs() const;
   // Mapping of contig ID to genome ordering (e.g., the first contig on the first chromosome in the fasta maps to 0, etc.)
@@ -114,9 +114,9 @@ class TrueMapping
   vector<int> QueriesToGenomeOrder() const;
   // Find the first contig on a chromosome.  Useful for non-de novo assemblies.
   int FirstContigOnChrom( const int chrom_ID ) const;
-  
+
   /* Modification functions */
-  
+
   // Remove a target sequence from consideration by marking all query sequences that map to it as unmapped.  (Don't remove its name from the lists though.)
   // This function is useful if a reference fasta contains unannotated or unplaced scaffolds (e.g., the "het" and "U" reference contigs in Drosophila.)
   void RemoveTarget( const int target_ID );
@@ -126,22 +126,22 @@ class TrueMapping
   void MergeTargets( const int target_ID_1, const int target_ID_2, const string & merged_name );
   void MergeTargets( const string & target_name_1, const string & target_name_2, const string & merged_name )
   { MergeTargets( TargetID( target_name_1 ), TargetID( target_name_2 ), merged_name ); }
-  
-  
-  
+
+
+
   // Reorder the query sequences.  This accepts output from QueriesToHumanGenome().
   void ReorderQueries( const vector<int> & new_ordering );
-  
-  
+
+
  private:
-  
+
   // Helper function for the TrueMapping constructor.
   // Read alignment info from the BLAST files and write them in a simple format to TrueMapping_file.  If TrueMapping_file already exists, just read from it
   // directly, to save runtime.  Either way, load the alignment data into this TrueMapping object.
   void ReadBlastAlignsFromFileSet( const string & species, const string & dummy_SAM_file, const vector<string> & BLAST_files, const string & TrueMapping_file );
-  
+
   /* The following three functions assume that species() == "human" and that the chromosomes are named in accordance with the standard in HumanGenome.h. */
-  
+
   // Return a mapping of contig ID to chromosome ID in the human genome.
   vector<int> QueriesToHumanChromIDs() const;
   // Return a mapping of contig ID to overall ordering in the human genome (e.g., the first contig on chr1 maps to 0, and so on.)
@@ -149,24 +149,24 @@ class TrueMapping
   vector<int> QueriesToHumanGenome() const;
   // Make a mapping of *target* ID to chromosome ID in the human genome.
   vector<int> TargetToHumanChromIDs() const;
-  
-  
-  
+
+
+
   /* DATA */
   string _species;
-  
-  
+
+
   // Lists of contig names.
   vector<string> _query_names; // query names (draft assembly)
   vector<string> _target_names; // target names (reference assembly)
-  
+
   // The alignments themselves.  Query and target contigs here are indicated by an integer, which is their index in the above name lists.
   vector<int> _target; // query contig -> target contig
   vector<int> _start, _stop; // query contig -> alignment start/stop on target (iff start > stop, then the alignment is RC)
-  
+
   // Alignment quality scores, as calculated in TabulateAlignsToTarget.
   vector<double> _qual_alignability, _qual_specificity;
-  
+
 };
 
 

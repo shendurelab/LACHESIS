@@ -17,7 +17,7 @@
 // For documentation, see CopyNumberProfile.cc.
 #include "CopyNumberProfile.h"
 
-#include <assert.h> 
+#include <assert.h>
 #include <math.h>
 #include <string>
 #include <vector>
@@ -58,10 +58,10 @@ CopyNumberProfile::CopyNumberProfile( const string & BEDgraph_file, const int ga
 {
   _CNs.resize  ( HumanGenome_n_chroms );
   _HRCNs.resize( HumanGenome_n_chroms );
-  
+
   // First, parse the BEDgraph and get a set of copy-number calls in intervals.
   vector< pair<chrom_interval,double> > CN_calls = ParseBEDgraph( BEDgraph_file );
-  
+
   // Now, put these calls into the local data structure.
   // The AddCN function merges the intervals if necessary, if they're in order.
   for ( size_t i = 0; i < CN_calls.size(); i++ )
@@ -86,7 +86,7 @@ CopyNumberProfile::AddCN( const chrom_interval & interval, const int CN )
 {
   int chrID = interval.chrID;
   assert( chrID != -1 );
-  
+
   // Consider the already-existing HRCN intervals on this chromosome.
   // Determine whether this HRCN interval can be merged into the existing final
   // interval (e.g. it's close to the existing interval and has the same HRCN.)
@@ -96,22 +96,22 @@ CopyNumberProfile::AddCN( const chrom_interval & interval, const int CN )
   if ( !_CNs[chrID].empty() ) {
     map<chrom_interval,int>::iterator it = _CNs[chrID].end();
     it--;
-    
+
     assert( interval > it->first ); // this assert will fail if chrom_intervals aren't added in increasing order; see comment above
-    
+
     if ( interval.distance( it->first ) <= _gap_size && CN == it->second ) {
-      
+
       // Merge the new region into the existing final region.
       merged = true;
       chrom_interval merger = it->first;
       _CNs[chrID].erase( it );
       merger = merger.union_with_gap( interval );
       _CNs[chrID].insert( make_pair( merger, CN ) );
-      
+
     }
   }
-  
-  
+
+
   // If this interval wasn't merged in, add it to the _CNs data structure.
   if ( !merged ) _CNs[chrID].insert( make_pair( interval, CN ) );
 }
@@ -135,11 +135,11 @@ CopyNumberProfile::AddHRCN( const chrom_interval & interval, const int major_CN,
   assert( chrID != -1 );
   assert( major_CN >= minor_CN );
   pair<int,int> HRCN = make_pair( major_CN, minor_CN );
-  
+
   // Verify that this region's HRCN is consistent with its already-recorded CN.
   assert( CN( interval ) == major_CN + minor_CN );
-  
-  
+
+
   // Consider the already-existing HRCN intervals on this chromosome.
   // Determine whether this HRCN interval can be merged into the existing final
   // interval (e.g. it's close to the existing interval and has the same HRCN.)
@@ -149,22 +149,22 @@ CopyNumberProfile::AddHRCN( const chrom_interval & interval, const int major_CN,
   if ( !_HRCNs[chrID].empty() ) {
     map< chrom_interval, pair<int,int> >::iterator it = _HRCNs[chrID].end();
     it--;
-    
+
     assert( interval > it->first ); // this assert will fail if chrom_intervals aren't added in increasing order; see comment above
-    
+
     if ( interval.distance( it->first ) <= _gap_size && HRCN == it->second ) {
-      
+
       // Merge the new region into the existing final region.
       merged = true;
       chrom_interval merger = it->first;
       _HRCNs[chrID].erase( it );
       merger = merger.union_with_gap( interval );
       _HRCNs[chrID].insert( make_pair( merger, HRCN ) );
-      
+
     }
   }
-  
-  
+
+
   // If this interval wasn't merged in, add it to the _HRCNs data structure.
   if ( !merged ) _HRCNs[chrID].insert( make_pair( interval, HRCN ) );
 }
@@ -246,17 +246,17 @@ CopyNumberProfile::CN_regions( const chrom_interval & query ) const
 {
   vector<chrom_interval> regions;
   if ( query.empty() ) return regions; // empty in -> empty out
-  
+
   // Get the set of copy-number calls (i.e., chrom_intervals) on this chrom.
   const map<chrom_interval,int> & intervals = _CNs[ query.chrID ];
-  
+
   // Loop over all the copy-number calls and search for intervals that overlap the query.
   map<chrom_interval,int>::const_iterator iter;
   for ( iter = intervals.begin(); iter != intervals.end(); iter++ ) {
     chrom_interval overlap = iter->first.intersection( query );
     if ( !overlap.empty() ) regions.push_back( overlap );
   }
-  
+
   return regions;
 }
 
@@ -296,14 +296,14 @@ CopyNumberProfile::CN_and_interval( const string & chrom, const int pos ) const
 {
   // Get the set of copy-number calls (i.e., chrom_intervals) on this chrom.
   const map<chrom_interval,int> & intervals = _CNs[ chrom_to_chrID.at(chrom) ];
-  
+
   // Loop over all the copy-number calls and search for an interval that
   // contains this position.
   map<chrom_interval,int>::const_iterator iter;
   for ( iter = intervals.begin(); iter != intervals.end(); iter++ )
     if ( iter->first.contains(pos) )
       return *iter;
-  
+
   // If no interval contains this position, return the dummy answer.
   return make_pair( chrom_interval(), -1 );
 }
@@ -318,14 +318,14 @@ CopyNumberProfile::HRCN_and_interval( const string & chrom, const int pos ) cons
 {
   // Get the set of HRCN (i.e., chrom_intervals) on this chrom.
   const map<chrom_interval, pair<int,int> > & intervals = _HRCNs[ chrom_to_chrID.at(chrom) ];
-  
+
   // Loop over all the copy-number calls and search for an interval that
   // contains this position.
   map<chrom_interval, pair<int,int> >::const_iterator iter;
   for ( iter = intervals.begin(); iter != intervals.end(); iter++ )
     if ( iter->first.contains(pos) )
       return *iter;
-  
+
   // If no interval contains this position, return the dummy answer.
   return make_pair( chrom_interval(), make_pair(-1,-1) );
 }
@@ -345,7 +345,7 @@ CopyNumberProfile::PrintCNStats( ostream & out ) const
 {
   int n_calls = 0;
   int64_t total_len = 0;
-  
+
   out << "Number of copy-number calls per chromosome:" << endl;
   for ( size_t i = 0; i < HumanGenome_n_chroms; i++ )
     if ( !_CNs[i].empty() ) {
@@ -364,9 +364,9 @@ CopyNumberProfile::PrintHRCNStats( ostream & out ) const
 {
   int n_calls = 0;
   int64_t total_len = 0;
-  
+
   out << "Number of HRCN calls per chromosome:" << endl;
-  for ( size_t i = 0; i < HumanGenome_n_chroms; i++ ) 
+  for ( size_t i = 0; i < HumanGenome_n_chroms; i++ )
     if ( !_HRCNs[i].empty() ) {
       n_calls += _HRCNs[i].size();
       out << chrID_to_chrom[i] << "\t" << _HRCNs[i].size() << endl;
@@ -384,7 +384,7 @@ CopyNumberProfile::PrintHRCNs( ostream & out ) const
 {
   int n_calls = 0;
   out << "CopyNumberProfile::PrintHRCNs" << endl;
-  
+
   // Print the number of HRCN calls per chromosome.
   for ( size_t i = 0; i < HumanGenome_n_chroms; i++ )
     if ( !_HRCNs[i].empty() ) {
@@ -393,7 +393,7 @@ CopyNumberProfile::PrintHRCNs( ostream & out ) const
       for ( it = _HRCNs[i].begin(); it != _HRCNs[i].end(); it++ )
 	out << "\t" << it->first << "\t(" << it->second.first << ":" << it->second.second << ")" << endl;
     }
-  
+
   out << "TOTAL CALLS:\t" << n_calls << endl;
   out << endl;
 }
@@ -409,7 +409,7 @@ CopyNumberProfile::WriteHRCNs( const string & BEDfile, const bool append ) const
 {
   ofstream out( BEDfile.c_str(), append ? ios::app : ios::out );
   map<chrom_interval, pair<int,int> >::const_iterator iter;
-  
+
   // Output the chromosomes in HumanGenome order.
   for ( size_t i = 0; i < HumanGenome_n_chroms; i++ )
     for ( iter = _HRCNs[i].begin(); iter != _HRCNs[i].end(); iter++ ) {
@@ -417,6 +417,6 @@ CopyNumberProfile::WriteHRCNs( const string & BEDfile, const bool append ) const
       int CN = HRCN.first + HRCN.second;
       out << iter->first.str_BED() << '\t' << CN << '\t' << HRCN.first << '\t' << HRCN.second << endl;
     }
-  
+
   out.close();
 }

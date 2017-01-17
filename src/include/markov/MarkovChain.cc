@@ -36,13 +36,13 @@ size_t
 log_prob_index( const vector<double> & logprobs, double threshold )
 {
   assert( threshold >= 0 && threshold < 1 );
-  
+
   double total = 0;
   for ( size_t i = 0; i < logprobs.size(); i++ ) {
     total += exp( logprobs[i] );
     if ( total >= threshold ) return i;
   }
-  
+
   // control should never reach here
   cerr << "FAIL: MarkovChain::log_prob_index" << endl;
   cerr << "Debug info:" << endl;
@@ -71,19 +71,19 @@ vector<int>
 MarkovChain::GenerateChain( const int chain_length, const bool set_seed ) const
 {
   vector<int> chain;
-  
+
   if ( set_seed ) srand48( time(0) ); // set random seed
-  
+
   // Choose an initial state at random.
   int state = log_prob_index( _init_probs, drand48() );
-  
+
   // Each state transitions randomly into the next state.
   // Record each state, until the requested number of states has been observed.
   for ( int i = 0; i < chain_length; i++ ) {
     chain.push_back(state);
     state = log_prob_index( _trans_probs[state], drand48() );
   }
-  
+
   return chain;
 }
 
@@ -100,7 +100,3 @@ MarkovChain::Print( ostream & out ) const
 {
   out << "MarkovChain::Print is not yet implemented." << endl; // TEMP
 }
-
-
-
-

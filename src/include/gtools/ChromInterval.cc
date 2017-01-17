@@ -51,7 +51,7 @@ chrom_interval::chrom_order( const string & chrom_name )
 {
   map<string,int>::const_iterator it = _chrom_order.find( chrom_name );
   // If this assert fails, the chrom name is unrecognized.
-  assert ( it != _chrom_order.end() ); 
+  assert ( it != _chrom_order.end() );
   return it->second;
 }
 
@@ -72,13 +72,13 @@ chrom_interval::chrom_interval( const string & s )
   size_t p0 = s.find(':');
   assert( p0 != string::npos ); // input string must contain ':'
   chrID = chrom_order( s.substr( 0, p0 ) );
-  
+
   // Parse the start and stop integers.
   size_t p1 = s.find( '-', p0+1 );
   assert( p1 != string::npos ); // string must contain '-' after ':'
   start = boost::lexical_cast<int>( s.substr( p0+1, p1-p0-1 ) );
   stop  = boost::lexical_cast<int>( s.substr( p1+1 ) );
-  
+
   assert( start <= stop );
 }
 
@@ -288,7 +288,7 @@ chrom_interval_from_BED_line( const string & line )
   vector<string> tokens;
   boost::split( tokens, line, boost::is_any_of("\t") );
   assert( tokens.size() >= 3 );
-  
+
   return chrom_interval( tokens[0],
 			 boost::lexical_cast<int>( tokens[1] ),
 			 boost::lexical_cast<int>( tokens[2] ) );

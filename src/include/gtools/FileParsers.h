@@ -81,15 +81,15 @@ using namespace std;
 // Struct that gets passed in to the function ParseVCF, describing the type
 // of variants to filter.
 struct VCF_input_filter {
-  
+
   string chrom; // if this is set, only return variants on this chrom
   int genotype; // -1 = all; 1 = het only; 2 = hmz alt only
   int dbSNP; // -1 = all; 0 = not in dbSNP only; 1 = in dbSNP only
-  
-  
+
+
   // The default constructor doesn't filter anything out.
   VCF_input_filter() { chrom = ""; genotype = -1; dbSNP = -1; }
-  
+
 };
 
 
@@ -159,7 +159,7 @@ ParseSimHapMatrix( const string & matrix_file,
 		   vector<int> & frag_offsets,
 		   vector<boost::tribool> & frag_truth,
 		   string & loci_truth );
-  
+
 
 
 

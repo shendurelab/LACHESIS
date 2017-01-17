@@ -42,16 +42,16 @@ ClusterVec::ClusterVec( const vector<int> & cluster_IDs, const bool remove_singl
 {
   assert( !cluster_IDs.empty() );
   clear();
-  
+
   _N_contigs = cluster_IDs.size();
-  
+
   map<int,int> vec_to_local; // map of cluster ID in the input vector to cluster ID in this ClusterVec
   int local_ID = 0;
-  
+
   // Step through the input vector.
   for ( int i = 0; i < _N_contigs; i++ ) {
     if ( cluster_IDs[i] < 0 ) continue; // negative cluster ID means this contig isn't in any clusters
-    
+
     // Determine whether or not this cluster ID has been seen before.
     // If not, create a new cluster.
     map<int,int>::const_iterator it = vec_to_local.find( cluster_IDs[i] );
@@ -64,12 +64,12 @@ ClusterVec::ClusterVec( const vector<int> & cluster_IDs, const bool remove_singl
     else
       at( it->second ).insert(i);
   }
-  
-  
+
+
   // Remove singleton clusters, which contain no information whatsoever (except in the case of chromosome-spanning contigs with a CEN,
   // which occurs in some yeast assemblies.)
   if ( remove_singletons ) RemoveSingletons();
-  
+
   // Sort the clusters to make them nicer looking for dotplots.
   SortByMedian();
 }
@@ -82,11 +82,11 @@ ClusterVec::cluster_IDs() const
 {
   //PRINT2( _N_contigs, SizeSum() );
   vector<int> out( _N_contigs, -1 );
-  
+
   for ( size_t i = 0; i < size(); i++ )
     for ( set<int>::const_iterator it = at(i).begin(); it != at(i).end(); it++ )
       out[*it] = i;
-  
+
   return out;
 }
 
@@ -97,33 +97,33 @@ void
 ClusterVec::ReadFile( const string & file, const vector<string> * contig_names )
 {
   clear();
-  
+
   // If contig names are given, make a lookup table.
   map<string,int> contig_name_to_ID;
   if ( contig_names != NULL )
     for ( size_t i = 0; i < contig_names->size(); i++ )
       contig_name_to_ID.insert( make_pair( (*contig_names)[i], i ) );
-  
-  
+
+
   // Parse the whole input file into tokens.
   vector< vector<string> > file_as_tokens;
   TokenizeFile( file, file_as_tokens );
   _N_contigs = 0;
-  
+
   // Loop over every line of tokens.
   for ( size_t i = 0; i < file_as_tokens.size(); i++ ) {
     const vector<string> & tokens = file_as_tokens[i];
-    
+
     // Ignore the commented lines in the header, except the one that gives the number of contigs.
     if ( tokens[0][0] == '#' ) {
-      
+
       // Line: "# N_contigs = 1"
       if ( tokens.size() == 4 && tokens[1] == "N_contigs" )
 	_N_contigs = boost::lexical_cast<int> ( tokens[3] );
-      
+
       continue;
     }
-    
+
     // For each non-commented line, reconstitute a cluster.
     set<int> cluster;
     for ( size_t j = 0; j < tokens.size(); j++ )
@@ -140,7 +140,7 @@ ClusterVec::ReadFile( const string & file, const vector<string> * contig_names )
       }
     push_back( cluster );
   }
-  
+
   if ( _N_contigs == 0 ) _N_contigs = SizeSum(); // for backward compatibility with files that don't have the "N_contigs" line
 }
 
@@ -157,9 +157,9 @@ ClusterVec::WriteFile( const string & file, const vector<string> * contig_names 
   // Sanity check if contig names are given.
   //if ( contig_names != NULL ) PRINT2( _N_contigs, contig_names->size() );
   if ( contig_names != NULL ) assert( _N_contigs == (int) contig_names->size() );
-  
+
   ofstream out( file.c_str(), ios::out );
-  
+
   // Write a header.
   out << "# ClusterVec file - see ClusterVec.h for documentation of this object type" << endl;
   out << "#\n";
@@ -170,11 +170,11 @@ ClusterVec::WriteFile( const string & file, const vector<string> * contig_names 
   out << "# There is one (non-commented) line in this file for each cluster." << endl;
   out << "# Each line lists all the contigs, indicated by their ID in the draft assembly, in that cluster." << endl;
   out << "#\n";
-  
+
   // Write each cluster out on a separate line, in the form of a tab-delimited series of integers (or strings, if contig_names are given.)
   for ( size_t i = 0; i < size(); i++ )
     PrintCluster( i, out, contig_names );
-  
+
   out.close();
 }
 
@@ -186,15 +186,15 @@ void
 ClusterVec::PrintCluster( const int i, ostream & out, const vector<string> * contig_names ) const
 {
   assert( i < (int) size() );
-  
+
   for ( set<int>::const_iterator it = at(i).begin(); it != at(i).end(); it++ ) {
     if ( it != at(i).begin() ) out << '\t';
     if ( contig_names != NULL ) out << contig_names->at(*it);
     else out << *it;
   }
-  
+
   out << '\n';
-    
+
 }
 
 
@@ -223,11 +223,11 @@ ClusterVec::SortBySmallest()
   for ( size_t i = 0; i < size(); i++ )
     if ( !at(i).empty() )
       clusters_set.insert( at(i) );
-  
+
   clear();
   for ( set< set<int> >::const_iterator it = clusters_set.begin(); it != clusters_set.end(); ++it )
     push_back( *it );
-  
+
 }
 
 
@@ -237,17 +237,17 @@ ClusterVec::RemoveSingletons()
 {
   // Make a mapping of old cluster ID -> new cluster ID.  Singleton clusters will be mapped to -1, indicating they'll be destroyed.
   vector<int> new_IDs( size(), -1 );
-  
+
   int n_non_singletons = 0;
   for ( size_t i = 0; i < size(); i++ )
     if ( at(i).size() > 1 )
       new_IDs[i] = n_non_singletons++;
-  
+
   // Move all clusters into their new places.
   for ( int i = 0; i < (int) size(); i++ )
     if ( new_IDs[i] != -1 && new_IDs[i] < i ) // new_IDs[i] <= i for all i, but if they're equal, nothing needs to be done
       at( new_IDs[i] ) = at(i);
-  
+
   resize( n_non_singletons );
 }
 
@@ -260,7 +260,7 @@ void
 ClusterVec::SortByMedian()
 {
   map<int,int> medians;
-  
+
   // Find the median of each cluster.  (Technically this is just the (n/2)-th element, which isn't quite the same thing as the median.  But calculating the
   // median would (a) be harder and (b) create the possibility of two clusters with the same median, which would be bad for this map.)
   for ( size_t i = 0; i < size(); i++ ) {
@@ -270,12 +270,12 @@ ClusterVec::SortByMedian()
     for ( int j = 0; j < med_idx; j++ ) ++it;
     medians.insert( make_pair( *it, i ) );
   }
-  
+
   // Rebuild the cluster order.
   ClusterVec sorted;
   sorted._N_contigs = _N_contigs;
   for ( map<int,int>::const_iterator it = medians.begin(); it != medians.end(); ++it )
     sorted.push_back( at( it->second ) );
-  
+
   *this = sorted;
 }

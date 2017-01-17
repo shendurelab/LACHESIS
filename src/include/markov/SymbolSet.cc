@@ -30,7 +30,7 @@ SymbolSet::SymbolSet( const int n_symbols )
     _ID_to_sym.push_back( symbol );
     _sym_to_ID[ symbol ] = i;
   }
-  
+
 }
 
 
@@ -39,7 +39,7 @@ SymbolSet::SymbolSet( const int n_symbols )
 SymbolSet::SymbolSet( const vector<string> & syms )
 {
   _ID_to_sym = syms;
-  
+
   for ( size_t i = 0; i < syms.size(); i++ )
     _sym_to_ID[ syms[i] ] = i;
 }
@@ -79,6 +79,6 @@ SymbolSet::all_symbols() const
   string symbols( size(), '\0' );
   for ( size_t i = 0; i < size(); i++ )
     symbols[i] = i + 28;
-  
+
   return symbols;
 }

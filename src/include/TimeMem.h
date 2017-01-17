@@ -19,7 +19,7 @@
  * TimeMem.h
  *
  * This module contains two functions: Time() and MemUsage().
- * 
+ *
  *
  * Usage example:
  *

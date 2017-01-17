@@ -50,7 +50,7 @@
  * -- There must be at least one whitespace character in between each
  *    argument-value pair.
  * -- The return value is a ParsedArgs object: documentation below.
- * 
+ *
  *
  *
  * Josh Burton
@@ -88,11 +88,11 @@
  *
  */
 class ParsedArgs {
-  
+
  public:
   ParsedArgs() {}
-  
-  
+
+
   void Require( const string & key ) const {
     map<string,string>::const_iterator value_iter = args_map.find( key );
     if ( value_iter == args_map.end() ) {
@@ -100,20 +100,20 @@ class ParsedArgs {
       exit(1);
     }
   }
-  
+
   void RequireOrDefault( const string & key, const string & value ) {
     map<string,string>::iterator value_iter = args_map.find( key );
     if ( value_iter == args_map.end() )
       args_map[key] = value;
   }
-  
-  
+
+
   string operator[]( const string & key ) const {
     map<string,string>::const_iterator value_iter = args_map.find( key );
     if ( value_iter == args_map.end() ) KeyFail( key );
     return value_iter->second;
   }
-  
+
   int ValueAsInt( const string & key ) const {
     string value = (*this)[key];
     int i;
@@ -123,7 +123,7 @@ class ParsedArgs {
       ConversionFail( value, "ValueAsInt" );
     return i;
   }
-  
+
   double ValueAsDouble( const string & key ) const {
     string value = (*this)[key];
     double d;
@@ -133,7 +133,7 @@ class ParsedArgs {
       ConversionFail( value, "ValueAsDouble" );
     return d;
   }
-  
+
   bool ValueAsBool( const string & key ) const {
     string value = (*this)[key];
     // Convert the string to lowercase.
@@ -149,25 +149,25 @@ class ParsedArgs {
     exit(1); // failed
     return false;
   }
-  
-  
+
+
   friend ParsedArgs ParseArgs( int argc, char * argv[] ); // the below function
-  
+
  private:
-  
+
   // Error message and abort, if the user asks for a non-existent key.
   void KeyFail( const string & key ) const {
       cerr << "ERROR: ParsedArgs: Can't find requested argument key `" << key << "'" << endl;
       exit(1);
   }
-  
+
   // Error message and abort, if the user submits a non-numeric "number".
   void ConversionFail( const string & value, const string & function ) const {
       cerr << "ERROR: ParsedArgs: Can't call function `" << function
 	<< "' on non-numeric value `" << value << "'" << endl;
       exit(1);
   }
-  
+
   map<string,string> args_map;
 };
 
@@ -177,34 +177,34 @@ ParsedArgs
 ParseArgs( int argc, char * argv[] )
 {
   ParsedArgs args;
-  
+
   // Parse each argument individually.  The arguments have already been
   // separated by whitespace (by the shell.)
-  // Note that the first argument - argv[0] - is just the command name. 
+  // Note that the first argument - argv[0] - is just the command name.
   for ( int i = 1; i < argc; i++ ) {
-    
+
     // Find the location of the = sign.
     char * equals_loc = strstr( argv[i], "=" );
     if ( equals_loc == NULL ) {
       cerr << "ERROR: ParsedArgs: Couldn't find a `=' token in argument `" << argv[i] << "'" << endl;
       exit(1);
     }
-    
+
     // Check that there is no more than one = sign.
     char * equals_loc_2 = strstr( equals_loc+1, "=" );
     if ( equals_loc_2 != NULL ) {
       cerr << "ERROR: ParsedArgs: Found multiple `=' tokens in argument `" << argv[i] << "'" << endl;
       exit(1);
     }
-    
+
     // Grab the strings on either side of the = sign.
     string key = argv[i];
     key.resize( equals_loc - argv[i] );
     string value = equals_loc + 1;
-    
+
     args.args_map[key] = value;
   }
-  
+
   return args;
 }
 

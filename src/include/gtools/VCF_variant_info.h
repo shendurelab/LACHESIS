@@ -42,7 +42,7 @@
 // chrom, pos, ref/alt base; and one that's "variant info"
 
 struct VCF_variant_info {
-  
+
   /* DATA IN VCF */
   string chrom; // e.g., "chr1"
   int pos; // on chrom, 0-indexed
@@ -52,20 +52,20 @@ struct VCF_variant_info {
   string ref_base, alt_base; // identity of ref/alt base(s); will consist of ACGT and will be single-letter except for indels
   int ref_depth, alt_depth; // ref/alt allele depth
   int call; // genotype call in the VCF file: 0 = hmz ref; 1 = het; 2 = hmz alt - note that this is made by GATK and may be fallible!
-  
+
   /* AUXILIARY DATA, NOT IN VCF - but may be loaded later */
   int CN; // copy number of region around variant; -1 if unknown
   boost::tribool in_repeat; // boost::indeterminate if unknown
-  
-  
+
+
   /* FUNCTIONS */
-  
+
   // Simple processing functions.
   string name() const { return chrom + ":" + boost::lexical_cast<string>(pos); }
   string tag()  const { return chrom + "_" + boost::lexical_cast<string>(pos) + "_" + ref_base + "_" + alt_base; }
   bool is_SNV() const { return ref_base.size() == 1 && alt_base.size() == 1; }
   bool is_indel() const { return !is_SNV(); }
-  
+
   int total_depth() const { return ref_depth + alt_depth; }
   string call_word() const { return call == 0 ? "HMZ_REF" : call == 1 ? "HET" : "HMZ_ALT"; }
   bool call_het() const { return call == 1; }
@@ -76,7 +76,7 @@ struct VCF_variant_info {
   double RAF() const { return double(ref_depth) / ( ref_depth + alt_depth ); }
   double AAF() const { return double(alt_depth) / ( ref_depth + alt_depth ); }
   double MAF() const { return double( min( ref_depth, alt_depth ) ) / (ref_depth + alt_depth ); }
-  
+
   // Info dump.
   string all_info() const { return name() + "\tdbSNP? " + boost::lexical_cast<string>(dbSNP) + "\tin1KG? " + boost::lexical_cast<string>(in1KG) + "\tQUAL: " + boost::lexical_cast<string>(qual) + "\t" + ref_base + "->" + alt_base + " (depths: " + boost::lexical_cast<string>(ref_depth) + "," + boost::lexical_cast<string>(alt_depth) + ")\tCALL: " + call_word();
   }

@@ -45,10 +45,10 @@ HMM::HMM( const int N_states, const int N_symbols )
   _has_symbol_emiss_probs = false;
   _has_observations       = false;
   _has_time_emiss_probs   = false;
-  
+
   _ran_viterbi    = false;
   _ran_baum_welch = false;
-  
+
 }
 
 
@@ -67,18 +67,18 @@ void
 HMM::SetSymbolEmissProbs( const vector< vector<double> > & probs )
 {
   assert( is_discrete_HMM() );
-  
+
   // Before using this probability set, verify that it makes sense.
   assert( int( probs.size() ) == _N_states );
   for ( int i = 0; i < _N_states; i++ )
     assert_prob_vector( probs[i], _N_symbols );
-  
+
   // Convert the probabilities to log scale.
   _symbol_emiss_probs.resize( _N_states, vector<double>( _N_symbols ) );
   for ( int i = 0; i < _N_states; i++ )
     for ( int j = 0; j < _N_symbols; j++ )
       _symbol_emiss_probs[i][j] = log( probs[i][j] );
-  
+
   _has_symbol_emiss_probs = true;
 }
 
@@ -91,7 +91,7 @@ void
 HMM::SetObservations( const vector<int> & observations )
 {
   assert( is_discrete_HMM() );
-  
+
   _observations = observations;
   _has_observations = true;
 }
@@ -111,18 +111,18 @@ void
 HMM::SetTimeEmissProbs( const vector< vector<double> > & probs )
 {
   assert( !is_discrete_HMM() );
-  
+
   // Find the number of timepoints.
   assert( !probs.empty() );
   size_t N_timepoints = probs.size();
-  
+
   for ( size_t i = 0; i < N_timepoints; i++ )
     assert( (int)probs[i].size() == _N_states );
-  
+
   _time_emiss_probs.resize( N_timepoints, vector<double>( _N_states ) );
-  
+
   // The probabilities are already in log scale (which is necessary because
-  // they can be tiny) so there's no need to convert.  However, we do 
+  // they can be tiny) so there's no need to convert.  However, we do
   // semi-"normalize" them by adding constant factors, just to prevent possible
   // underflow.
   for ( size_t i = 0; i < N_timepoints; i++ ) {
@@ -132,7 +132,7 @@ HMM::SetTimeEmissProbs( const vector< vector<double> > & probs )
       _time_emiss_probs[i][j] = probs[i][j] - max;
     }
   }
-  
+
   _has_time_emiss_probs = true;
 }
 
@@ -145,7 +145,7 @@ HMM::HasAllData() const
 {
   if ( !_has_init_probs  ) return false;
   if ( !_has_trans_probs ) return false;
-  
+
   // Discrete HMMs need symbol emission probabilities and observations.
   if ( is_discrete_HMM() ) {
     if ( !_has_symbol_emiss_probs ) return false;
@@ -154,7 +154,7 @@ HMM::HasAllData() const
   // Continuous HMMs need time emission probabilities.
   else
     if ( !_has_time_emiss_probs ) return false;
-  
+
   return true;
 }
 
@@ -175,10 +175,10 @@ WDAG
 HMM::to_WDAG() const
 {
   assert( HasAllData() );
-  
+
   WDAG wdag;
   wdag.Reserve( 2 * _N_states * NTimepoints() + 2 );
-  
+
   // Create a pair of state vectors.  These will soon hold sets of WDAGNodes
   // representing the current state of the model.
   // stateA: The HMM has reached this state at this location in the sequence.
@@ -186,30 +186,30 @@ HMM::to_WDAG() const
   vector<WDAGNode *> stateA( _N_states, NULL );
   vector<WDAGNode *> stateB( _N_states, NULL );
   char edge_name[50];
-  
-  
+
+
   // Create the beginning node for the WDAG.
   WDAGNode * start_node = wdag.AddNode();
   wdag.SetReqStart( start_node );
-  
-  
+
+
   // Step through the set of observed symbols and extend the graph for each
   // observation.  Each observation adds 2N symbols to the graph, where N is
   // the number of states.
   for ( size_t t = 0; t < NTimepoints(); t++ ) {
-    
-    
-    // Create a set of nodes representing the states at this location. 
+
+
+    // Create a set of nodes representing the states at this location.
     for ( int i = 0; i < _N_states; i++ ) {
       stateA[i] = wdag.AddNode();
-      
+
       // If this is the first timepoint, create a special set of vertices.
       // The initial state probabilities are used here as edge weights.
       if ( t == 0 ) {
 	sprintf( edge_name, "S %d", i ); // "S" = start
 	stateA[i]->AddEdge( start_node, edge_name, _init_probs[i] );
       }
-      
+
       // Otherwise, join each of these nodes to each of the second nodes from
       // the previous state - a total of N^2 states.  The edge weights are the
       // state transition probabilities.
@@ -220,14 +220,14 @@ HMM::to_WDAG() const
 	  stateA[i]->AddEdge( stateB[i_prev], edge_name, _trans_probs[i_prev][i] );
 	}
     }
-    
-    
+
+
     // Apply this symbol to the WDAG by adding a second node for each state.
     // The two nodes for the state are joined by an edge with a weight equal to
     // the state's emission probability for this observation.
     // These edges' names indicate which state is emitting which observation.
     for ( int i = 0; i < _N_states; i++ ) {
-      
+
       // Find the probability of this state emitting this observation at this
       // timepoint.
       // If this is a discrete HMM, the emission probability is the probability
@@ -244,27 +244,27 @@ HMM::to_WDAG() const
 	obs = -1; // this is a dummy value used in edge naming only
 	emiss_prob = _time_emiss_probs[t][i];
       }
-      
+
       stateB[i] = wdag.AddNode();
       sprintf( edge_name, "E %d %d", i, obs ); // "E" = emission
       stateB[i]->AddEdge( stateA[i], edge_name, emiss_prob );
     }
-    
+
   }
-  
-  
-  
+
+
+
   // Finally, create the ending node.  This node's input weights are all 0.
   WDAGNode * end_node = wdag.AddNode();
   for ( int i = 0; i < _N_states; i++ )
     end_node->AddEdge( stateB[i], "F", 0 ); // "F" = finish
   wdag.SetReqEnd( end_node );
-  
-  
+
+
   assert( (size_t) wdag.N() == 2 * _N_states * NTimepoints() + 2 );
-  
+
   return wdag;
-  
+
 }
 
 
@@ -279,7 +279,7 @@ bool
 HMM::AdjustProbsToViterbi( const vector<string> & best_path, vector<int> & states )
 {
   assert( !best_path.empty() ); // if this fails, the WDAG has failed - typically because there is no way to get from the beginning to the end of the path due to transmission/emission probabilities that are 0
-  
+
   // Get the names of the edges in the best path, and tally the number of times
   // each edge name appears.  Thus find the observed transition and
   // emission probabilities.
@@ -287,9 +287,9 @@ HMM::AdjustProbsToViterbi( const vector<string> & best_path, vector<int> & state
   vector< vector<int> > emiss_counts( _N_states, vector<int>( _N_symbols,0 ) );
   vector<int> state_counts( _N_states, 0 );
   states.clear();
-  
+
   for ( size_t i = 0; i < best_path.size(); i++ ) {
-    
+
     // The edges we care about have names of the format "E x y" or "T x z",
     // where x,y are state IDs and z is an observed symbol.
     iss = new istringstream( best_path[i] );
@@ -297,71 +297,71 @@ HMM::AdjustProbsToViterbi( const vector<string> & best_path, vector<int> & state
     int S1, S2;
     *iss >> type >> S1 >> S2;
     assert( type == 'S' || type == 'T' || type == 'E' || type == 'F' );
-    
+
     // Transition edges.
     if ( type == 'T' ) trans_counts[S1][S2]++;
-    
+
     // Emission edges.
     if ( type == 'E' ) {
       if ( is_discrete_HMM() ) emiss_counts[S1][S2]++;
       state_counts[S1]++;
       states.push_back(S1);
     }
-    
+
     delete iss;
   }
-  
+
   assert( states.size() == NTimepoints() );
-  
+
   bool change = false;
-  
+
   // Determine the frequency with which each state appears in the best path.
   _state_freqs.resize( _N_states );
   for ( int i = 0; i < _N_states; i++ )
     _state_freqs[i] = double( state_counts[i] ) / NTimepoints();
-  
-  
+
+
   // Normalize the observed transition probabilities, then set them as the
   // theoretical probabilities, thus completing the Viterbi training.
   for ( int i = 0; i < _N_states; i++ ) {
     int total = accumulate( trans_counts[i].begin(), trans_counts[i].end(), 0 );
-    
+
     for ( int j = 0; j < _N_states; j++ ) {
-      
+
       // If a state never occurs in the Viterbi iteration, add pseudocounts
       // to make it equally likely to transition to any other state.
       double new_prob =
 	total == 0 ?
 	-log( _N_states ) :
 	log( double( trans_counts[i][j] ) / total );
-      
+
       if ( _trans_probs[i][j] != new_prob ) change = true;
       _trans_probs[i][j] = new_prob;
     }
   }
-  
+
   // If this is a discrete HMM, reset the symbol emission probabilities in the
   // same manner as the transition probabilities.
   if ( is_discrete_HMM() )
     for ( int i = 0; i < _N_states; i++ ) {
       int total = accumulate( emiss_counts[i].begin(), emiss_counts[i].end(), 0 );
-      
+
       for ( int j = 0; j < _N_symbols; j++ ) {
-	
+
 	// If a state never occurs in the Viterbi iteration, add pseudocounts
 	// to make it equally likely to emit any symbol.
 	double new_prob =
 	  total == 0 ?
 	  -log( _N_symbols ) :
 	  log( double( emiss_counts[i][j] ) / total );
-	
+
 	if ( _symbol_emiss_probs[i][j] != new_prob ) change = true;
 	_symbol_emiss_probs[i][j] = new_prob;
       }
     }
-  
-  
-  
+
+
+
   // Return true if any of the probabilities have changed.
   return change;
 }
@@ -378,30 +378,30 @@ HMM::AdjustProbsToViterbi( const vector<string> & best_path, vector<int> & state
 bool
 HMM::AdjustProbsToBaumWelch( const WDAG & wdag )
 {
-  
+
   // These variables will contain sums of the total weights of all transition,
   // emission, and initiation edges.
   vector<double> new_init_probs( _N_states, LOG_ZERO );
   vector< vector<double> > new_trans_probs( _N_states, vector<double>( _N_states,  LOG_ZERO ) );
   vector< vector<double> > new_emiss_probs( _N_states, vector<double>( _N_symbols, LOG_ZERO ) );
   vector<double> new_state_freqs( _N_states, LOG_ZERO );
-  
+
   size_t n_emissions = 0;
-  
-  
+
+
   // Loop over all edges in the WDAG.  We do this indirectly, by looping over
   // all nodes and then by those nodes' in-edges.
   for ( int i = 0; i < wdag.N(); i++ ) {
     const WDAGNode * child = wdag.GetNode(i);
-    
+
     for ( int j = 0; j < child->_n_parents; j++ ) {
       const WDAGNode * parent = child->_parents[j];
       string edge_name = child->_in_e_names[j];
       double edge_weight = child->_in_e_weights[j];
-      
+
       // Calculate the posterior probability of this edge.
       double p_prob = parent->_fw_prob + child->_bw_prob + edge_weight;
-      
+
       // Parse this edge's name to determine what kind of edge it is.
       // Initiation edges are of the format "S x".
       // Transition edge names are of the format "T x y", while emission edge
@@ -411,18 +411,18 @@ HMM::AdjustProbsToBaumWelch( const WDAG & wdag )
       int S1, S2;
       *iss >> type >> S1 >> S2;
       assert( type == 'S' || type == 'T' || type == 'E' || type == 'F' );
-      
+
       // Initiation edge.
       if ( type == 'S' )
 	new_init_probs[S1] = p_prob;
-      
+
       // Transition edge.
       else if ( type == 'T' ) {
 	new_trans_probs[S1][S2] = lnsum( new_trans_probs[S1][S2], p_prob );
 	if ( isnan( new_trans_probs[S1][S2] ) )
 	     cout << "EDGE: " << edge_name << "\tPROBS: " << parent->_fw_prob << " + " << child->_bw_prob << " + " << edge_weight << " = " << p_prob << "\tTRANS PROB GOES TO " << new_trans_probs[S1][S2] << endl;
       }
-      
+
       // Emission edge.
       else if ( type == 'E' ) {
 	if ( is_discrete_HMM() )
@@ -430,18 +430,18 @@ HMM::AdjustProbsToBaumWelch( const WDAG & wdag )
 	new_state_freqs[S1] = lnsum( new_state_freqs[S1], p_prob );
 	n_emissions++;
       }
-      
-      
+
+
       delete iss;
     }
   }
-  
-      
+
+
   assert( n_emissions == NTimepoints() * _N_states );
-  
+
   bool change = false;
-  
-  
+
+
   // Normalize to determine the frequency with which each state appears in the
   // average path.
   double denom = LOG_ZERO;
@@ -450,34 +450,34 @@ HMM::AdjustProbsToBaumWelch( const WDAG & wdag )
   _state_freqs.resize( _N_states );
   for ( int j = 0; j < _N_states; j++ )
     _state_freqs[j] = exp( new_state_freqs[j] - denom );
-  
-  
+
+
   // Normalize the observed initiation probabilities, then set them as the
   // theoretical probabilities.
   denom = LOG_ZERO;
   for ( int j = 0; j < _N_states; j++ )
     denom = lnsum( denom, new_init_probs[j] );
-  
+
   for ( int j = 0; j < _N_states; j++ ) {
     if ( _init_probs[j] != new_init_probs[j] - denom ) change = true;
     _init_probs[j] = new_init_probs[j] - denom;
   }
-  
-  
+
+
   // Normalize the observed transition probabilities, then set them as the
   // theoretical probabilities, thus completing the Viterbi training.
   for ( int i = 0; i < _N_states; i++ ) {
     denom = LOG_ZERO;
     for ( int j = 0; j < _N_states; j++ )
       denom = lnsum( denom, new_trans_probs[i][j] );
-    
+
     for ( int j = 0; j < _N_states; j++ ) {
       if ( _trans_probs[i][j] != new_trans_probs[i][j] - denom ) change = true;
       _trans_probs[i][j] = new_trans_probs[i][j] - denom;
     }
   }
-  
-  
+
+
   // If this is a discrete HMM, reset the symbol emission probabilities in the
   // same manner as the transition probabilities.
   if ( is_discrete_HMM() )
@@ -485,15 +485,15 @@ HMM::AdjustProbsToBaumWelch( const WDAG & wdag )
       denom = LOG_ZERO;
       for ( int j = 0; j < _N_symbols; j++ )
 	denom = lnsum( denom, new_emiss_probs[i][j] );
-      
+
       for ( int j = 0; j < _N_symbols; j++ ) {
 	if ( _symbol_emiss_probs[i][j] != new_emiss_probs[i][j] - denom ) change = true;
 	_symbol_emiss_probs[i][j] = new_emiss_probs[i][j] - denom;
       }
     }
-  
-  
-  
+
+
+
   // Return true if any of the probabilities have changed.
   return change;
 }
@@ -511,20 +511,20 @@ bool
 HMM::ViterbiTraining( vector<int> & predicted_states )
 {
   assert( HasAllData() );
-  
+
   // Create a WDAG for this HMM.
   WDAG wdag = to_WDAG();
-  
+
   // Compute the highest-weight path on this WDAG.
   wdag.FindBestPath();
-  
-  
+
+
   // Apply the highest-weight path to find the probabilities and predict the
   // set of hidden states.
   bool change = AdjustProbsToViterbi( wdag._best_edges, predicted_states );
-  
+
   _ran_viterbi = true;
-  
+
   return change;
 }
 
@@ -539,21 +539,21 @@ bool
 HMM::BaumWelchTraining( double & log_like )
 {
   assert( HasAllData() );
-  
+
   // Create a WDAG for this HMM.
   WDAG wdag = to_WDAG();
-  
+
   // Run the highest-weight-path on this WDAG and find all of the
   // forward and backward probabilities.
   wdag.FindPosteriorProbs();
-  
-  
+
+
   // Combine the forward and backward probabilities to find the posterior
   // probability of each transition and each emission.
   bool change = AdjustProbsToBaumWelch( wdag );
-  
+
   _ran_baum_welch = true;
-  
+
   log_like = wdag.Alpha() / log(2);
   return change;
 }
@@ -589,19 +589,19 @@ void
 HMM::DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t depth ) const
 {
   assert( T < NTimepoints() );
-  
-  
+
+
   // Figure out the range of timepoints that we'll be dealing with.
   size_t min_t = T > depth ? T - depth : 0;
   size_t max_t = min( T + depth, NTimepoints() - 1 );
-  
-  
-  
+
+
+
   // Open up a digraph that will illustrate the edges between the nodes.
   // Write the digraph as a DOT format file.
   ofstream DOT( ( PNG_file_head + ".dot" ).c_str(), ios::out );
   DOT << "digraph HMM_at_state_" << T << " {\n";
-  
+
   // Each timepoint T is represented in the WDAG as two seta (N1, N2) of nodes.
   // Each set has _N_states nodes.
   // Transitions from the N2 state of timepoint T-1 to the N1 state of
@@ -612,7 +612,7 @@ HMM::DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t 
   // representing state transitions from N2(T-1) to N1(T), and one representing
   // emissions from N1(T) to N2(T).
   for ( size_t t = min_t; t <= max_t; t++ ) {
-  
+
     // Find the ID of the two sets of nodes N1(t), N2(t) that represent
     // timepoint t, as well as the set N2(t-1).
     // Each set has _N_states nodes, except at edge cases.
@@ -622,7 +622,7 @@ HMM::DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t 
       N1    .push_back( _N_states * (2*t+2) + 1 + i );
       N2    .push_back( _N_states * (2*t+3) + 1 + i );
     }
-    
+
     // Assign labels to the vertices.
     for ( int i = 0; i < _N_states; i++ ) {
       if ( t == 0 ) DOT << "0 [label=\"START\"]\n";
@@ -630,13 +630,13 @@ HMM::DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t 
       DOT << N1[i] << " [label=\"" << t+1 << "_" << i << "_E\"]\n";
       DOT << N2[i] << " [label=\"" << t+1 << "_" << i << "_T\"]\n";
     }
-    
+
     // Create digraph adjacencies representing the transitions from t-1 to t.
     for ( int i = 0; i < _N_states; i++ )
       for ( int j = 0; j < _N_states; j++ )
 	if ( isfinite( _trans_probs[i][j] ) )
 	  DOT << N2_tm1[i] << " -> " << N1[j] << " [ label = \"T_" << exp(_trans_probs[i][j]) << "\" ];\n";
-    
+
     // Create digraph adjacencies representing the emissions at time t.
     for ( int i = 0; i < _N_states; i++ ) {
       double emiss_prob;
@@ -645,16 +645,16 @@ HMM::DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t 
       if ( isfinite( emiss_prob ) )
 	DOT << N1[i] << " -> " << N2[i] << " [ label = \"E_" << exp(emiss_prob) << "\" ];\n";
     }
-    
+
   }
-  
-  
-  
+
+
+
   DOT << "}\n";
-  
+
   DOT.close();
-  
-  
+
+
   // Now automatically convert the DOT file into a PNG file.
   string cmd = "dot -Tpng " + PNG_file_head + ".dot > ~/public_html/" + PNG_file_head + ".png";
   system( cmd.c_str() );
@@ -671,9 +671,9 @@ void
 HMM::Print( ostream & out ) const
 {
   static const int MAX_N_SYMBOLS = 200;
-  
+
   char num[50];
-  
+
   out << "HIDDEN MARKOV MODEL" << endl;
   out << _N_states << " states" << endl;
   if ( is_discrete_HMM() )
@@ -681,8 +681,8 @@ HMM::Print( ostream & out ) const
   else
     out << "Continuous HMM with " << NTimepoints() << " timepoints" << endl;
   out << endl;
-  
-  
+
+
   // Print initial state probabilities.
   out << "Initial state probabilities:";
   if ( _has_init_probs ) {
@@ -695,18 +695,18 @@ HMM::Print( ostream & out ) const
   }
   else
     out << "\t\t\tNOT LOADED" << endl;
-  
-  
+
+
   // Print state-to-state transition probabilities.
   out << "State-to-state transition probabilities:";
   if ( _has_trans_probs ) {
-    
+
     // Print header line for matrix chart.
     out << endl;
     for ( int j = 0; j < _N_states; j++ )
       out << "\tS" << j+1;
     out << endl;
-    
+
     // Print matrix chart.
     for ( int i = 0; i < _N_states; i++ ) {
       out << "S" << i+1;
@@ -717,25 +717,25 @@ HMM::Print( ostream & out ) const
       out << endl;
     }
     out << endl;
-    
+
   }
   else
     out << "\tNOT LOADED" << endl;
-  
-  
-  
+
+
+
   // Print the probability of each state emitting each symbol.
   // If there are a lot of observations, don't print them all.
   if ( is_discrete_HMM() ) {
     out << "Symbol emission probabilities:";
     if ( _has_symbol_emiss_probs && _N_symbols <= MAX_N_SYMBOLS ) {
-      
+
       // Print header line for matrix chart.
       out << endl;
       for ( int j = 0; j < _N_symbols; j++ )
 	out << "\tSYM" << j;
       out << endl;
-      
+
       // Print matrix chart.
       for ( int i = 0; i < _N_states; i++ ) {
 	out << "S" << i+1;
@@ -746,14 +746,14 @@ HMM::Print( ostream & out ) const
 	out << endl;
       }
       out << endl;
-      
+
     }
     else if ( _has_symbol_emiss_probs )
       out << "\t\t\t<matrix of size " << _N_states << " states X " << _N_symbols << " symbols>" << endl;
     else
       out << "\t\t\tNOT LOADED" << endl;
-    
-    
+
+
     out << "Sequence of observed symbols:";
     if ( _has_observations ) {
       out << "\t\t\t<sequence of length " << NTimepoints() << ">" << endl;
@@ -761,15 +761,11 @@ HMM::Print( ostream & out ) const
     else
       out << "\t\t\tNOT LOADED" << endl;
   }
-  
+
   else { // continuous HMMs
     out << "Time emission probabilities:" << endl;
     out << "\t\t\t<matrix of size " << _N_states << " states X " << NTimepoints() << " timepoints>" << endl;
   }
-    
+
   out << endl;
 }
-
-
-
-

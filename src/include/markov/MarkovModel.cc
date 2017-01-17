@@ -32,10 +32,10 @@
 // I.e.: the numbers sum to 1, and none of them is less than 0.
 // Local-use function.
 void assert_prob_vector( const vector<double> & v, const int size ) {
-  
+
   if ( size != 0 )
     assert( int( v.size() ) == size );
-  
+
   double prob_sum = 0;
   for ( int i = 0; i < size; i++ ) {
     if ( v[i] < 0 ) {
@@ -44,7 +44,7 @@ void assert_prob_vector( const vector<double> & v, const int size ) {
     }
     prob_sum += v[i];
   }
-  
+
   if ( fabs( prob_sum - 1 ) > 1e-6 ) { // allow floating-point rounding error
     cerr << "MarkovModel::assert_prob_vector:  The elements in this probability vector do not add to 1.  Instead they add to: " << prob_sum << endl;
     cerr << "Probability vector:" << endl;
@@ -64,11 +64,11 @@ MarkovModel::MarkovModel( const int N_states )
   // Clear the flags for loaded data.
   _has_init_probs   = false;
   _has_trans_probs  = false;
-  
+
   // Initialize probability matrices.
   _init_probs .resize( _N_states );
   _trans_probs.resize( _N_states );
-  
+
   for ( int i = 0; i < N_states; i++ )
     _trans_probs[i].resize( _N_states );
 }
@@ -88,11 +88,11 @@ MarkovModel::SetInitProbs( const vector<double> & probs )
 {
   // Before using this probability set, verify that it makes sense.
   assert_prob_vector( probs, _N_states );
-  
+
   // Convert the probabilities to log scale.
   for ( int i = 0; i < _N_states; i++ )
     _init_probs[i] = log( probs[i] );
-  
+
   _has_init_probs = true;
 }
 
@@ -119,12 +119,12 @@ MarkovModel::SetTransProbs( const vector< vector<double> > & probs )
   assert( int( probs.size() ) == _N_states );
   for ( int i = 0; i < _N_states; i++ )
     assert_prob_vector( probs[i], _N_states );
-  
+
   // Convert the probabilities to log scale.
   for ( int i = 0; i < _N_states; i++ )
     for ( int j = 0; j < _N_states; j++ )
       _trans_probs[i][j] = log( probs[i][j] );
-  
+
   _has_trans_probs = true;
 }
 
@@ -139,13 +139,13 @@ MarkovModel::SetTransProbsUniformSwitchProb( const double switch_prob )
   assert( switch_prob >= 0 && switch_prob <= 1 );
   double diag_prob = 1 - (_N_states-1) * switch_prob;
   assert( diag_prob > 0 ); // if this fails, switch_prob is too high
-  
+
   // Initialize the NxN matrix.
   vector< vector<double> > trans_probs( _N_states, vector<double>( _N_states, switch_prob ) );
   // Modify the diagonal.
   for ( int i = 0; i < _N_states; i++ )
     trans_probs[i][i] = diag_prob;
-  
+
   SetTransProbs( trans_probs );
 }
 
@@ -182,4 +182,3 @@ MarkovModel::GetTransitionFreq( const int stateA, const int stateB ) const
   assert( stateB < _N_states );
   return exp( _trans_probs[stateA][stateB] );
 }
-

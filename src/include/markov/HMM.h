@@ -66,27 +66,27 @@ using namespace std;
 
 class HMM : public MarkovModel
 {
-  
+
  public:
-  
+
   // Constructor function.
   // IMPORTANT: If you set N_symbols = 0, this will be a continuous HMM;
   // otherwise, it will be a discrete HMM with N symbols.
   // This function does not fill all of the model parameters.  You must
   // subsequently call the data-loading functions, below.
   HMM( const int N_states, const int N_symbols );
-  
+
   // Destructor.
   ~HMM();
-  
+
   /* DATA-LOADING FUNCTIONS */
-  
+
   // You must call some of these functions before running the HMM.
   // For discrete HMMs, call SetSymbolEmissProbs and SetObservations.
   // For continuous HMMs, call SetTimeEmissProbs.
   // For both, you must also call the other MarkovModel data-loading functions:
   // SetInitProbs and SetTransProbs.
-  
+
   // In a discrete HMM: Probabilities of each state emitting each symbol.
   // Input these as non-logarithms.  The vector is by states, then symbols.
   void SetSymbolEmissProbs( const vector< vector<double> > & probs );
@@ -96,66 +96,66 @@ class HMM : public MarkovModel
   // data at each timepoint.  Input these as logarithms.
   // Note that the vector is by timepoints, then states.
   void SetTimeEmissProbs( const vector< vector<double> > & probs );
-  
+
   bool HasAllData() const;
-  
+
   /* HMM ALGORITHMS */
-  
+
   // Viterbi or Baum-Welch training to improve the transition probabilities.
   // For iterative training, run these functions repeatedly.
   // Return true if any of the probabilities change.
   bool ViterbiTraining( vector<int> & predicted_states );
   bool BaumWelchTraining( double & log_like );
-  
-  
+
+
   /* OUTPUT FUNCTIONS UNIQUE TO THE HMM CLASS */
-  
+
   size_t NTimepoints() const;
   void WriteWDAGToFile( const string & file ) const { to_WDAG().WriteToFile(file); }
   void DrawPNGAtState( const string & PNG_file_head, const size_t T, const size_t depth = 2 ) const;
   void Print( ostream & out = cout ) const;
-  
-  
+
+
   //private: // TEMP
-  
+
   /* HELPER FUNCTIONS */
-  
+
   // Is this a discrete or a continuous HMM?
   bool is_discrete_HMM() const { return _N_symbols != 0; }
-  
+
   // Create a WDAG representing this HMM with its current parameters.
   WDAG to_WDAG() const;
-  
+
   // Change the transition and/or emission probabilities in accordance with
   // calculated data.  This is the final step of both Viterbi and Baum-Welch.
   // Return true if any of the probabilities change.
   bool AdjustProbsToViterbi( const vector<string> & best_path, vector<int> & states );
   bool AdjustProbsToBaumWelch( const WDAG & wdag );
-  
-  
-  
-  
+
+
+
+
   /* HIDDEN MARKOV MODEL PARAMETERS */
-  
+
   // Number of obervable symbols.  If 0, this is a continuous HMM.
   const int _N_symbols;
-  
+
   // Flags for whether or not types of data have been loaded in.
   // (There are more of these in the MarkovModel class.)
   bool _has_symbol_emiss_probs, _has_observations; // used in discrete HMMs
   bool _has_time_emiss_probs; // used in continuous HMMs
-  
+
   // Flags for whether or not algorithms have been run.
   bool _ran_viterbi, _ran_baum_welch;
-  
+
   // NOTE: THESE ARE STORED AS LOGARITHMS
   vector< vector<double> > _symbol_emiss_probs; // used in discrete HMMs
   vector< vector<double> >   _time_emiss_probs; // used in continuous HMMs
-  
+
   // Set of observed symbols.  Used in discrete HMMs.
   vector<int> _observations;
-  
-  
+
+
 };
 
 

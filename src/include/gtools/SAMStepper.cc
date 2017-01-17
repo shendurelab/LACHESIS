@@ -69,12 +69,12 @@ void
 SAMStepper::Init()
 {
   assert( !_init ); // this will fail if Init() has already been called.
-  
+
   // Check that all SAM files exist.
   assert( !_SAM_files.empty() );
   for ( size_t i = 0; i < _SAM_files.size(); i++ )
     assert( boost::filesystem::is_regular_file( _SAM_files[i] ) );
-  
+
   // Initialize local variables.
   _ID = 0;
   _align  = new bam1_t();
@@ -82,14 +82,14 @@ SAMStepper::Init()
   _init = true;
   _N_aligns_read = 0;
   _N_pairs_read  = 0;
-  
+
   // All filters are off by default.
   _filter_aligned = false;
   _filter_aligned_pair = false;
   _filter_chrom = -1;
   _filter_start = -1;
   _filter_end = -1;
-  
+
   // Open the first SAM/BAM file.  (Don't yet read any alignments from it!)
   assert( !_SAM_files.empty() );
   _SAM = open_next();
@@ -121,7 +121,7 @@ void
 SAMStepper::FilterRegion( const int chrom, const int start, const int end )
 {
   assert( _N_aligns_read == 0 && _N_pairs_read == 0 ); // can't turn on a filter after beginning to go through alignments
-  
+
   _filter_aligned = true; // a read can't align to a specific region if it doesn't align at all!
   _filter_chrom = chrom;
   _filter_start = start;
@@ -149,36 +149,36 @@ SAMStepper::next_read()
   // Get the next alignment from the currently open SAM/BAM file.
   while ( samread( _SAM, _align ) != -1 ) {
     const bam1_core_t & c = _align->core;
-    
+
     // If alignment and/or range filters have been set, skip over any read that doesn't meet them.
     bool aligned = !( c.flag & 0x4 );
     if ( _filter_aligned && !aligned ) continue;
-    
+
     if ( _filter_aligned_pair && ( c.flag & 0x8 ) ) continue;
-    
+
     if ( _filter_chrom != -1 && _filter_chrom != c.tid ) continue;
     if ( ( _filter_start != -1 && _filter_end != -1 ) && ( c.pos < _filter_start || c.pos > _filter_end ) ) continue;
-    
+
     // Sanity check.  Aligned reads should satisfy all of these.
     if ( aligned ) {
       assert( c.tid != -1 ); // note that c.pos == -1 can occur because for some reason c.pos is 1 less than the number in the POS column of the samfile
       assert( c.n_cigar > 0 );
     }
-    
+
     _N_aligns_read++;
     return _align;
   }
-  
-  
+
+
   // If control reaches here, we've exhausted this SAM/BAM file.
   // If there are no more files, we're done: return NULL.
   if ( _ID + 1 == (int)_SAM_files.size() ) return NULL;
-  
+
   // If there's another SAM/BAM file to open, open it.
   _ID++;
   samclose(_SAM);
   _SAM = open_next();
-  
+
   // Now recurse on next_read() so that we can actually find and return an alignment.
   return next_read();
 }
@@ -192,17 +192,17 @@ pair< bam1_t *, bam1_t * >
 SAMStepper::next_pair()
 {
   pair< bam1_t *, bam1_t * > null = make_pair( (bam1_t *) NULL, (bam1_t *) NULL );
-  
+
   // Call next_read() twice to get two new reads.  Each call to next_read() fills the local variable _align.
   if ( next_read() == NULL ) return null;
   bam_copy1( _align2, _align );
   if ( next_read() == NULL ) return null;
-  
+
   // If necessary, call next_read() repeatedly until two consecutive reads have the same fragment name (or one is a substring of the other).;
   // This can happen if one read passes the filters but the others does not, including times when the two reads have inconsistent 0x4 and 0x8 FLAGs
   // (which oddly happens sometimes with MT-aligned reads in this one SAM file.)
   while ( 1 ) {
-    
+
     // Find the first non-matching character between the names.
     // If it's punctuation (i.e., not alphanumeric), or if we reach the end of the strings, the names are considered to match.
     //cout << "NAMES: " << bam1_qname(_align) << "\t" << bam1_qname(_align2) << endl;
@@ -215,14 +215,14 @@ SAMStepper::next_pair()
       else if ( len1 > len2 ) { if ( !isalnum( name1[len2] ) ) break; }
       else if ( len2 > len1 ) { if ( !isalnum( name2[len1] ) ) break; }
     }
-    
+
     // No match found.  Move on.
     _N_aligns_read--; // offset the increase due to the extra next_read() call
     bam_copy1( _align2, _align );
     if ( next_read() == NULL ) return null;
   }
-  
-  
+
+
   // Return _align2 before _align because it came first in the file.
   _N_pairs_read++;
   return make_pair( _align2, _align );
@@ -252,11 +252,11 @@ NTargetsInSAM( const string & SAM_file )
     cout << "ERROR: SAMStepper::NTargetsInSAM: Can't find file `" << SAM_file << "'" << endl;
     assert(0);
   }
-  
+
   samfile_t * sam = open_SAM( SAM_file );
   int N_targets = sam->header->n_targets;
   samclose(sam);
-  
+
   return N_targets;
 }
 
@@ -271,14 +271,14 @@ TargetNames( const string & SAM_file )
     cout << "ERROR: SAMStepper::TargetNames: Can't find file `" << SAM_file << "'" << endl;
     assert(0);
   }
-  
+
   vector<string> target_names;
-  
+
   samfile_t * sam = open_SAM( SAM_file );
   for ( int i = 0; i < sam->header->n_targets; i++ )
     target_names.push_back( sam->header->target_name[i] );
   samclose(sam);
-  
+
   return target_names;
 }
 
@@ -291,14 +291,14 @@ TargetLengths( const string & SAM_file )
     cout << "ERROR: SAMStepper::TargetLengths: Can't find file `" << SAM_file << "'" << endl;
     assert(0);
   }
-  
+
   vector<int> target_lengths;
-  
+
   samfile_t * sam = open_SAM( SAM_file );
   for ( int i = 0; i < sam->header->n_targets; i++ )
     target_lengths.push_back( sam->header->target_len[i] );
   samclose(sam);
-  
+
   return target_lengths;
 }
 
@@ -313,20 +313,20 @@ TargetNHits( const string & SAM_file )
     cout << "ERROR: SAMStepper::TargetNHits: Can't find file `" << SAM_file << "'" << endl;
     assert(0);
   }
-  
+
   // Set up a SAMStepper object to read in the reads.
   SAMStepper stepper( SAM_file );
-  
+
   vector<int> target_N_hits( stepper.N_targets(), 0 );
-  
+
   // For each read that aligned, look at what target sequence it aligned to, and tally the number of hits for that target.
   // ALT METHOD: Call FilterAligned() on the SAMStepper, so no need to check the tids.  This is faster but buggy because the 0x4 FLAG doesn't always match.
   for ( bam1_t * align = stepper.next_read(); align != NULL; align = stepper.next_read() ) {
-    
+
     const int & tid = align->core.tid;
     if ( tid != -1 ) target_N_hits[tid]++; // if tid == -1, the read didn't align
   }
-  
+
   return target_N_hits;
 }
 
@@ -341,16 +341,16 @@ TargetCoverages( const string & SAM_file )
     cout << "ERROR: SAMStepper::TargetCoverages: Can't find file `" << SAM_file << "'" << endl;
     assert(0);
   }
-  
+
   vector<int> target_N_hits = TargetNHits( SAM_file );
   vector<int> target_lens = TargetLengths( SAM_file );
-  
+
   assert( target_N_hits.size() == target_lens.size() );
-  
+
   // Calcualate each contig's coverage.
   vector<double> target_covs( target_N_hits.size(), 0 );
   for ( size_t i = 0; i < target_N_hits.size(); i++ )
     target_covs[i] = double( target_N_hits[i] ) / target_lens[i];
-  
+
   return target_covs;
 }

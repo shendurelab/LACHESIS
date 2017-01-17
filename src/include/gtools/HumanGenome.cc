@@ -120,7 +120,7 @@ const map<string,chrom_interval>
 HumanGenome_centromere_intervals()
 {
   map<string,chrom_interval> intervals;
-  
+
   intervals["chr1"]  = chrom_interval( "chr1", 121535434, 124535434 );
   intervals["chr2"]  = chrom_interval( "chr2",  92326171,  95326171 );
   intervals["chr3"]  = chrom_interval( "chr3",  90504854,  93504854 );
@@ -145,7 +145,7 @@ HumanGenome_centromere_intervals()
   intervals["chr22"] = chrom_interval( "chr22", 13000000,  16000000 );
   intervals["chrX"] = chrom_interval( "chrX",   58632012,  61632012 );
   intervals["chrY"] = chrom_interval( "chrY",   10104553,  13104553 );
-  
+
   return intervals;
 }
 
@@ -156,11 +156,11 @@ const map<string,int>
 HumanGenome_centromere_locs()
 {
   const map<string,chrom_interval> intervals = HumanGenome_centromere_intervals();
-  
+
   map<string,int> interval_centers;
   for ( map<string,chrom_interval>::const_iterator it = intervals.begin(); it != intervals.end(); ++it )
     interval_centers[it->first] = ( it->second.start + it->second.stop ) / 2;
-  
+
   return interval_centers;
 }
 
