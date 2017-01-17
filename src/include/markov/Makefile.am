@@ -18,7 +18,7 @@ AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
 # directories with .h's in them - the LACHESIS_BOOST_DIR environment variable must be set
-INCLUDES = -Isamtools
+INCLUDES =
 
 # compiler flags
 

@@ -1,9 +1,0 @@
-The BAM library.
-────────────────
-
-Currently, the BAM library only exists in static version. It (actually the
-whole package) is built with the -fPIC option, to allow the compilation of the
-Bio::SamTools Perl module on the amd64 platform (Debian package
-libbio-samtools-perl).
-
- -- Charles Plessy <plessy@debian.org>  Thu, 15 Jul 2010 08:37:41 +0900
