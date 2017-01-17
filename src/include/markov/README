@@ -1,0 +1,22 @@
+This directory contains the 'markov' package, designed by Josh Burton.
+The modules in the 'markov' package allow for the building of Markov models,
+including Markov chains and hidden Markov models.
+
+MODULES:
+
+TestMarkovModel.cc
+   An executable test script
+MarkovModel
+   A class describing a general Markov model
+MarkovChain
+   A class describing a Markov chain; subclass of MarkovModel
+HMM
+   A class describing a hidden Markov model; subclass of MarkovModel
+WDAG
+   (Weighted Directed Acyclic Graph) A helper class for HMM
+SymbolSet
+   Converter from HMM states to printable symbols; used only in TestMarkovModel
+
+
+
+For more information about any of these modules, see the module's *.h file.

@@ -1,0 +1,78 @@
+#%Module
+### The following lines are added so that I can have consistent, but easily changeable
+### variables set in the cbcb module file, which will therefore be loaded by all
+module add cbcb/env
+### Set some base variables here
+set NAME lachesis
+set VERSION git-201609static
+
+## The variable MODULE_PRE is set in the cbcb module and provides the $PREFIX to which 
+## software was compiled.  Changing that variable in the cbcb/rhel7 file will therefore
+## set $DIR below
+## This is set in two lines, which is unneccessarily verbose...
+set PRE $::env(MODULE_PRE)
+set DIR $PRE/$NAME/$VERSION
+
+### Add pre-requisites here
+module add samtools
+module add boost/1.61
+
+### Define a simple help message
+proc ModulesHelp { } {
+ puts "This modulefile defines the variables needed to use: [module-info name]"
+ puts ""
+}
+
+set is_module_rm [module-info mode remove]
+
+###
+# Add your executable to PATH.
+###
+if { [file isdirectory $DIR] == 1} {
+ prepend-path PATH $DIR
+}
+
+###
+# Add an include directory
+###
+if { [file isdirectory $DIR/include] == 1} {
+ prepend-path CPATH $DIR/include
+}
+
+###
+# And a place to look for info pages
+###
+if { [file isdirectory $DIR/info] == 1} {
+ prepend-path INFOPATH $DIR/info
+}
+
+###
+# Set up library paths
+###
+if { [file isdirectory $DIR/lib] == 1} {
+ prepend-path LIBRARY_PATH $DIR/lib
+ prepend-path LD_RUN_PATH $DIR/lib
+}
+
+###
+# Find the manual entries for this tool
+###
+if { [file isdirectory $DIR/man] == 1} {
+ prepend-path MANPATH $DIR/man
+}
+
+if { [file isdirectory $DIR/share/man] == 1} {
+ prepend-path MANPATH $DIR/share/man
+}
+
+###
+# If there are .pc files, put them here
+# and get pkgconfig to handle compilation flags
+###
+if { [file isdirectory $DIR/pkgconfig] == 1} {
+ prepend-path PKG_CONFIG_PATH $DIR/pkgconfig
+}
+
+### Some example things you can do:
+## set	_version_		[ string map {. -} $version ]
+## set-alias get-modules "git clone git://git.code.sf.net/p/modules/git modules-$_version_ && cd modules-$_version_ && git checkout modules-$_version_"

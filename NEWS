@@ -1,0 +1,6 @@
+## Time-stamp: <Mon Jan 16 10:33:43 2017 Ashton Trey Belew (abelew@gmail.com)>
+
+No news as of this writing.  I am attempting to auto-confiscate this and make it so that
+it is installable/useable via the tried and true macro of './configure && make && make install'
+
+Given the odd mix of shell, C++, R, and perl; this seems foolhardy at best.
