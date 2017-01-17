@@ -1,0 +1,564 @@
+# A Bad ChangeLog is better than none?
+
+Yeah, I am a jackass and just did git log > Changelog
+
+## git log follows
+
+commit 85241b5ce4e272863c80a0134898efc6d0427a9e
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Fri Jan 13 12:05:48 2017 -0500
+
+    note to self about tidy
+
+commit 3c7b885ccb8a95feba37373e85271a47ea94a456
+Merge: 3bbb37b 81ea957
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Fri Jan 13 11:52:28 2017 -0500
+
+    introduced a stupid conflict on a perl prelude
+    
+    Merge https://github.com/shendurelab/LACHESIS
+
+commit 3bbb37b17b1e8385c105522146210d7d5bd8bd99
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Fri Jan 13 11:45:46 2017 -0500
+
+    changed C style comment prologs to shell/R/perl where appropriate.
+    Filled in a couple of variables with default values which are not hard-coded to /net/fs/whatever
+    changed all the invocations of bash/Rscript/perl to env invocations to help portability
+
+commit 81ea957348ce0db454145399f2cfe1253c0ff427
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Oct 3 11:45:28 2016 -0700
+
+    Cleanup.
+
+commit ddd9d8f10ac8a387747d7de5defe3439f83c5368
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Sep 25 11:29:18 2016 -0700
+
+    Fixing merge
+
+commit 6a6e30928be248a0903684bed8c862436b84a9b2
+Merge: a412179 65454ff
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Sep 25 11:28:35 2016 -0700
+
+    Merge branch 'master' of github.com:shendurelab/LACHESIS
+    
+    Conflicts:
+            ChromLinkMatrix.cc
+
+commit a4121796284c5d73e25d6d3ae958fc29816cac99
+Merge: 0ec3e89 fab9357
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Sep 25 11:26:04 2016 -0700
+
+    Merge branch 'abelew-master'
+
+commit 65454ff53451c9dadf256afd23bd8ffb1e1c2b8f
+Merge: 0ec3e89 87b60ed
+Author: Josh Burton <jnburton@uw.edu>
+Date:   Sun Sep 25 08:33:17 2016 -0700
+
+    Merge pull request #12 from cooketho/master
+    
+    Bugfix for ChromLinkMatrix.cc Enrichment function. Bugfix for CountMotifsInFasta.pl.
+
+commit fab935714cf4f02c56ad91fa2b66ceead9c2d214
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Mon Sep 19 18:56:30 2016 -0400
+
+    cleaned out a couple thousand tidy warnings and therefore learned a bit more about c++ casting, yay!
+
+commit 4e0505ba469730a9315a6b26fa143e3ddcbabf62
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Mon Sep 19 15:06:19 2016 -0400
+
+    lots of small cleanups, added a clang-based tidy so I can semi-automatically clean up the style
+    make Reporter.tidy for example
+
+commit ecc3393745d02a9d8e76591b02d2b638b63165be
+Author: Ashton Trey Belew <abelew@gmail.com>
+Date:   Mon Sep 19 12:03:30 2016 -0400
+
+    lots of small changes to try and stop segfaults and inappropriate calls to stuff in ~/public_html
+
+commit 0ec3e8931509e1502cc2774f54a295208b5766c9
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Aug 17 16:40:04 2016 -0700
+
+    Simple shell commands to wrap calls to blastn.  May not be portable.
+
+commit 87b60edded369002782e07049a46a4e0b7a33478
+Author: cooketho <cooketho@gmail.com>
+Date:   Thu Jan 21 21:37:12 2016 -0800
+
+    fixed bug in ChromLinkMatrix.cc Enrichment function. Fixed CountMotifsInFasta.pl
+
+commit c23474f9925adedd5ec447639d941db915521dd1
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 09:34:08 2015 -0700
+
+    Updated documentation to account for some user experiences and bug reports.
+
+commit 19abc7b2a364b18b7d20f70d46bbfa6f1f8cdf66
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:57:00 2015 -0700
+
+    Remove some old cruft.
+
+commit 840fde39021ddd7f67adfbf5c896503e2bc9cac2
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:55:35 2015 -0700
+
+    Add CLUSTER_CONTIGS_WITH_CENS.
+
+commit 7d1410d0aac945ee7709257cea2d856c674f503c
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:54:58 2015 -0700
+
+    Fix references to LACHESIS_SAMTOOLS_DIR and LACHESIS_BOOST_DIR.
+
+commit afe34f061626b1e4026469ea8a28bba395ed2697
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:36:52 2015 -0700
+
+    Added copyright notice at top of all source code.
+
+commit db8fdf0cd71c3b84fc39abdb7532c8f47a302da4
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:34:59 2015 -0700
+
+    Added copyright notice at top of all source code.
+
+commit 70492ae18816eec01a3225ae224322f511e0a707
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:34:05 2015 -0700
+
+    Added copyright notice at top of all source code.
+
+commit 1b5dbe9e467ffec2d094626d0c6d3ce9673a30c6
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:33:35 2015 -0700
+
+    Added copyright notice at top of all source code.
+
+commit 1e4568eb7ffe843dd31170153ebfa3e442569269
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:32:55 2015 -0700
+
+    Added copyright notice at top of all source code.
+
+commit 2db8ac6d4909a7325cb4e7c3dc7d1ffc0aaeac23
+Merge: fa2019e 89fe4cb
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Sep 28 08:25:30 2015 -0700
+
+    Merge branch 'master' of github.com:shendurelab/LACHESIS
+
+commit 89fe4cb6559f6350217c1b3596a4b97a44ce6a92
+Author: makirc <mkircher@uw.edu>
+Date:   Mon Sep 7 15:34:08 2015 -0700
+
+    Update README.md
+    
+    Added note about minimum required stack size.
+
+commit fa2019e9e6b9fe3e545b0ead983db24a4fa2bd66
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu May 1 13:39:57 2014 -0700
+
+    Add the function GetFastaSizes().
+
+commit 656f05a08ee68b8c4c2dbeca9dd0d2509c322b93
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Apr 14 14:53:39 2014 -0700
+
+    Tiny bug fix.
+
+commit 2151de9028a73749cd897fa4f8d1dc61d8efb6e3
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Apr 8 14:36:56 2014 -0700
+
+    Fix formatting.
+
+commit 741273d098bc218db34d8aa67c44794168d1ab30
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Apr 8 14:34:59 2014 -0700
+
+    Update documentation.
+
+commit ad06a1cb17756c78932c78247a4fea0feeb55c9e
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Apr 6 13:22:13 2014 -0700
+
+    Make an error message more helpful.
+
+commit e3cb2bd1e3734251124cc43b01f69a62ec5d158e
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Apr 6 13:16:11 2014 -0700
+
+    Add function TokenizeCSV().
+
+commit aff7b70f039f8b3f70381ba56c390b88ba478ade
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Mar 25 12:38:09 2014 -0700
+
+    Activate the ORDER_DRAW_DOTPLOT parameter.
+
+commit ccdc716c6a2f0ebd5ab215c5599602ab83c26fb1
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Mar 24 09:16:45 2014 -0700
+
+    Forestall a compilation error.
+
+commit ebaa057ea5cc06c53c5a10cf0e26e4a4d5a5dc9b
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Mar 14 12:24:30 2014 -0700
+
+    Bug fixes and better user-friendliness.
+
+commit 109b30f831a9fef105a4d7c663944f772c3b3d12
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Mar 13 14:27:09 2014 -0700
+
+    Avoid an overflow bug for high-density data sets by limiting the size of each line of the *.CLM cache files.
+
+commit 024973fd74c957b45828c36bacaf3ab2ff21fe26
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Mar 13 13:20:12 2014 -0700
+
+    Add the function TargetCoverages().
+
+commit 65a0c8ea4285026e1c4d6c2d76bc829656acd61b
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Mar 11 11:57:11 2014 -0700
+
+    Add some sanity checks.
+
+commit d46ef20358c7fd12a4e98a2f41c1136efa350979
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Mar 11 11:01:34 2014 -0700
+
+    Add the function TargetNHits().
+
+commit ff3786e0277c736510284f9f6a824d3f2e754eba
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Mar 7 14:08:53 2014 -0800
+
+    Fix a bug that was causing some contig names to be mis-parsed.
+
+commit 18bdd891f7be29b65d5edd0cd9b2183dcc8ae9d1
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Mar 5 17:34:10 2014 -0800
+
+    MakeWholeAssemblyHeatmap (triggered when REPORT_MAKE_HEATMAP = 1) now determines the plots the longest contigs, instead of applying a hard-wired length cutoff.
+
+commit bd05861b03e98ea90a43da6ce98d34a131c45380
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Mar 5 17:05:55 2014 -0800
+
+    Reformat the clustering info chart to look nicer and give more room for chromosome names.
+
+commit 0356c83ef20d1a3ba7cd19f2c9d16434575e4f7f
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Mar 3 19:03:53 2014 -0800
+
+    Make a compiler warning go away.
+
+commit 664aa0f96069887ac875f8c80f47a08966a67cad
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Mar 3 19:03:30 2014 -0800
+
+    Make a compiler warning go away.
+
+commit 9634c4b9992608869977bf1cfbc0704a3068b617
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Mar 3 18:33:51 2014 -0800
+
+    Make a compiler warning go away.
+
+commit 173d1500a2b43505aff0003dc0bd314f8b8c32e7
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Mar 3 18:25:23 2014 -0800
+
+    Make a compiler warning go away.
+
+commit 9146f7c2b8f530ea999b1bd85347b483dd0eb5c9
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sun Feb 2 11:06:57 2014 -0800
+
+    Fix a typo.
+
+commit 29994a6e42ff525c3448d4f8914431556d5ed5b0
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sat Feb 1 16:34:04 2014 -0800
+
+    Add a useful comment.
+
+commit 3c73ac7fcfbbe9842169ad39e7fc94c5cc7bb016
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Sat Feb 1 16:32:45 2014 -0800
+
+    Tiny bug fix.
+
+commit 2a3149191b1ad1a1f9b61bd51c0dd37bbc22ad89
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Jan 24 14:50:22 2014 -0800
+
+    Add documentation.
+
+commit 5838e591fb732909a09ca8db75ff91c243ef9c5d
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Jan 15 18:52:40 2014 -0800
+
+    Bug fix.
+
+commit c0965466774d08f113927e7c5ae1a1bfc12cc71f
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Jan 10 10:27:12 2014 -0800
+
+    Added helpful comments to some asserts.
+
+commit 719f0af372c798eff02faa466820a3939fc2af9b
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Jan 8 14:05:44 2014 -0800
+
+    Avoid a run-time warning.
+
+commit c4828d0f86636393305d5048ae1ad4e6c598ab9d
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Jan 6 11:03:29 2014 -0800
+
+    The BLAST-alignment-parsing functionality from the TrueMapping module is now in the TextFileParsers function ParseBlastAlignmentFiles().
+
+commit 9b057c7196fb8868e1ec1b9dc90d09e332e1aea6
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Jan 6 10:05:33 2014 -0800
+
+    Add function TargetNames().
+
+commit 9c6e7005341e24755671ebc1ad4642bafc7aa572
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Jan 6 10:02:21 2014 -0800
+
+    Small makefile fix.
+
+commit 8af83253a821b8cf81ff5785e517029775fa8c58
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Jan 6 08:59:58 2014 -0800
+
+    Added an R script that I forgot to add earlier.
+
+commit 4caa793961f07153149534e90b549c17e1885b89
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Jan 6 08:41:56 2014 -0800
+
+    Added some stub code for contig spacing.  I still can't get it to work but I may be closer.
+
+commit bcdb66b993206613f0c752cfdfa8d8120e8256dc
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Dec 20 10:07:11 2013 -0800
+
+    Tiny bug fix.
+
+commit b3618b0afa70b9429e53a8263f95d434a92b65fe
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Dec 20 09:22:22 2013 -0800
+
+    Speed up SkipRepeats().
+
+commit 456db6d264a4f4137199992fd3e8775055c1bc8f
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Dec 19 23:39:15 2013 -0800
+
+    Added some spiffy ASCII boxes to visual output.
+
+commit 31ae4a19927f45c666405bb4236afea6fd0d6f20
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Dec 19 23:03:06 2013 -0800
+
+    SpaceContigs() now uses each contig's intra-contig link density as a normalization factor.
+
+commit 01a90377fee2f9dd7b3716c70c6e681e96cdd7bd
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Dec 19 15:16:21 2013 -0800
+
+    Activate the REPORT_DRAW_HEATMAP option.
+
+commit 34986fb3945696915d3937e66a885600a0ecec63
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 18 18:25:42 2013 -0800
+
+    Documented some advice on how to improve an assembly.
+
+commit 0f9c92407457f4b8703df01d238ebdd4c70f1ef3
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 17 13:13:54 2013 -0800
+
+    Catch a memory allocation error if the ChromLinkMatrix is too big to fit into memory.
+
+commit c9a5dac01a21a2b7778b4dd40efd159260387ffb
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Dec 16 13:00:06 2013 -0800
+
+    Fixed a bug that only happens in some versions of Perl.
+
+commit bb0d838a98f740cd47c42d5e7573bdba57485eea
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Dec 12 11:51:44 2013 -0800
+
+    Splash screen now includes the LACHESIS paper citation.
+
+commit 1b9635ffaae0b3efa95f94c00f51c53e361caa06
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Thu Dec 12 11:50:44 2013 -0800
+
+    The non-de novo functions are no longer hardwired to the human genome and can work on any genome.
+
+commit 678b7295133e1923f317c376f46347fcd01c5295
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 10 11:06:23 2013 -0800
+
+    More tweaks to the markdown readability.
+
+commit 3d9f19f34b64d87902e11fb80b2386cca42cea8e
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Dec 9 16:10:45 2013 -0800
+
+    Redid the documentation to be in Github Markdown.
+
+commit 0d047d88fb4b58340e6bd9618ab091b50bcc8b3e
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Mon Dec 9 15:44:23 2013 -0800
+
+    Moved README.txt to README.md so it can be visible on GitHub.
+
+commit 9ad195092664dff01984c851097c8babfed1e605
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Fri Dec 6 12:20:20 2013 -0800
+
+    Added #include <iomanip>.  This prevents weird behavior on some OS's.
+
+commit f414fa6a2fb8957d73c370bcee3e5cbf9c2e59fd
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 16:46:43 2013 -0800
+
+    Loosened the input file requirements: it's ok not to have the fasta files if you have the names and RE_sites files derived from the fasta files.
+
+commit 3bf32aba1cea377bad1d91050b821dd95c2fbf6f
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 16:40:56 2013 -0800
+
+    Update parameters to avoid a crash.
+
+commit 0735d72e0aa892ada7d526b4bbb79cd53d11f515
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 16:29:02 2013 -0800
+
+    Flowchart that illustrates the steps needed to prepare data for input to LACHESIS.
+
+commit e3699f59234f84b3a295a8f735488540bad15672
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 15:16:37 2013 -0800
+
+    Big update!  The INI files now have several new parameters (DRAFT_ASSEMBLY_FASTA, REF_ASSEMBLY_FASTA, RE_SITE_SEQ, CLUSTER_NONINFORMATIVE_RATIO, ORDER_DRAW_DOTPLOTS, REPORT_MAKE_HEATMAP) and several para
+
+commit a2963a3e6894b8f86d7b0f9f84dd989b1d0cd176
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 15:15:35 2013 -0800
+
+    Big update!  The INI files now have several new parameters (DRAFT_ASSEMBLY_FASTA, REF_ASSEMBLY_FASTA, RE_SITE_SEQ, CLUSTER_NONINFORMATIVE_RATIO, ORDER_DRAW_DOTPLOTS, REPORT_MAKE_HEATMAP) and several parameters have been removed (DRAFT_ASSEMBLY_NAMES_FILE, REF_ASSEMBLY_NAMES_FILE, RE_COUNTS_FILE, CLUSTER_DO_NONINFORMATIVE, REPORT_CHART_OUTFILE).  The goal of these changes is to make the INI files more user-friendly and easier to use.  The process of using grep to create *.names files and using CountMotifsInFasta.pl to create *.counts_*.txt file is now automated by Lachesis.
+
+commit 389523f99493b3fb3937c3a3461095ac96a3bf34
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 15:12:28 2013 -0800
+
+    Updated these fasta-auxiliary files to reflect changes in Lachesis' input file parsing.
+
+commit 73a95c7e985cdc6dd418187d8da06fe6fb5f3572
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Wed Dec 4 14:41:12 2013 -0800
+
+    Centromere locations are now hard-wired in HumanGenome.cc rather than requiring an external file.
+
+commit 28f9b82090022104d84d99018de5553d2b286171
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 20:47:42 2013 -0800
+
+    Changed a parameter from int to double.
+
+commit f84d7399fcca7c4d00d0da088b5098f899adf190
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 20:43:50 2013 -0800
+
+    Bug fix
+
+commit b470dacfc21a79c7ebc75c0bdd036cd7ad3797de
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 20:12:28 2013 -0800
+
+    Output filename now includes entire input filename.
+
+commit 2044c83584014b3ff7ec1a99f6d81d59093469f7
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 19:28:28 2013 -0800
+
+    Bug fix
+
+commit 5b73d640308789bbb0a6f3854e866695373dd8e0
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 18:24:38 2013 -0800
+
+    Modified all Makefiles to accept the LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR environment variables, rather than requiring manual editing.
+
+commit a0e18bb05dc70e93ef408d615e95f19bf372545f
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 18:24:03 2013 -0800
+
+    Modified all Makefiles to accept the LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR environment variables, rather than requiring manual editing.
+
+commit 156e8737671c041b187f7c2410dc009ddc366e30
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 18:22:59 2013 -0800
+
+    R scripts to draw heatmaps using ggplot2.
+
+commit dfbec5cbf41de595ea2625a09e03df162c7e71ac
+Author: JOSHUA N. BURTON <jnburton@uw.edu>
+Date:   Tue Dec 3 10:45:19 2013 -0800
+
+    Added the QuickDotplot script, which is used by some Lachesis functions to make dotplots with R and ggplot2.
+
+commit deb728b875284d88e160ea36e3762b53b504d731
+Author: JOSHUA N. BURTON <jnburton@s001.grid.gs.washington.edu>
+Date:   Mon Dec 2 17:55:48 2013 -0800
+
+    Pre-empt a compilation problem on some Ubuntu machines.
+
+commit 3ef4867f148363ad8916040af6086fa68aa9a637
+Author: JOSHUA N. BURTON <jnburton@s001.grid.gs.washington.edu>
+Date:   Mon Dec 2 17:54:23 2013 -0800
+
+    Oops, shouldn't have added the executable to the repository.
+
+commit 9934423dc6c4162ff72a61ed3b2d6ae0ed7dd99e
+Author: JOSHUA N. BURTON <jnburton@s001.grid.gs.washington.edu>
+Date:   Mon Dec 2 15:01:38 2013 -0800
+
+    This is the first commit of the LACHESIS code base into its git project.  It includes the entire LACHESIS source code, auxiliary scripts, and test case (test_case/) as described in README.txt.
+    
+    This version of the code is up-to-date as of December 2, 2013.  It is more recent than the version in the LACHESIS Nature Biotech paper and includes some bug fixes since then.
+
+commit 1cf0f08da1f463bb6c3353f086893dee3a4c4842
+Author: makirc <mkircher@uw.edu>
+Date:   Fri Nov 22 15:29:08 2013 -0800
+
+    Update README.md
+
+commit 2163502c554e1f0facb1f7a65fca983edb2cc26f
+Author: Josh Burton <jnburton@uw.edu>
+Date:   Fri Nov 22 15:06:37 2013 -0800
+
+    Initial commit

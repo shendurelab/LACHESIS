@@ -1,0 +1,6 @@
+libbam.a	usr/lib
+bam.h		usr/include/samtools
+bgzf.h		usr/include/samtools
+khash.h		usr/include/samtools
+faidx.h		usr/include/samtools
+sam.h		usr/include/samtools
