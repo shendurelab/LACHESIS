@@ -1,0 +1,601 @@
+# BLASTN 2.2.23+
+# Query:  scaffold_8100
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8100	7	99.96	41412	3	5	17001	58399	113912107	113953518	0.0	7.637e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8101
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8101	17	99.87	11897	10	2	1	11892	76255896	76244000	0.0	2.189e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8102
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8102	4	99.73	40330	60	17	1	40292	159289734	159330054	0.0	7.389e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8103
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8103	7	99.47	9512	41	7	54004	63508	100939676	100930167	0.0	1.732e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8104
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8104	3	99.79	22844	15	12	16640	39480	159163666	159186478	0.0	4.190e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8105
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8105	X	99.88	22366	23	4	1	22365	103326639	103349001	0.0	4.118e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8106
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8106	2	99.84	49224	36	21	1	49203	118283046	118233845	0.0	9.046e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8107
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8107	X	99.92	39906	26	5	23317	63217	22672578	22632674	0.0	7.355e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8108
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8108	5	99.98	38919	3	4	24569	63482	147658802	147697719	0.0	7.182e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8109
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8109	2	99.83	32981	41	6	30252	63229	111422155	111455123	0.0	6.063e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8110
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8110	10	99.78	27228	46	9	36004	63225	96626390	96653609	0.0	4.999e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8111
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8111	15	99.78	63115	94	25	1	63105	58423906	58486986	0.0	1.159e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8112
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8112	1	99.49	26352	55	36	19425	45741	33154403	33128096	0.0	4.786e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8113
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8113	9	99.64	23730	51	21	18705	42423	31249420	31273125	0.0	4.331e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8114
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8114	1	99.57	60690	166	37	1	60674	146599269	146659876	0.0	1.107e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8115
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8115	12	99.79	21549	28	9	20473	42006	42415485	42393939	0.0	3.956e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8116
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8116	4	99.97	62974	8	5	1	62971	73033879	73096847	0.0	1.162e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8117
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8117	11	99.87	14711	15	3	48407	63113	108264926	108250216	0.0	2.708e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8118
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8118	X	99.91	30643	18	6	1	30639	71965930	71935294	0.0	5.646e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8119
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8119	18	99.75	22275	32	14	1	22262	14788757	14766493	0.0	4.084e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8120
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8120	5	99.75	26910	41	8	11561	38465	144258832	144231943	0.0	4.935e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8121
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8121	X	99.91	54659	31	11	1	54649	96770430	96825079	0.0	1.007e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8122
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8122	5	99.83	13115	18	3	12361	25474	49606604	49619715	0.0	2.409e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8123
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8123	6	99.90	62913	36	14	1	62895	126091386	126028482	0.0	1.158e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8124
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8124	6	99.93	63015	10	17	1	62984	142136094	142073081	0.0	1.161e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8125
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8125	2	99.97	19995	2	2	28524	48515	136203778	136223772	0.0	3.690e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8126
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8126	14	99.49	12458	19	14	1	12421	64846237	64833787	0.0	2.264e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8127
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8127	5	99.70	62979	116	27	1	62971	109614400	109551488	0.0	1.152e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8128
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8128	12	99.53	12530	40	12	48439	60958	17872480	17859960	0.0	2.284e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8129
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8129	3	99.97	29957	7	2	13465	43418	49135120	49165076	0.0	5.526e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8130
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8130	12	99.86	29134	24	7	33969	63088	88111327	88140457	0.0	5.359e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8131
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8131	6	99.83	58354	50	20	4559	62903	81621706	81563396	0.0	1.072e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8132
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8132	5	99.80	44406	55	13	18389	62763	126582309	126537907	0.0	8.152e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8133
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8133	14	99.76	62636	91	25	1	62621	78396065	78458654	0.0	1.148e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8134
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8134	5	99.99	31708	3	1	31111	62817	51577318	51609025	0.0	5.853e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8135
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8135	X	99.29	10072	33	21	41372	51439	1593525	1603561	0.0	1.819e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8136
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8136	3	99.89	39550	27	4	23577	63109	148094669	148134217	0.0	7.280e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8137
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8137	10	99.98	46012	7	2	16734	62744	52989727	53035736	0.0	8.492e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8138
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8138	11	99.87	40820	41	5	4302	45115	60364249	60323435	0.0	7.509e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8139
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8139	5	99.92	35492	16	7	3831	39310	32763722	32799211	0.0	6.539e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8140
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8140	X	99.86	39453	36	11	23174	62609	134328422	134288973	0.0	7.256e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8141
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8141	17	99.71	18540	21	11	23357	41892	41377184	41358674	0.0	3.393e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8142
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8142	11	99.64	35000	82	18	6275	41269	55171049	55206008	0.0	6.395e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8143
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8143	10	99.80	22856	42	3	24009	46863	96868870	96891723	0.0	4.202e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8144
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8144	8	99.92	17804	9	5	22608	40405	42819097	42836900	0.0	3.279e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8145
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8145	11	99.81	35871	39	12	20457	56303	1058672	1022807	0.0	6.587e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8146
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8146	2	99.93	16664	9	2	21233	37896	173030895	173014234	0.0	3.071e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8147
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8147	15	99.82	20875	22	7	28913	49777	22861466	22882335	0.0	3.834e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8148
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8148	19	99.94	27959	13	3	34551	62507	37572578	37544621	0.0	5.155e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8149
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8149	19	99.87	14917	17	2	47627	62543	24514962	24500049	0.0	2.745e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8150
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8150	16	99.60	8925	31	4	42087	51007	29214258	29223181	0.0	1.632e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8151
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8151	7	99.96	26860	7	3	31531	58387	112404573	112377715	0.0	4.954e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8152
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8152	X	99.77	42323	72	15	11167	53469	76216729	76259047	0.0	7.768e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8153
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8153	8	99.60	19611	73	3	8	19618	1185515	1165910	0.0	3.582e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8154
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8154	7	99.77	29294	47	9	12080	41364	153550957	153521675	0.0	5.375e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8155
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8155	11	99.62	60412	166	35	2175	62538	107172425	107232821	0.0	1.105e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8156
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8156	12	99.71	24560	58	8	29192	53747	43084500	43059950	0.0	4.501e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8157
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8157	1	99.64	62014	118	57	1	61978	31967029	31905083	0.0	1.132e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8158
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8158	11	99.76	31040	63	8	7993	39029	13636579	13605549	0.0	5.697e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8159
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8159	15	99.81	34500	46	13	27531	62021	82056229	82090717	0.0	6.339e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8160
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8160	1	99.82	14182	15	9	44558	58732	45612373	45626550	0.0	2.604e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8161
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8161	X	99.93	30032	13	6	31994	62023	96731884	96701860	0.0	5.533e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8162
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8162	5	99.58	36943	72	35	25065	61968	151996721	152033618	0.0	6.728e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8163
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8163	12	99.42	20361	103	11	41630	61981	131835101	131814747	0.0	3.699e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8164
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8164	8	99.69	29352	46	20	13472	42802	98588200	98558872	0.0	5.373e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8165
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8165	11	99.71	44775	85	21	17196	61948	88174694	88129942	0.0	8.202e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8166
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8166	X	99.80	51147	53	16	10640	61780	12546461	12495356	0.0	9.391e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8167
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8167	4	99.82	19034	15	3	13917	32934	98734770	98753799	0.0	3.496e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8168
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8168	4	99.81	52395	67	9	9470	61846	82998223	82945845	0.0	9.620e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8169
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8169	4	99.77	56346	104	12	5563	61899	127844009	127787681	0.0	1.035e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8170
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8170	22	99.94	10422	5	1	9279	19699	22213768	22224189	0.0	1.922e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8171
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8171	2	99.95	49893	23	1	11881	61773	209561402	209611292	0.0	9.203e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8172
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8172	16	99.88	30861	22	12	1	30851	34593135	34562280	0.0	5.679e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8173
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8173	5	99.71	32909	55	17	10404	43296	179183437	179216321	0.0	6.026e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8174
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8174	2	99.82	31062	33	8	30674	61713	134341396	134310335	0.0	5.708e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8175
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8175	X	99.89	33274	32	4	1	33273	74991690	75024959	0.0	6.127e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8176
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8176	2	99.96	29901	7	2	1	29898	182663857	182633958	0.0	5.516e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8177
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8177	2	99.60	46125	161	19	12813	58923	95460083	95413968	0.0	8.422e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8178
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8178	4	99.84	25932	19	6	6532	32460	168209568	168235480	0.0	4.766e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8179
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8179	15	99.87	13453	15	1	31139	44589	30501771	30515223	0.0	2.477e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8180
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8180	6	99.89	30081	23	7	29006	59075	78544101	78514021	0.0	5.539e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8181
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8181	12	99.72	33442	82	6	2557	35995	55803481	55770048	0.0	6.129e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8182
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8182	13	99.59	24825	76	10	35095	59899	19739763	19714944	0.0	4.533e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8183
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8183	20	99.35	46046	166	71	15670	61611	18566515	18520499	0.0	8.332e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8184
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8184	4	99.89	32269	24	10	1	32261	132279501	132311765	0.0	5.942e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8185
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8185	2	99.72	61529	92	17	1	61487	59553918	59492427	0.0	1.127e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8186
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8186	10	99.33	52522	266	39	6316	58792	47016217	46963739	0.0	9.525e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8187
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8187	10	99.83	21775	32	2	39701	61471	117167766	117189540	0.0	4.004e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8188
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8188	5	99.92	32968	17	8	9462	42424	40697560	40664599	0.0	6.072e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8189
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8189	3	99.56	33838	96	21	1429	35236	153301355	153267540	0.0	6.173e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8190
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8190	10	99.91	36065	8	10	25342	61400	87504208	87468162	0.0	6.641e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8191
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8191	12	99.82	27884	34	9	33635	61512	100352849	100324977	0.0	5.125e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8192
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8192	3	99.79	28376	31	8	32997	61355	65078029	65106392	0.0	5.208e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8193
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8193	X	99.83	23136	10	19	2909	26023	153523835	153546961	0.0	4.249e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8194
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8194	10	99.52	23025	84	18	20301	43312	122629580	122652591	0.0	4.200e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8195
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8195	X	99.09	11673	50	20	19704	31332	2019550	2007890	0.0	2.096e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8196
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8196	1	99.73	35721	71	11	25492	61195	112795446	112831156	0.0	6.548e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8197
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8197	4	99.79	61292	64	24	1	61255	107559465	107498200	0.0	1.125e+05
+# BLASTN 2.2.23+
+# Query:  scaffold_8198
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8198	10	99.29	25074	141	20	1	25054	5156209	5181264	0.0	4.543e+04
+# BLASTN 2.2.23+
+# Query:  scaffold_8199
+# Database: /net/gs/vol2/home/jnburton/vol10/hg19/all/Homo_sapiens_assembly19.fasta.blastdb
+# Fields: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
+# 1 hits found
+scaffold_8199	7	99.60	33767	107	14	27701	61443	97479872	97446111	0.0	6.165e+04
+# BLAST processed 100 queries

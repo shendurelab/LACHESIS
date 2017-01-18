@@ -92,10 +92,11 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = src/include/gtools
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/boost.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_lib_samtools.m4 \
+	$(top_srcdir)/m4/boost.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -158,6 +159,7 @@ CCDEPMODE = @CCDEPMODE@
 
 # compiler flags
 CFLAGS = -Wall -ansi -pedantic -g -O3 -std=c++11
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -275,7 +277,7 @@ RM = /bin/rm -rf
 BACKUPS = *~ \\\#*\\\#
 
 # directories with .h's in them - the LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR environment variables must be set
-INCLUDES = -I../samtools
+INCLUDES = 
 all: all-am
 
 .SUFFIXES:

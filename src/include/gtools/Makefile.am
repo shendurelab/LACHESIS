@@ -14,7 +14,7 @@ AR      = ar crv
 BACKUPS = *~ \\\#*\\\#
 
 # directories with .h's in them - the LACHESIS_BOOST_DIR and LACHESIS_SAMTOOLS_DIR environment variables must be set
-INCLUDES = -I../samtools
+INCLUDES = 
 
 # compiler flags
 CFLAGS  = -Wall -ansi -pedantic -g -O3 -std=c++11
