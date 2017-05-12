@@ -1,4 +1,4 @@
-### Note: LACHESIS is no longer being actively developed. If you run into issues, we suggest trying more recently developed software that implements this same concept (e.g. see [http://github.com/theaidenlab]http://github.com/theaidenlab).
+### Note: LACHESIS is no longer being actively developed. If you run into issues, we suggest trying more recently developed software that implements this same concept (e.g. see http://github.com/theaidenlab).
 
 ## LACHESIS User's Manual and Quick Start Guide
 LACHESIS: A software tool to measure the thread of life.
