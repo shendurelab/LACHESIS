@@ -5,7 +5,7 @@ LACHESIS: A software tool to measure the thread of life.
 
 Created by Josh Burton (`jnburton at uw.edu`) in the Department of Genome Sciences at the University of Washington, Seattle, WA, USA
 
-Publication in *Nature Biotechnology* (please cite) is here: [http://dx.doi.org/10.1038/nbt.2727](http://dx.doi.org/10.1038/nbt.2727)
+Publication in *Nature Biotechnology* (please cite) is here: [https://doi.org/10.1038/nbt.2727](https://doi.org/10.1038/nbt.2727)
 
 ## Table of Contents
 
@@ -67,7 +67,7 @@ Finally, to compile LACHESIS, simply type `make` in the main LACHESIS directory.
 
 #### 4. Testing out LACHESIS on a sample dataset
 
-This LACHESIS distribution includes a small sample dataset - specifically, a reduced version of the hESC dataset we used in [our paper](http://dx.doi.org/10.1038/nbt.2727) - that allows you to try out running LACHESIS.  To run it, go into the LACHESIS directory and type `Lachesis INIs/test_case.ini`.  The file `test_case.ini` gives the parameters that control how LACHESIS is run, in this case including the input files from the sample dataset.  On my computer, LACHESIS takes 3 minutes to run on this dataset, most of which is in file I/O.
+This LACHESIS distribution includes a small sample dataset - specifically, a reduced version of the hESC dataset we used in [our paper](https://doi.org/10.1038/nbt.2727) - that allows you to try out running LACHESIS.  To run it, go into the LACHESIS directory and type `Lachesis INIs/test_case.ini`.  The file `test_case.ini` gives the parameters that control how LACHESIS is run, in this case including the input files from the sample dataset.  On my computer, LACHESIS takes 3 minutes to run on this dataset, most of which is in file I/O.
 
 A directory called `out/test_case/` will be created and will contain the results from this run.  A summary of the results is in the file `REPORT.txt`; the main output files are in the subdirectory `main_results/`; other intermediate results are in the subdirectory `cached_data/`.  The results from this test case won't be very good because the dataset of Hi-C links is so small, but they should give you an idea of how to run LACHESIS and what to expect from it.
 
