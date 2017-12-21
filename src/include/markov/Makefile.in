@@ -157,7 +157,7 @@ CC = g++
 CCDEPMODE = @CCDEPMODE@
 
 # compiler flags
-CFLAGS = -Wall -ansi -pedantic -g -O3 -std=c++11
+CFLAGS = -Wall -ansi -pedantic -g -O3 
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -261,7 +261,6 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@

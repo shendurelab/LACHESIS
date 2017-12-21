@@ -22,7 +22,7 @@ INCLUDES =
 
 # compiler flags
 
-CFLAGS  = -Wall -ansi -pedantic -g -O3 -std=c++11
+CFLAGS  = -Wall -ansi -pedantic -g -O3 
 #CFLAGS += -pg
 
 # linking flags

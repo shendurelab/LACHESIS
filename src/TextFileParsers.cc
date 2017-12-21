@@ -34,7 +34,7 @@
 
 
 
-static const unsigned LINE_LEN = 1000000;
+static const unsigned LINE_LEN = 1000000000;
 char LINE[LINE_LEN];
 
 

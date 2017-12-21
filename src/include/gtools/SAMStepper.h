@@ -62,7 +62,7 @@
 using namespace std;
 
 // To compile using this, you must include -I<samtools dir>
-#include <sam.h>
+#include <bam/sam.h>
 
 
 class SAMStepper
