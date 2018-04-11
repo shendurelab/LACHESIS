@@ -190,6 +190,40 @@ while (<IN>) {
     
 }
 
+# process the last fasta record
+my ( $prev_start, $prev_end ) = (-1,-1);
+foreach my $pos ( @motif_positions ) {
+	if ( $prev_end == -1 ) {
+	$prev_start = $pos;
+	$prev_end   = $pos;
+	}
+	if ( $prev_end + 2*$range < $pos ) {
+	$prev_start =         $range if $prev_start < $range;
+	$prev_end = $offset - $range if $prev_end > $offset - $range; # prevent overflow past the end of the contig/chromosome
+	print BED "$contig_name\t", $prev_start - $range, "\t", $prev_end + $range, "\n";
+	$prev_start = $pos;
+	}
+	#print "pos = $pos\n";
+	$prev_end = $pos;
+}
+	
+# Print the final BED line for this contig/chromosome.
+if (@motif_positions) {
+	$prev_start =         $range if $prev_start < $range;
+	$prev_end = $offset - $range if $prev_end > $offset - $range; # prevent overflow past the end of the contig/chromosome
+	print BED "$contig_name\t", $prev_start - $range, "\t", $prev_end + $range, "\n";
+}
+	
+# Get the new contig's name.
+$contig_name = $1;
+print localtime() . ": $contig_name\n" if $verbose;
+print POS ">$contig_name\n";
+	
+# Reset other contig-related variables.
+$offset = 0;
+$prev_chars = '';
+@motif_positions = ();
+
 close IN;
 close BED;
 close POS;
